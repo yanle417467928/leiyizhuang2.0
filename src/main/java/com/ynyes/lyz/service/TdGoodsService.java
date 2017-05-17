@@ -1680,7 +1680,7 @@ public class TdGoodsService {
 				+ "goods.isColorful as isColorful, inventory.inventory as inventory, goods.coverImageUri as goodsCoverImageUri "
 				+ "from TdGoods goods, TdDiySiteInventory inventory where " + "goods.categoryId = " + categoryId
 				+ " and goods.isOnSale = true and " + "goods.id = inventory.goodsId and inventory.regionId = " + sobId
-				+ " order by goods.sortId asc");
+				+ " and " + "inventory.diyCode is null and inventory.inventory > 0 order by goods.sortId asc");
 		List<Object[]> result = query.getResultList();
 		em.close();
 		return this.translateResultSet(result);
