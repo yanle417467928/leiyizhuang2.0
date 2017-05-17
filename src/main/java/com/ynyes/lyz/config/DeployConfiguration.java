@@ -5,12 +5,14 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.ynyes.lyz.util.ApplicationConstant;
 
 @Configuration
+@AutoConfigureBefore(WebServiceConfiguration.class)
 public class DeployConfiguration {
 	
 	private final Logger LOG = LoggerFactory.getLogger(DeployConfiguration.class);
@@ -36,12 +38,6 @@ public class DeployConfiguration {
 	@Value("${deploy.oss.bucket}")
 	private String ossBucket;
 	
-	@Value("${deploy.wms.url}")
-	private String wmsUrl;
-	
-	@Value("${deploy.ebs.url}")
-	private String ebsUrl;
-	
 	@Bean
 	public ApplicationConstant applicationConstant() {
 		LOG.info("imagePath : {}", imagePath);
@@ -51,8 +47,7 @@ public class DeployConfiguration {
 		LOG.info("cdnHosts : {}", Arrays.toString(cdnHosts));
 		LOG.info("ossFolder : {}", ossFolder);
 		LOG.info("ossBucket : {}", ossBucket);
-		LOG.info("wmsUrl : {}", wmsUrl);
-		LOG.info("ebsUrl : {}", ebsUrl);
+
 		ApplicationConstant constant = new ApplicationConstant();
 		constant.setImagePath(imagePath);
 		constant.setAlipayReturnUrl(alipayReturnUrl);
@@ -61,8 +56,6 @@ public class DeployConfiguration {
 		constant.setCdnHosts(cdnHosts);
 		constant.setOssFolder(ossFolder);
 		constant.setOssBucket(ossBucket);
-		constant.setWmsUrl(wmsUrl);
-		constant.setEbsUrl(ebsUrl);
 		return constant;
 	}
 
@@ -120,21 +113,5 @@ public class DeployConfiguration {
 
 	public void setOssBucket(String ossBucket) {
 		this.ossBucket = ossBucket;
-	}
-
-	public String getWmsUrl() {
-		return wmsUrl;
-	}
-
-	public void setWmsUrl(String wmsUrl) {
-		this.wmsUrl = wmsUrl;
-	}
-
-	public String getEbsUrl() {
-		return ebsUrl;
-	}
-
-	public void setEbsUrl(String ebsUrl) {
-		this.ebsUrl = ebsUrl;
 	}
 }
