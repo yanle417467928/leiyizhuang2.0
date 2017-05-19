@@ -173,7 +173,7 @@ public class CallWMSImpl implements ICallWMS {
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>解密后XML数据为空</MESSAGE></STATUS></RESULTS>";
 		}
 
-		LOGGER.info("getWMSInfo, decodedXML=" + decodedXML);
+		LOGGER.debug("getWMSInfo, decodedXML=" + decodedXML);
 
 		// 解析XML
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

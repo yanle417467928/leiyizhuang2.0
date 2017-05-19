@@ -29,24 +29,16 @@ public class FitGoodsController extends FitBasicController {
 	@RequestMapping(value = "/category/{categoryId}", method = RequestMethod.POST, produces = "text/html;charset=utf-8")
 	public String getGoodsByCategoryId(HttpServletRequest request, ModelMap map, @PathVariable Long categoryId) {
 		try {
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("进入控制器，根据商品分类ID，获取可售商品，参数：categoryId = {}", categoryId);
-			}
+			LOGGER.debug("进入控制器，根据商品分类ID，获取可售商品，参数：categoryId = {}", categoryId);
 			FitEmployee employee = this.getLoginEmployee(request);
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("获取当前登录用户的信息，得到装饰公司id = {}", null == employee ? null : employee.getCompanyId());
-			}
+			LOGGER.debug("获取当前登录用户的信息，得到装饰公司id = {}", null == employee ? null : employee.getCompanyId());
 			List<ClientGoods> someGoods = this.bizGoodsService.getGoodsByCategoryId(categoryId, employee.getCompanyId());
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("查询完成，查询共计{}件商品", someGoods.size());
-			}
+			LOGGER.debug("查询完成，查询共计{}件商品", someGoods.size());
 			map.addAttribute("some_goods", someGoods);
 			return "/fitment/goods_list";
 		} catch (Exception e) {
 			e.printStackTrace();
-			if (LOGGER.isWarnEnabled()) {
 				LOGGER.warn(e.getMessage());
-			}
 			return "fitment/500";
 		}
 	}
