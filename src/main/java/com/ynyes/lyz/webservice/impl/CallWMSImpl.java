@@ -34,6 +34,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.geronimo.mail.util.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -81,6 +83,8 @@ import com.ynyes.lyz.webservice.ICallWMS;
 
 @WebService
 public class CallWMSImpl implements ICallWMS {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CallWMSImpl.class);
 
 	@Autowired
 	private TdDeliveryInfoService tdDeliveryInfoService;
@@ -137,13 +141,15 @@ public class CallWMSImpl implements ICallWMS {
 	private TdTbwWholeSepDirectionService tdTbwWholeSepDirectionService;
 
 	public String GetWMSInfo(String STRTABLE, String STRTYPE, String XML) {
-		System.out.println("MDJ:WMSInfo called：" + STRTABLE);
+		LOGGER.info("getWMSInfo called, STRTABLE=" + STRTABLE +", STRTYPE=" + STRTYPE +", XML=" + XML);
 
 		if (null == STRTABLE || STRTABLE.isEmpty() || STRTABLE.equals("?")) {
+			LOGGER.info("getWMSInfo, STRTABLE参数错误");
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>STRTABLE参数错误</MESSAGE></STATUS></RESULTS>";
 		}
 
 		if (null == XML || XML.isEmpty() || XML.equals("?")) {
+			LOGGER.info("getWMSInfo, XML参数错误");
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>XML参数错误</MESSAGE></STATUS></RESULTS>";
 		}
 
@@ -158,15 +164,16 @@ public class CallWMSImpl implements ICallWMS {
 		try {
 			decodedXML = new String(decoded, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			System.out.println("UnsupportedEncodingException for decodedXML");
+			LOGGER.info("getWMSInfo, XML解析错误");
 			e.printStackTrace();
 		}
 
 		if (null == decodedXML || decodedXML.isEmpty()) {
+			LOGGER.info("getWMSInfo, 解密后XML数据为空");
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>解密后XML数据为空</MESSAGE></STATUS></RESULTS>";
 		}
 
-		System.out.println(decodedXML);
+		LOGGER.info("getWMSInfo, decodedXML=" + decodedXML);
 
 		// 解析XML
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -175,6 +182,7 @@ public class CallWMSImpl implements ICallWMS {
 			builder = factory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
+			LOGGER.info("getWMSInfo, 解密后xml参数错误");
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>解密后xml参数错误</MESSAGE></STATUS></RESULTS>";
 		}
 
@@ -186,6 +194,7 @@ public class CallWMSImpl implements ICallWMS {
 			document = builder.parse(is);
 		} catch (SAXException | IOException e) {
 			e.printStackTrace();
+			LOGGER.info("getWMSInfo, 解密后xml格式不对");
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>解密后xml格式不对</MESSAGE></STATUS></RESULTS>";
 		}
 		NodeList nodeList = document.getElementsByTagName("TABLE");

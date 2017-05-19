@@ -33,6 +33,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.geronimo.mail.util.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -71,6 +73,8 @@ import com.ynyes.lyz.webservice.ICallEBS;
 
 @WebService
 public class CallEBSImpl implements ICallEBS {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CallEBSImpl.class);
 
 	@Autowired
 	private TdDiySiteService tdDiySiteService;
@@ -115,7 +119,7 @@ public class CallEBSImpl implements ICallEBS {
 	private TdDiySiteInventoryLogService tdDiySiteInventoryLogService;
 
 	public String GetErpInfo(String STRTABLE, String STRTYPE, String XML) {
-		System.out.println("getErpInfo called：" + XML);
+		LOGGER.info("getErpInfo called, STRTABLE=" + STRTABLE +", STRTYPE=" + STRTYPE +", XML=" + XML);
 
 		if (null == STRTABLE || STRTABLE.isEmpty() || STRTABLE.equals("?")) {
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>STRTABLE参数错误</MESSAGE></STATUS></RESULTS>";
@@ -136,7 +140,7 @@ public class CallEBSImpl implements ICallEBS {
 		try {
 			decodedXML = new String(decoded, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			System.out.println("UnsupportedEncodingException for decodedXML");
+			LOGGER.info("UnsupportedEncodingException for decodedXML");
 			e.printStackTrace();
 		}
 
@@ -144,7 +148,7 @@ public class CallEBSImpl implements ICallEBS {
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>解密后XML数据为空</MESSAGE></STATUS></RESULTS>";
 		}
 
-		System.out.println(decodedXML);
+		LOGGER.info(decodedXML);
 
 		// 解析XML
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
