@@ -119,7 +119,7 @@ public class CallEBSImpl implements ICallEBS {
 	private TdDiySiteInventoryLogService tdDiySiteInventoryLogService;
 
 	public String GetErpInfo(String STRTABLE, String STRTYPE, String XML) {
-		LOGGER.info("getErpInfo called, STRTABLE=" + STRTABLE +", STRTYPE=" + STRTYPE +", XML=" + XML);
+		LOGGER.info("getErpInfo called, STRTABLE=" + STRTABLE +", STRTYPE=" + STRTYPE);
 
 		if (null == STRTABLE || STRTABLE.isEmpty() || STRTABLE.equals("?")) {
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>STRTABLE参数错误</MESSAGE></STATUS></RESULTS>";
@@ -140,7 +140,7 @@ public class CallEBSImpl implements ICallEBS {
 		try {
 			decodedXML = new String(decoded, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			LOGGER.info("UnsupportedEncodingException for decodedXML");
+			LOGGER.info("getErpInfo, OUT, UnsupportedEncodingException for decodedXML");
 			e.printStackTrace();
 		}
 
@@ -148,7 +148,7 @@ public class CallEBSImpl implements ICallEBS {
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>解密后XML数据为空</MESSAGE></STATUS></RESULTS>";
 		}
 
-		LOGGER.info(decodedXML);
+		LOGGER.info("getErpInfo, decodedXML=" + decodedXML);
 
 		// 解析XML
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -306,6 +306,7 @@ public class CallEBSImpl implements ICallEBS {
 					}
 				}
 			}
+			LOGGER.info("getErpInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("CUXAPP_OM_PRICE_LIST_H_OUT"))// TdPriceList
 		{
@@ -436,6 +437,7 @@ public class CallEBSImpl implements ICallEBS {
 				}
 			}
 
+			LOGGER.info("getErpInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("CUXAPP_OM_PRICE_LIST_L_OUT")) // TdPriceListItem
 		{
@@ -597,6 +599,7 @@ public class CallEBSImpl implements ICallEBS {
 					fitPriceLineService.save(line);
 				}
 			}
+			LOGGER.info("getErpInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("CUXAPP_INV_ITEMS_OUT"))// TdGoods
 		{
@@ -718,6 +721,7 @@ public class CallEBSImpl implements ICallEBS {
 				tdGoods.setIsWallAccessory(false);//是否是“墙面辅料”产品，默认false。用于计算运费
 				tdGoodsService.save(tdGoods, "数据导入");
 			}
+			LOGGER.info("getErpInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("CUXAPP_INV_ITEM_CATES_OUT"))// TdLyzParameter
 																			// 电商和物流系统物料类别接口表
@@ -798,6 +802,7 @@ public class CallEBSImpl implements ICallEBS {
 				tdLyzParameterService.save(tdLyzParameter);
 
 			}
+			LOGGER.info("getErpInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("CUXAPP_INV_ITEMS_LIMIT_OUT"))// TdGoodsLimit
 		{
@@ -896,6 +901,7 @@ public class CallEBSImpl implements ICallEBS {
 				}
 				tdGoodsLimitService.save(tdGoodsLimit);
 			}
+			LOGGER.info("getErpInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} // CUXAPP_QP_LIST_ASSIGNS_OUT
 		else if (STRTABLE.equalsIgnoreCase("CUXAPP_QP_LIST_ASSIGNS_OUT"))// 把价目表绑定到门店
@@ -946,6 +952,7 @@ public class CallEBSImpl implements ICallEBS {
 				tdDiySite.setPriceListName(name);
 				tdDiySiteService.save(tdDiySite);
 			}
+			LOGGER.info("getErpInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("CUXAPP_INV_STORE_TRANS_OUT"))// ebs库存修改
 		{
@@ -1159,6 +1166,7 @@ public class CallEBSImpl implements ICallEBS {
 					tdDiySiteInventoryService.save(inventory);
 				}
 			}
+			LOGGER.info("getErpInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		}
 
