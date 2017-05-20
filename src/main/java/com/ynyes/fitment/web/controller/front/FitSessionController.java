@@ -28,9 +28,7 @@ public class FitSessionController {
 	@RequestMapping(method = RequestMethod.POST)
 	public ClientResult fitSessionPost(HttpServletRequest request, String mobile, String password) {
 		try {
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("进入登录控制器，参数：mobile = {} password = {}", mobile, password);
-			}
+			LOGGER.debug("进入登录控制器，参数：mobile = {} password = {}", mobile, password);
 			
 			// 验证信息
 			if (StringUtils.isEmpty(mobile)) {
@@ -38,29 +36,21 @@ public class FitSessionController {
 			} else if (StringUtils.isEmpty(password)) {
 				return new ClientResult(ActionCode.FAILURE, "请填写密码");
 			} else {
-				if (LOGGER.isInfoEnabled()) {
-					LOGGER.info("参数验证成功，开始查询匹配手机号码和密码的员工信息");
-				}
+				LOGGER.debug("参数验证成功，开始查询匹配手机号码和密码的员工信息");
 				
 				ClientResult clientResult = this.bizSessionService.login(request, mobile, MD5.md5(password, 32));
 				
-				if (LOGGER.isInfoEnabled()) {
-					LOGGER.info("查询完成，结果为：result = {}", clientResult.toString());
-				}
+				LOGGER.debug("查询完成，结果为：result = {}", clientResult.toString());
 				
 				return clientResult;
 			}
 		} catch (ApplicationException e) {
 			e.printStackTrace();
-			if (LOGGER.isWarnEnabled()) {
-				LOGGER.warn(e.getMessage());
-			}
+			LOGGER.warn(e.getMessage());
 			return new ClientResult(ActionCode.FAILURE, e.getNotice());
 		} catch (Exception e) {
 			e.printStackTrace();
-			if (LOGGER.isErrorEnabled()) {
-				LOGGER.error(e.getMessage());
-			}
+			LOGGER.error(e.getMessage());
 			return new ClientResult(ActionCode.FAILURE, "出现意外的错误，请联系管理员");
 		}
 	}

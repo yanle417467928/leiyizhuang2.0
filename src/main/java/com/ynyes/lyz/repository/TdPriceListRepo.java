@@ -38,5 +38,24 @@ public interface TdPriceListRepo extends
 	List<TdPriceList> findByCityId(Long cityId);
 	
 	List<TdPriceList> findByCityIdAndActiveFlag(Long cityId, String activeFlag);
+	
+	/**
+	 * @title 获取商品价格中间表信息
+	 * @describe 
+	 * @author Generation Road
+	 * @date 2017年5月9日
+	 * @param listHeaderId
+	 * @param priceType
+	 * @param start
+	 * @param listHeaderId2
+	 * @param priceType2
+	 * @param start2
+	 * @param end2
+	 * @param listHeaderId3
+	 * @param priceType3
+	 * @return
+	 */
+	List<TdPriceList> findByListHeaderIdAndPriceTypeAndStartDateActiveBeforeAndEndDateActiveIsNullOrListHeaderIdAndPriceTypeAndStartDateActiveBeforeAndEndDateActiveAfterOrListHeaderIdAndPriceTypeAndStartDateActiveIsNull(
+			Long listHeaderId, String priceType, Date start, Long listHeaderId2, String priceType2, Date start2, Date end2,Long listHeaderId3,String priceType3);
 
 }

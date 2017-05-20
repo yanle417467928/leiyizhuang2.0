@@ -154,4 +154,22 @@ public class TdPriceListService {
 		return repository.findByCityIdAndActiveFlag(sobId, flag);
 	}
 
+	/**
+	 * @title 获取商品价格中间表信息
+	 * @describe 
+	 * @author Generation Road
+	 * @date 2017年5月9日
+	 * @param listHeaderId
+	 * @param priceType
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	public List<TdPriceList> findByListHeaderIdAndPriceTypeAndStartDateActiveAndEndDateActive(Long listHeaderId, String priceType, Date start, Date end) {
+		if (null == listHeaderId || null == priceType || null == start) {
+			return null;
+		}
+		return repository.findByListHeaderIdAndPriceTypeAndStartDateActiveBeforeAndEndDateActiveIsNullOrListHeaderIdAndPriceTypeAndStartDateActiveBeforeAndEndDateActiveAfterOrListHeaderIdAndPriceTypeAndStartDateActiveIsNull(listHeaderId, priceType, start, listHeaderId, priceType, start, end, listHeaderId, priceType);
+	}
+
 }

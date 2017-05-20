@@ -34,6 +34,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.geronimo.mail.util.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -81,6 +83,8 @@ import com.ynyes.lyz.webservice.ICallWMS;
 
 @WebService
 public class CallWMSImpl implements ICallWMS {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CallWMSImpl.class);
 
 	@Autowired
 	private TdDeliveryInfoService tdDeliveryInfoService;
@@ -137,13 +141,15 @@ public class CallWMSImpl implements ICallWMS {
 	private TdTbwWholeSepDirectionService tdTbwWholeSepDirectionService;
 
 	public String GetWMSInfo(String STRTABLE, String STRTYPE, String XML) {
-		System.out.println("MDJ:WMSInfo called：" + STRTABLE);
+		LOGGER.info("getWMSInfo called, STRTABLE=" + STRTABLE +", STRTYPE=" + STRTYPE);
 
 		if (null == STRTABLE || STRTABLE.isEmpty() || STRTABLE.equals("?")) {
+			LOGGER.info("getWMSInfo, OUT, STRTABLE参数错误");
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>STRTABLE参数错误</MESSAGE></STATUS></RESULTS>";
 		}
 
 		if (null == XML || XML.isEmpty() || XML.equals("?")) {
+			LOGGER.info("getWMSInfo, OUT, XML参数错误");
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>XML参数错误</MESSAGE></STATUS></RESULTS>";
 		}
 
@@ -158,15 +164,16 @@ public class CallWMSImpl implements ICallWMS {
 		try {
 			decodedXML = new String(decoded, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			System.out.println("UnsupportedEncodingException for decodedXML");
+			LOGGER.info("getWMSInfo, OUT, XML解析错误");
 			e.printStackTrace();
 		}
 
 		if (null == decodedXML || decodedXML.isEmpty()) {
+			LOGGER.info("getWMSInfo, OUT, 解密后XML数据为空");
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>解密后XML数据为空</MESSAGE></STATUS></RESULTS>";
 		}
 
-		System.out.println(decodedXML);
+		LOGGER.debug("getWMSInfo, decodedXML=" + decodedXML);
 
 		// 解析XML
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -175,6 +182,7 @@ public class CallWMSImpl implements ICallWMS {
 			builder = factory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
+			LOGGER.info("getWMSInfo, OUT, 解密后xml参数错误");
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>解密后xml参数错误</MESSAGE></STATUS></RESULTS>";
 		}
 
@@ -186,6 +194,7 @@ public class CallWMSImpl implements ICallWMS {
 			document = builder.parse(is);
 		} catch (SAXException | IOException e) {
 			e.printStackTrace();
+			LOGGER.info("getWMSInfo, OUT, 解密后xml格式不对");
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>解密后xml格式不对</MESSAGE></STATUS></RESULTS>";
 		}
 		NodeList nodeList = document.getElementsByTagName("TABLE");
@@ -274,6 +283,7 @@ public class CallWMSImpl implements ICallWMS {
 				// 保存 修改
 				TdDeliveryInfo tdDeliveryInfo = tdDeliveryInfoService.findByTaskNo(c_task_no);
 				if (tdDeliveryInfo != null) {
+					LOGGER.info("getWMSInfo, OUT, 编号:" + c_task_no + " 已存在");
 					return "<RESULTS><STATUS><CODE>1</CODE>编号:" + c_task_no
 							+ " 已存在<MESSAGE></MESSAGE></STATUS></RESULTS>";
 				}
@@ -309,15 +319,18 @@ public class CallWMSImpl implements ICallWMS {
 				tdDeliveryInfo.setcTaskType(cTaskType);
 				if (cTaskType != null && cTaskType.contains("退货")) {
 					if (cCompanyId == null) {
+						LOGGER.info("getWMSInfo, OUT, 采购退货城市id不能为空");
 						return "<RESULTS><STATUS><CODE>1</CODE>采购退货城市id不能为空<MESSAGE></MESSAGE></STATUS></RESULTS>";
 					}
 					TdCity tdCity = tdCityService.findBySobIdCity(cCompanyId);
 					if (tdCity == null) {
+						LOGGER.info("getWMSInfo, OUT, app不存在城市id为:" + cCompanyId + "的城市");
 						return "<RESULTS><STATUS><CODE>1</CODE>app不存在城市id为:" + cCompanyId
 								+ "的城市<MESSAGE></MESSAGE></STATUS></RESULTS>";
 					}
 					List<TdDeliveryInfoDetail> infoDetails = tdDeliveryInfoDetailService.findByTaskNo(c_task_no);
 					if (infoDetails == null || infoDetails.size() < 1) {
+						LOGGER.info("getWMSInfo, OUT, 未找到任务编号为" + c_task_no + " 的明细，请先传明细，在主档");
 						return "<RESULTS><STATUS><CODE>1</CODE>未找到任务编号为" + c_task_no
 								+ " 的明细，请先传明细，在主档<MESSAGE></MESSAGE></STATUS></RESULTS>";
 					}
@@ -350,6 +363,7 @@ public class CallWMSImpl implements ICallWMS {
 
 				tdDeliveryInfoService.save(tdDeliveryInfo);
 			}
+			LOGGER.info("getWMSInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		}
 		if (STRTABLE.equalsIgnoreCase("tbw_send_task_Driver")) // 配送出库修改配送员
@@ -458,6 +472,7 @@ public class CallWMSImpl implements ICallWMS {
 				tdDeliveryInfo.setOwnerNo(c_owner_no);
 				tdDeliveryInfoService.save(tdDeliveryInfo);
 			}
+			LOGGER.info("getWMSInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("tbw_send_task_d")) // 配送出库明细
 		{
@@ -572,6 +587,7 @@ public class CallWMSImpl implements ICallWMS {
 				infoDetail.setSubOrderNumber(c_reserved1);
 				TdGoods tdGoods = tdGoodsService.findByCode(c_gcode);
 				if (tdGoods == null) {
+					LOGGER.info("getWMSInfo, OUT, 编码为" + c_gcode + "的商品不存在");
 					return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>编码为" + c_gcode
 							+ "的商品不存在</MESSAGE></STATUS></RESULTS>";
 				}
@@ -579,6 +595,7 @@ public class CallWMSImpl implements ICallWMS {
 				if (c_reserved1 != null) {
 					TdOrder tdOrder = tdOrderService.findByOrderNumber(c_reserved1);
 					if (null == tdOrder) {
+						LOGGER.info("getWMSInfo, OUT, 单号为" + c_reserved1 + "的单据不存在");
 						return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>单号为" + c_reserved1
 								+ "的单据不存在</MESSAGE></STATUS></RESULTS>";
 					}
@@ -594,6 +611,7 @@ public class CallWMSImpl implements ICallWMS {
 					}
 				}
 			}
+			LOGGER.info("getWMSInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("tbw_back_m"))// 退货入库单 主档
 		{
@@ -830,6 +848,7 @@ public class CallWMSImpl implements ICallWMS {
 				// }
 				// }
 			}
+			LOGGER.info("getWMSInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("tbw_back_d"))// 退货入库单 详细
 		{
@@ -1040,6 +1059,7 @@ public class CallWMSImpl implements ICallWMS {
 				tdBackDetailService.save(tdBackDetail);
 
 			}
+			LOGGER.info("getWMSInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("tbw_rec_d")) // 城市采购入库明细
 		{
@@ -1277,19 +1297,23 @@ public class CallWMSImpl implements ICallWMS {
 				recd.setInitTime(new Date());
 				TdGoods tdGoods = tdGoodsService.findByCodeAndStatus(gcode, 1l);
 				if (StringUtils.isBlank(recQty)) {
+					LOGGER.info("getWMSInfo, OUT, 商品验收数量不能为空");
 					return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>商品验收数量不能为空</MESSAGE></STATUS></RESULTS>";
 				}
 				if (tdGoods == null) {
+					LOGGER.info("getWMSInfo, OUT, 商品编码为：" + gcode + "的商品不存在或者不可用");
 					return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>商品编码为：" + gcode
 							+ "的商品不存在或者不可用</MESSAGE></STATUS></RESULTS>";
 				}
 				Long count = this.tdTbwRecdService.countByGcodeAndRecNo(gcode, recNo);
 				if (count > 0) {
+					LOGGER.info("getWMSInfo, OUT, 该数据已经成功接收，请勿重复传输");
 					return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>该数据已经成功接收，请勿重复传输</MESSAGE></STATUS></RESULTS>";
 				}
 				
 				tdTbwRecdService.save(recd);
 			}
+			LOGGER.info("getWMSInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("tbw_rec_m"))// 城市采购入库主档
 		{
@@ -1508,10 +1532,12 @@ public class CallWMSImpl implements ICallWMS {
 				recm.setInitTime(new Date());
 				tdTbwRecmService.save(recm);
 				if (cCompanyId == null) {
+					LOGGER.info("getWMSInfo, OUT, 城市编码不存在");
 					return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>城市编码不存在</MESSAGE></STATUS></RESULTS>";
 				}
 				List<TdTbwRecd> tbwRecds = tdTbwRecdService.findByRecNo(cRecNo);
 				if (tbwRecds == null || tbwRecds.size() < 1) {
+					LOGGER.info("getWMSInfo, OUT, " + cRecNo + "：未找到明细");
 					return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>" + cRecNo + "：未找到明细</MESSAGE></STATUS></RESULTS>";
 				}
 				for (TdTbwRecd tdTbwRecd : tbwRecds) {
@@ -1547,6 +1573,7 @@ public class CallWMSImpl implements ICallWMS {
 				}
 			}
 
+			LOGGER.info("getWMSInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 			
 		}else if(STRTABLE.equalsIgnoreCase("tbw_whole_sep_direction")){ //整转零
@@ -1876,11 +1903,13 @@ public class CallWMSImpl implements ICallWMS {
 				if(null != cPackQty){
 					cPackQtyTemp = cPackQty;
 				}else{
+					LOGGER.info("getWMSInfo, OUT, cPackQty不能为空!");
 					return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>cPackQty不能为空!</MESSAGE></STATUS></RESULTS>";
 				}
 				if(null != cInQty){
 					cInQtyTemp = cInQty;
 				}else{
+					LOGGER.info("getWMSInfo, OUT, cInQty不能为空!");
 					return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>cInQty不能为空!</MESSAGE></STATUS></RESULTS>";
 				}
 				
@@ -1890,10 +1919,12 @@ public class CallWMSImpl implements ICallWMS {
 						if (null != inventory) {
 							inventory.setInventory(inventory.getInventory() - cPackQtyTemp);
 						}else{
+							LOGGER.info("getWMSInfo, OUT, 城市编码为：" + cCompanyId + "的城市不存在或SKU为" + cGcode + "的商品不存在");
 							return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>城市编码为：" + cCompanyId + "的城市不存在或SKU为" + cGcode
 									+ "的商品不存在</MESSAGE></STATUS></RESULTS>";
 						}
 					}else{
+						LOGGER.info("getWMSInfo, OUT, 商品编码Gcode不能不为空！");
 						return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>商品编码Gcode不能不为空！</MESSAGE></STATUS></RESULTS>";
 					}
 					if(null != cDGcode){
@@ -1901,10 +1932,12 @@ public class CallWMSImpl implements ICallWMS {
 						if(null != dInventory){
 							dInventory.setInventory(dInventory.getInventory() + cInQtyTemp.longValue());
 						}else{
+							LOGGER.info("getWMSInfo, OUT, 城市编码为：" + cCompanyId + "的城市不存在或SKU为" + cDGcode + "的商品不存在");
 							return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>城市编码为：" + cCompanyId + "的城市不存在或SKU为" + cDGcode
 									+ "的商品不存在</MESSAGE></STATUS></RESULTS>";
 						}
 					}else{
+						LOGGER.info("getWMSInfo, OUT, 商品编码cDGcode不能不为空！");
 						return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>商品编码cDGcode不能不为空！</MESSAGE></STATUS></RESULTS>";
 					}
 					tdDiySiteInventoryService.save(inventory);
@@ -1914,9 +1947,11 @@ public class CallWMSImpl implements ICallWMS {
 					tdDiySiteInventoryLogService.saveChangeLog(dInventory, cInQtyTemp.longValue(), null, null,
 							TdDiySiteInventoryLog.CHANGETYPE_TURN_ZERO);
 				}else{
+					LOGGER.info("getWMSInfo, OUT, 城市编码不能为空！");
 					return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>城市编码不能为空！</MESSAGE></STATUS></RESULTS>";
 				}
 			}
+			LOGGER.info("getWMSInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		}else if (STRTABLE.equalsIgnoreCase("tbw_back_rec_d"))// 城市采购退货明细
 		{
@@ -2096,6 +2131,7 @@ public class CallWMSImpl implements ICallWMS {
 				}
 
 			}
+			LOGGER.info("getWMSInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("tbw_back_rec_m"))// 城市采购退货主档
 		{
@@ -2260,6 +2296,7 @@ public class CallWMSImpl implements ICallWMS {
 				}
 
 			}
+			LOGGER.info("getWMSInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("tbw_om_d"))// 城市调拨明细
 		{
@@ -2474,6 +2511,7 @@ public class CallWMSImpl implements ICallWMS {
 				}
 			}
 
+			LOGGER.info("getWMSInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("tbw_om_m"))// 城市调拨主档
 		{
@@ -2673,6 +2711,7 @@ public class CallWMSImpl implements ICallWMS {
 				}
 			}
 
+			LOGGER.info("getWMSInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("tbw_waste_view"))// 报损报溢
 		{
@@ -2936,6 +2975,7 @@ public class CallWMSImpl implements ICallWMS {
 				}
 			}
 
+			LOGGER.info("getWMSInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		}
 		return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>不支持该表数据传输：" + STRTABLE + "</MESSAGE></STATUS></RESULTS>";

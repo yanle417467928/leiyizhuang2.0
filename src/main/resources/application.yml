@@ -35,7 +35,7 @@ spring:
     hibernate:
       naming:
         strategy: org.hibernate.cfg.ImprovedNamingStrategy
-  datasource: 
+  datasource:
     url: jdbc:mysql://localhost:3306/lyz?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false
     username: root
     password: root
@@ -50,6 +50,14 @@ deploy:
   wechat:
     async:
       url: http://test.leyizhuang.com.cn/pay/wechat/return/async
+  oss:
+    cdnHosts: img-dev.leyizhuang.com.cn
+    folder: app/images/
+    bucket: leyizhuang-dev
+  wms:
+    url: http://120.76.214.99:8199/WmsInterServer.asmx?wsdl
+  ebs: 
+    url: http://erptest.zghuarun.com:8030/webservices/SOAProvider/plsql/cux_app_webservice_pkg/?wsdl
       
 ---
 
@@ -61,7 +69,7 @@ spring:
     hibernate:
       naming:
         strategy: org.hibernate.cfg.ImprovedNamingStrategy
-  datasource: 
+  datasource:
     url: jdbc:mysql://localhost:3306/lyz?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false
     username: root
     password: root
@@ -76,10 +84,18 @@ deploy:
   wechat:
     async:
       url: http://test.leyizhuang.com.cn/pay/wechat/return/async
+  oss:
+    cdnHosts: img-dev.leyizhuang.com.cn
+    folder: app/images/
+    bucket: leyizhuang-dev
+  wms: 
+    url: http://120.76.214.99:8199/WmsInterServer.asmx?wsdl
+  ebs: 
+    url: http://erptest.zghuarun.com:8030/webservices/SOAProvider/plsql/cux_app_webservice_pkg/?wsdl
       
 ---
 
-#正式环境
+#生产环境
 spring:
   profiles: prod
   jpa:
@@ -87,7 +103,7 @@ spring:
     hibernate:
       naming:
         strategy: org.hibernate.cfg.ImprovedNamingStrategy
-  datasource: 
+  datasource:
     url: jdbc:mysql://rm-wz9805x7ngck809dg.mysql.rds.aliyuncs.com:3306/lyz?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=true
     username: magpie
     password: LEyizhuang2017
@@ -102,5 +118,13 @@ deploy:
   wechat:
     async:
       url: http://www.leyizhuang.com.cn/pay/wechat/return/async
+  oss:
+    cdnHosts: img1.leyizhuang.com.cn,img2.leyizhuang.com.cn,img3.leyizhuang.com.cn,img4.leyizhuang.com.cn,img5.leyizhuang.com.cn
+    folder: app/images/
+    bucket: leyizhuang
+  wms: 
+    url: http://120.76.23.226:8999/WmsInterServer.asmx?wsdl
+  ebs: 
+    url: http://erpap.zghuarun.com:8008/webservices/SOAProvider/plsql/cux_app_webservice_pkg/?wsdl
 
  

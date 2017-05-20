@@ -210,4 +210,30 @@ public class TdOrderGoodsService {
 		}
 		return repository.findByMainOrderNumber(mainOrderNumber);
 	}
+	
+	/**
+	 * @title 根据td_order_id查询
+	 * @describe 
+	 * @author Generation Road
+	 * @date 2017年5月10日
+	 * @param id
+	 * @return
+	 */
+	public List<TdOrderGoods> findByTdOrderId(Long id) {
+		return repository.findByTdOrderId(id);
+	}
+	
+	
+	/**
+	 * @title 根据td_order_id查询
+	 * @describe 
+	 * @author Generation Road
+	 * @date 2017年5月10日
+	 * @param id
+	 * @return
+	 */
+	public List<TdOrderGoods> findByTdReturnId(Long id) {
+		return repository.findByTdReturnId(id);
+	}
+	
 }

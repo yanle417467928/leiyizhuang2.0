@@ -159,6 +159,12 @@ public class TdOrderGoods {
 	// 是否墙面辅料
 	@Column(nullable = false)
 	private Boolean isWallAccessory = false;
+	
+	// order表id
+	private Long tdOrderId;
+	
+	//returnNote表id
+	private Long tdReturnId;
 
 	public String getSubOrderNumber() {
 		return subOrderNumber;
@@ -446,6 +452,22 @@ public class TdOrderGoods {
 
 	public void setIsWallAccessory(Boolean isWallAccessory) {
 		this.isWallAccessory = isWallAccessory;
+	}
+
+	public Long getTdOrderId() {
+		return tdOrderId;
+	}
+
+	public void setTdOrderId(Long tdOrderId) {
+		this.tdOrderId = tdOrderId;
+	}
+
+	public Long getTdReturnId() {
+		return tdReturnId;
+	}
+
+	public void setTdReturnId(Long tdReturnId) {
+		this.tdReturnId = tdReturnId;
 	}
 
 }

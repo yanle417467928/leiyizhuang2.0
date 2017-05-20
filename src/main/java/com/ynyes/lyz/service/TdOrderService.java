@@ -14,7 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ynyes.lyz.entity.TdDiySite;
+import com.ynyes.lyz.entity.TdGoods;
 import com.ynyes.lyz.entity.TdOrder;
+import com.ynyes.lyz.entity.TdOrderGoods;
+import com.ynyes.lyz.entity.TdPriceListItem;
 import com.ynyes.lyz.entity.user.TdUser;
 import com.ynyes.lyz.repository.TdOrderRepo;
 import com.ynyes.lyz.util.Criteria;
@@ -37,7 +40,16 @@ public class TdOrderService {
 
 	@Autowired
 	private TdDiySiteService tdDiySiteService;
+	
+	@Autowired
+	private TdGoodsService tdGoodsService;
+	
+	@Autowired
+	private TdCommonService tdCommonService;
 
+	@Autowired
+	private TdOrderGoodsService tdOrderGoods;
+	
 	private final Integer orderPageSize = 10;
 
 	/**
@@ -1233,4 +1245,64 @@ public class TdOrderService {
 		}
 		return orderPage;
 	}
+	
+	/**
+	 * @title 计算经销商订单总差价
+	 * @describe 
+	 * @author Generation Road
+	 * @date 2017年5月9日
+	 * @param tdOrder
+	 * @return
+	 */
+	public double calculateAllSpread(TdOrder tdOrder){
+		double difference = 0.0;
+		if (null == tdOrder) {
+			return difference;
+		}
+		//根据门店ID查询门店信息
+		TdDiySite diySite = tdDiySiteService.findOne(tdOrder.getDiySiteId());
+		if (null == diySite) {
+			return difference;
+		}
+		//判断门店类型是否是经销商
+		if (diySite.getCustTypeName().equalsIgnoreCase("经销商")) {
+			List<TdOrderGoods> list = tdOrder.getOrderGoodsList();
+			if(null == list || list.size() == 0){
+				list = tdOrderGoods.findByTdOrderId(tdOrder.getId());
+				if(null == list || list.size() == 0){
+					return difference;
+				}
+			}
+			//根据订单的每种商品查询差价
+			for (TdOrderGoods tdOrderGoods : list) {
+				//根据goodsId查询goods信息
+				TdGoods tdGoods = tdGoodsService.findOne(tdOrderGoods.getGoodsId());
+				difference += calculateOneSpread(diySite, tdGoods);
+			}
+		}
+		
+		return difference;
+	}
+	
+	
+	/**
+	 * @title 计算经销商单个商品的差价
+	 * @describe 
+	 * @author Generation Road
+	 * @date 2017年5月9日
+	 * @param tdOrder
+	 * @return
+	 */
+	public double calculateOneSpread(TdDiySite diySite, TdGoods tdGoods){
+		//查询商品的零售价
+		TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, tdGoods, "LS");
+		double retailPrice = priceListItem.getPrice();
+		
+		//查询商品的经销价
+		priceListItem = tdCommonService.secondGetGoodsPrice(diySite, tdGoods, "JX");
+		double dealerPrice = priceListItem.getPrice();
+		
+		return retailPrice - dealerPrice;
+	}
+	
 }
