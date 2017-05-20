@@ -38,21 +38,15 @@ public class FitCartController extends FitBasicController {
 	@ResponseBody
 	public ClientResult cartPost(HttpServletRequest request, String params) {
 		try {
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("进入控制器，准备添加商品到购物车，参数：params = {}", params);
-			}
+			LOGGER.debug("进入控制器，准备添加商品到购物车，参数：params = {}", params);
 			FitEmployee employee = this.getLoginEmployee(request);
 			this.bizCartGoodsService.addToCart(params, employee);
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("开始查询当前已选数量，参数：employeeId = {}", null == employee ? null : employee.getId());
-			}
+			LOGGER.debug("开始查询当前已选数量，参数：employeeId = {}", null == employee ? null : employee.getId());
 			Long selected = this.bizCartGoodsService.getSelectedCounts(employee.getId());
 			return new ClientResult(ActionCode.SUCCESS, selected);
 		} catch (Exception e) {
 			e.printStackTrace();
-			if (LOGGER.isWarnEnabled()) {
-				LOGGER.warn(e.getMessage());
-			}
+			LOGGER.warn(e.getMessage());
 			return new ClientResult(ActionCode.FAILURE, "出现意外的错误，请稍后重试或联系管理员");
 		}
 	}
@@ -61,16 +55,12 @@ public class FitCartController extends FitBasicController {
 	public String changeQuantity(@PathVariable("operation") String operation, @PathVariable("id") Long id,
 			Long quantity, HttpServletRequest request, ModelMap map) {
 		try {
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("开始操作购物车，参数：operation = {}, id = {}, quantity = {}", operation, id, quantity);
-			}
+			LOGGER.debug("开始操作购物车，参数：operation = {}, id = {}, quantity = {}", operation, id, quantity);
 			FitEmployee employee = this.getLoginEmployee(request);
 			Long inventory = this.bizInventoryService.getCityInventoryByGoodsId(employee.getCompanyId(), id);
 			FitCartGoods cart = this.bizCartGoodsService.getCartGoodsByGoodsId(employee.getId(), id);
 			this.bizCartGoodsService.changeCartGoodsQuantity(operation, cart, quantity, inventory);
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("操作完成，开始计算当前购物车商品总金额");
-			}
+			LOGGER.debug("操作完成，开始计算当前购物车商品总金额");
 			List<FitCartGoods> cartList = this.bizCartGoodsService.loadEmployeeCart(employee.getId());
 			map.addAttribute("cartList", cartList);
 			if (CollectionUtils.isNotEmpty(cartList)) {
@@ -81,15 +71,11 @@ public class FitCartController extends FitBasicController {
 					map.addAttribute("goods" + i, this.bizInventoryService
 							.getCityInventoryByGoodsId(employee.getCompanyId(), cartGoods.getGoodsId()));
 				}
-				if (LOGGER.isInfoEnabled()) {
-					LOGGER.info("当前购物车商品总金额计算完毕，totalPrice = {}", totalPrice);
-				}
+				LOGGER.debug("当前购物车商品总金额计算完毕，totalPrice = {}", totalPrice);
 				map.addAttribute("totalPrice", totalPrice);
 			}
 		} catch (Exception e) {
-			if (LOGGER.isWarnEnabled()) {
-				LOGGER.warn(e.getMessage());
-			}
+			LOGGER.warn(e.getMessage());
 			e.printStackTrace();
 		}
 		return "/fitment/selected_goods_and_color";
@@ -102,9 +88,7 @@ public class FitCartController extends FitBasicController {
 			FitEmployee employee = this.getLoginEmployee(request);
 			return this.bizCartGoodsService.deleteCartGoods(employee.getId(), id);
 		} catch (Exception e) {
-			if (LOGGER.isWarnEnabled()) {
-				LOGGER.warn(e.getMessage());
-			}
+			LOGGER.warn(e.getMessage());
 			e.printStackTrace();
 			return new ClientResult(ActionCode.FAILURE, "出现意外的错误，请稍后重试或联系管理员");
 		}

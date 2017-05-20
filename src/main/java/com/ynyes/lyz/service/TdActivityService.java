@@ -215,7 +215,7 @@ public class TdActivityService {
 			return null;
 		}
 		return repository.findByDiySiteIdsContainingAndBeginDateBeforeAndFinishDateAfterAndGiftTypeOrderBySortIdAsc(
-				diySiteId + ",", now, now, giftType);
+				"," + diySiteId + ",", now, now, giftType);
 	}
 
 	public TdActivity findByName(String name) {
