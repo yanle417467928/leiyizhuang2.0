@@ -252,10 +252,10 @@ public class BizOrderServiceImpl implements BizOrderService {
 		TdCity city = tdCityService.findBySobIdCity(company.getSobId());
 
 		order.setCity(city.getCityName());
-		order.setDetailAddress(null);
-		order.setDisctrict(null);
+		order.setDetailAddress(fitOrder.getDetailAddress());
+		order.setDisctrict(fitOrder.getDistrict());
 		order.setProvince(null);
-		order.setSubdistrict(null);
+		order.setSubdistrict(fitOrder.getSubdistrict());
 		order.setDiySiteCode(company.getCode());
 		order.setAllActualPay(0d);
 		order.setAllTotalPay(0d);
@@ -594,6 +594,48 @@ public class BizOrderServiceImpl implements BizOrderService {
 		}
 
 		return this.fitOrderService.save(order);
+	}
+
+	@Override
+	public FitOrder initOrder(List<FitCartGoods> cartGoodsList, String receiver, String receiverMobile,
+			String baseAddress, String detailAddress, FitEmployee employee, String deliveryDate, Long deliveryTime,
+			String remark, String district, String subdistrict) throws Exception {
+		List<FitOrderGoods> orderGoodsList = new ArrayList<>();
+		for (FitCartGoods cartGoods : cartGoodsList) {
+			if (null != cartGoods) {
+				FitOrderGoods orderGoods = new FitOrderGoods().init(cartGoods);
+				orderGoods = fitOrderGoodsService.save(orderGoods);
+				orderGoodsList.add(orderGoods);
+				this.bizCartGoodsService.clearCartWithId(cartGoods.getId());
+			}
+		}
+
+		FitOrder order = new FitOrder();
+		order.setCompanyId(employee.getCompanyId());
+		order.setCompanyTitle(employee.getCompanyTitle());
+		order.setEmployeeId(employee.getId());
+		order.setEmployeeName(employee.getName());
+		order.setEmployeeMobile(employee.getMobile());
+		if (employee.getIsMain()) {
+			order.setAuditorId(employee.getId());
+			order.setAuditorName(employee.getName());
+			order.setAuditorMobile(employee.getMobile());
+			order.setAuditTime(new Date());
+		}
+
+		order.setStatus(employee.getIsMain() ? AuditStatus.AUDIT_SUCCESS : AuditStatus.WAIT_AUDIT);
+		order.setOrderGoodsList(orderGoodsList);
+		order.setReceiveName(receiver);
+		order.setReceivePhone(receiverMobile);
+		order.setReceiveAddress(baseAddress + detailAddress);
+		this.loadDeliveryTime(order);
+		order.setDeliveryDate(deliveryDate);
+		order.setDeliveryTime(deliveryTime);
+		order.setRemark(remark);
+		order.setDistrict(district);
+		order.setSubdistrict(subdistrict);
+		order.setDetailAddress(detailAddress);
+		return this.fitOrderService.save(order.initOrderNumber().initPrice());
 	}
 
 }

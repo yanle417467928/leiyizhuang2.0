@@ -91,6 +91,18 @@ public class FitOrder extends TableEntity {
 	// 收货地址
 	@Column(length = 150, nullable = false, updatable = false)
 	private String receiveAddress;
+	
+	// 区
+	@Column
+	private String district;
+	
+	// 街道
+	@Column
+	private String subdistrict;
+	
+	// 详细地址
+	@Column
+	private String detailAddress;
 
 	// 上楼方式
 	@Column(length = 10, nullable = false)
@@ -278,6 +290,31 @@ public class FitOrder extends TableEntity {
 
 	public void setFloor(Long floor) {
 		this.floor = floor;
+	}
+	
+
+	public String getDistrict() {
+		return district;
+	}
+
+	public void setDistrict(String district) {
+		this.district = district;
+	}
+
+	public String getSubdistrict() {
+		return subdistrict;
+	}
+
+	public void setSubdistrict(String subdistrict) {
+		this.subdistrict = subdistrict;
+	}
+
+	public String getDetailAddress() {
+		return detailAddress;
+	}
+
+	public void setDetailAddress(String detailAddress) {
+		this.detailAddress = detailAddress;
 	}
 
 	public Double getTotalGoodsPrice() {

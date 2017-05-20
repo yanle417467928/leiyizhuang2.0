@@ -64,6 +64,8 @@
                 <div class="edit-info" onclick="getDistrict();">
                     <label>所在地区：</label>
                     <a class="edit-city" id="add_btn">${employee.cityTitle!''}</a>
+                     <input type="hidden" id="district" value="" name="district">
+                     <input type="hidden" id="subdistrict" value="" name="subdistrict">
                 </div>
                 <div class="edit-info">
                     <label>详细地址：</label>

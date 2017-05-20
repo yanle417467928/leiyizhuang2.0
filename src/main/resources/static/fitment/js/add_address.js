@@ -80,6 +80,7 @@ function getRegion(id, name, status) {
 				oBox.style.webkitTransition = '1s';
 				oBox.style.webkitTransform = 'translateX(0)';
 				$("#add_btn").html(city + name);
+				$("#district").val(name);
 			}
 		});
 	} else if (2 == status) {
@@ -99,6 +100,7 @@ function getRegion(id, name, status) {
 		// success : function(res) {
 		var info = $("#add_btn").html();
 		$("#add_btn").html(info + name);
+		$("#subdistrict").val(name);
 		// 关闭等待图标
 		close(100);
 		windowHide();
@@ -130,6 +132,9 @@ function saveAddress() {
 	var receiverMobile = $("#receiverMobile").val();
 	var detailAddress = $("#detailAddress").val();
 	var baseAddress = $("#add_btn").html();
+	
+	var district = $("#district").val();
+	var subdistrict = $("#subdistrict").val();
 
 	var limitDay = $("#early_date").val();
 	var limitId = $("#early_time").val();
@@ -197,7 +202,9 @@ function saveAddress() {
 			detailAddress : detailAddress,
 			selectedDate: date,
 			selectedTime: detailTime,
-			remark: remark
+			remark: remark,
+			district: district,
+			subdistrict: subdistrict
 		},
 		error : function(XMLHttpRequest, textStatus, errorThrown) {
 			// 关闭等待图标

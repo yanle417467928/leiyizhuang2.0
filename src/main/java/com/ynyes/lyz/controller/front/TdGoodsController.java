@@ -779,6 +779,7 @@ public class TdGoodsController {
 		cartGoods.setUserId(user.getId());
 		cartGoods.setUsername(username);
 		cartGoods.setQuantity(quantity);
+		cartGoods.setIsWallAccessory(goods.getIsWallAccessory());
 
 		// 获取所有的已选
 		List<TdCartGoods> cartGoods_list = tdCartGoodsService.findByUsername(username);
