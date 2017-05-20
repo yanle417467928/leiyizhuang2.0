@@ -29,4 +29,24 @@ public interface TdOrderGoodsRepo extends
 			+" WHERE "
 			+" 	o.main_order_number = ?1 ; ",nativeQuery=true)
 	List<TdOrderGoods> findByMainOrderNumber(String mainOrderNumber);
+
+	/**
+	 * @title  根据td_order_id查询
+	 * @describe 
+	 * @author Generation Road
+	 * @date 2017年5月10日
+	 * @param id
+	 * @return
+	 */
+	List<TdOrderGoods> findByTdOrderId(Long id);
+	
+	/**
+	 * @title  根据td_return_id查询
+	 * @describe 
+	 * @author Generation Road
+	 * @date 2017年5月10日
+	 * @param id
+	 * @return
+	 */
+	List<TdOrderGoods> findByTdReturnId(Long id);
 }
