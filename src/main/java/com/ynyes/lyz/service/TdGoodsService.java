@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.ModelMap;
 
 import com.ynyes.lyz.entity.TdBrand;
+import com.ynyes.lyz.entity.TdDiySitePrice;
 import com.ynyes.lyz.entity.TdGoods;
 import com.ynyes.lyz.entity.TdPriceList;
 import com.ynyes.lyz.entity.TdPriceListItem;
@@ -79,9 +80,12 @@ public class TdGoodsService {
 	@Autowired
 	private TdBrandService tdBrandService;
 	
+	@Autowired
+	private TdDiySitePriceService tdDiySitePriceService;
+	
 	// private static final String IMG_FOLDER = "F:/doc/leyizhuang/images/goods/";
 
-	private static final String IMG_FOLDER = "/mnt/root/images/goods/";
+//	private static final String IMG_FOLDER = "/mnt/root/images/goods/";
 
 	/******** 功能部分 ***********/
 
@@ -1719,4 +1723,8 @@ public class TdGoodsService {
 		}
 		return result;
 	}
+	
+//	private Map<String, Long> getPriceListMap(String diySiteCode) {
+//		TdDiySitePrice  = tdDiySitePriceService.findByStoreCodeAndStartDateActiveBeforeAndEndDateActiveAfter(diySiteCode);
+//	}
 }
