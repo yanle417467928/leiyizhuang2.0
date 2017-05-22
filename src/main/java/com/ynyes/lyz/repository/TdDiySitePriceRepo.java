@@ -30,4 +30,6 @@ public interface TdDiySitePriceRepo extends JpaRepository<TdDiySitePrice, Serial
 	 */
 	TdDiySitePrice findBySobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveAndEndDateActiveOrSobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveAndEndDateActiveIsNull(Long sobId, String storeCode, String custTypeCode, Date start, Date end, Long sobId2, String storeCode2, String custTypeCode2, Date start2);
 	
+	TdDiySitePrice findByAssignId(Long assignId);
+	
 }
