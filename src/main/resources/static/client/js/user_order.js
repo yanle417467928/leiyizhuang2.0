@@ -51,8 +51,10 @@ $(function() {
 	} else if (1 == init_id) {
 		$("#unpayed").click();
 	} else if (2 == init_id) {
-		$("#unsignin").click();
+		$("#undeliver").click();
 	} else if (3 == init_id) {
+		$("#unsignin").click();
+	}else if (4 == init_id) {
 		$("#uncommend").click();
 	}
 });
