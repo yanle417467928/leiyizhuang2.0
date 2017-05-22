@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +39,7 @@ public class TdSalesForActiveUserService {
 	
 	private static Log myLog = LogFactory.getLog(TdSalesForActiveUser.class);
 	
-	@Scheduled(cron="0 0 1 * * ?")
+	/*@Scheduled(cron="0 0 1 * * ?")*/
 	public void insertDataToSales() {
 		
 		myLog.info("开始执行销量抓取定时任务:"+new Date());
