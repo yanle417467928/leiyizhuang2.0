@@ -204,4 +204,15 @@ public class TdDiySitePrice {
 	public void setAttribute5(String attribute5) {
 		this.attribute5 = attribute5;
 	}
+
+	@Override
+	public String toString() {
+		return "TdDiySitePrice [id=" + id + ", sobId=" + sobId + ", assignId=" + assignId + ", listHeaderId="
+				+ listHeaderId + ", name=" + name + ", storeCode=" + storeCode + ", custTypeCode=" + custTypeCode
+				+ ", customerId=" + customerId + ", customerNumber=" + customerNumber + ", customerName=" + customerName
+				+ ", startDateActive=" + startDateActive + ", endDateActive=" + endDateActive + ", attribute1="
+				+ attribute1 + ", attribute2=" + attribute2 + ", attribute3=" + attribute3 + ", attribute4="
+				+ attribute4 + ", attribute5=" + attribute5 + "]";
+	}
+	
 }

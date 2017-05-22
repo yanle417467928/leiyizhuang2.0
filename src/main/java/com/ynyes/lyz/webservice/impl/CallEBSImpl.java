@@ -1174,6 +1174,7 @@ public class CallEBSImpl implements ICallEBS {
 			LOGGER.info("getErpInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("CUXAPP_QP_LIST_ASSIGNS_OUT")) {
+			LOGGER.info("开始解析接口数据：CUXAPP_QP_LIST_ASSIGNS_OUT");
 			return this.doWithQPList(nodeList);
 		}
 
@@ -1184,13 +1185,18 @@ public class CallEBSImpl implements ICallEBS {
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Node node = nodeList.item(i);
+			LOGGER.info("node = {}", node.toString());
 			NodeList childNodeList = node.getChildNodes();
+			LOGGER.info("开始循环遍历XML子节点");
 			for (int idx = 0; idx < childNodeList.getLength(); idx++) {
 				Node childNode = childNodeList.item(idx);
+				LOGGER.info("childNode = {}", childNode.toString());
 				TdDiySitePrice diySitePrice = new TdDiySitePrice();
+				LOGGER.info("childNode.nodeType = {}", childNode.getNodeType());
 				if (childNode.getNodeType() == Node.ELEMENT_NODE) {
 					String name = childNode.getNodeName();
 					String value = childNode.getFirstChild().getNodeValue();
+					LOGGER.info("name = {}, value = {}", name, value);
 					if (name.equalsIgnoreCase("SOB_ID")) {
 						diySitePrice.setSobId(Long.parseLong(value));
 					} else if (name.equalsIgnoreCase("ASSIGN_ID")) {
