@@ -43,10 +43,10 @@ public class TdDiySitePriceService {
 	 * @param end
 	 * @return
 	 */
-	public List<TdDiySitePrice> getDiySitePrice(Long sobId, String storeCode, String custTypeCode, Date start, Date end) {
+	public List<TdDiySitePrice> getDiySitePrice(Long sobId, String storeCode, String custTypeCode, String priceType, Date start, Date end) {
 		return repository
-				.findBySobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveAndEndDateActiveOrSobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveAndEndDateActiveIsNull(
-						sobId, storeCode, custTypeCode, start, end, sobId, storeCode, custTypeCode, start);
+				.findBySobIdAndStoreCodeAndCustTypeCodeAndPriceTypeAndStartDateActiveBeforeAndEndDateActiveIsNullOrSobIdAndStoreCodeAndCustTypeCodeAndPriceTypeAndStartDateActiveBeforeAndEndDateActiveAfterOrSobIdAndStoreCodeAndCustTypeCodeAndPriceTypeAndStartDateActiveIsNull(
+						sobId, storeCode, custTypeCode, priceType, start, sobId, storeCode, custTypeCode, priceType, start, end, sobId, storeCode, custTypeCode, priceType);
 	}
 
 	public TdDiySitePrice findByAssignId(Long assignId) {

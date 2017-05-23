@@ -573,28 +573,11 @@ public class TdCommonService {
 			return null;
 		}
 		
-		//获取商品价格中间表信息
-		List<TdDiySitePrice> diySitePriceList = tdDiySitePriceService.getDiySitePrice(sobId, storeCode, custType, new Date(), new Date());
-		
-		if (null == diySitePriceList || diySitePriceList.size() == 0) {
-			return null;
-		}
-		
 		String productFlag = goods.getBrandTitle();
 		if (null == productFlag) {
 			return null;
 		}
 		
-		TdDiySitePrice diySitePrice = null;
-		for (TdDiySitePrice tdDiySitePrice : diySitePriceList) {
-			if (tdDiySitePrice.getName().indexOf(productFlag) != -1) {
-				diySitePrice = tdDiySitePrice;
-			}
-		}
-
-		if (null == diySitePrice) {
-			return null;
-		}
 		
 		String priceType = null;
 
@@ -604,7 +587,7 @@ public class TdCommonService {
 		}
 		// 华润经销价
 		else if (productFlag.equalsIgnoreCase("华润") && custType.equalsIgnoreCase("JX")) {
-			priceType = "JXLS";
+			priceType = "JX_LS";
 		}
 		// 乐意装零售价
 		else if (productFlag.equalsIgnoreCase("乐易装") && custType.equalsIgnoreCase("ZY")) {
@@ -612,7 +595,7 @@ public class TdCommonService {
 		}
 		// 乐意装经销价
 		else if (productFlag.equalsIgnoreCase("乐易装") && custType.equalsIgnoreCase("JX")) {
-			priceType = "JXLYZ";
+			priceType = "JX_LYZ";
 		}
 		// 莹润零售价
 		else if (productFlag.equalsIgnoreCase("莹润") && custType.equalsIgnoreCase("ZY")) {
@@ -620,14 +603,21 @@ public class TdCommonService {
 		}
 		// 莹润经销价
 		else if (productFlag.equalsIgnoreCase("莹润") && custType.equalsIgnoreCase("JX")) {
-			priceType = "JXYR";
+			priceType = "JX_YR";
 		}
 		// 不支持的价格
 		else {
 			return null;
 		}
 		
-		Long listHeaderId = diySitePrice.getListHeaderId();
+		//获取商品价格中间表信息
+		List<TdDiySitePrice> diySitePriceList = tdDiySitePriceService.getDiySitePrice(sobId, storeCode, custType, priceType, new Date(), new Date());
+		
+		if (null == diySitePriceList || diySitePriceList.size() == 0 || diySitePriceList.size()>1) {
+			return null;
+		}
+		
+		Long listHeaderId = diySitePriceList.get(0).getListHeaderId();
 		
 		List<TdPriceList> priceList_list = tdPriceListService.findByListHeaderIdAndPriceTypeAndStartDateActiveAndEndDateActive(listHeaderId, priceType, new Date(), new Date());
 		

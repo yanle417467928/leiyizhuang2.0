@@ -28,9 +28,9 @@ public interface TdDiySitePriceRepo extends JpaRepository<TdDiySitePrice, Serial
 	 * @param end
 	 * @return
 	 */
-	List<TdDiySitePrice> findBySobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveAndEndDateActiveOrSobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveAndEndDateActiveIsNull(
-			Long sobId, String storeCode, String custTypeCode, Date start, Date end, Long sobId2, String storeCode2,
-			String custTypeCode2, Date start2);
+	List<TdDiySitePrice> findBySobIdAndStoreCodeAndCustTypeCodeAndPriceTypeAndStartDateActiveBeforeAndEndDateActiveIsNullOrSobIdAndStoreCodeAndCustTypeCodeAndPriceTypeAndStartDateActiveBeforeAndEndDateActiveAfterOrSobIdAndStoreCodeAndCustTypeCodeAndPriceTypeAndStartDateActiveIsNull(
+			Long sobId, String storeCode, String custTypeCode, String priceType, Date start, Long sobId2, String storeCode2, String custTypeCode2, String priceType2, Date start2, Date end2, Long sobId3, String storeCode3,
+			String custTypeCode3, String priceType3);
 
 	TdDiySitePrice findByAssignId(Long assignId);
 
