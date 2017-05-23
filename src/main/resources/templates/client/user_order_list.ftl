@@ -95,14 +95,13 @@
                     warning("亲，您的网速不给力啊");
                 },
                 success:function(res){
-                	if (!res.trim()) {
+                	$(".order-nav li").removeClass("current");
+                	userOrderData.currentOrderType = 5;
+	                $("#all_orders").html(res);
+	                close(1);
+                    if (!res.trim()) {
                 		warning("未查询到相关订单");
-                	} else {
-                		$(".order-nav li").removeClass("current");
-                		userOrderData.currentOrderType = 5;
-	                    $("#user_all_order").html(res);
-	                    close(1);
-                    }
+                	}
                 }
             });
         }

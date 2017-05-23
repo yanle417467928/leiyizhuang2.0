@@ -391,9 +391,9 @@ public class TdUserController {
 		if (null != user) {
 			Page<TdOrder> all_order_list = this.tdOrderService.orderSearch(user, keywords, 0);
 			// 获取用户的身份
-			map.addAttribute("all_order_list", all_order_list);
+			map.addAttribute("orderPage", all_order_list);
 		}
-		return "/client/user_all_order";
+		return "/client/user_order_page_data";
 	}
 
 	/**
