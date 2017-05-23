@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ynyes.lyz.entity.TdCartGoods;
 import com.ynyes.lyz.entity.TdCoupon;
+import com.ynyes.lyz.entity.TdDiySite;
 import com.ynyes.lyz.entity.TdGoods;
 import com.ynyes.lyz.entity.TdPriceListItem;
 import com.ynyes.lyz.entity.user.TdUser;
@@ -225,7 +226,24 @@ public class TdCouponController {
 				// 获取指定商品
 				TdGoods goods = tdGoodsService.findOne(Long.parseLong(goodsId_quantity[0]));
 				// 获取指定商品对于用户的价格
-				TdPriceListItem priceListItem = tdCommonService.getGoodsPrice(req, goods);
+//				TdPriceListItem priceListItem = tdCommonService.getGoodsPrice(req, goods);
+				
+				//根据登录信息查询门店信息
+				TdDiySite diySite = tdCommonService.getDiySite(req);
+				String custType = "";
+				//判断门店是经销还是直营
+				if (null != diySite) {
+					String custTypeName = diySite.getCustTypeName();
+					if ("经销商".equals(custTypeName)) {
+						custType = "JX";
+					}
+					if ("直营".equals(custTypeName)) {
+						custType = "ZY";
+					}
+				}
+				//根据门店、商品、价格类型查询商品价格信息
+				TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, goods, custType);
+				
 				// 创建一个实体用于存储拆分好的goodsId和quantity
 				TdCartGoods cartGoods = new TdCartGoods(Long.parseLong(goodsId_quantity[0]),
 						Long.parseLong(goodsId_quantity[1]));
