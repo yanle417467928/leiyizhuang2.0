@@ -1486,6 +1486,7 @@ public class TdCommonService {
 			if (null != goods.getIsCoupon() && goods.getIsCoupon()) {
 				virtual.setIsCoupon(true);
 			}
+			
 			List<TdOrderGoods> goodsList = virtual.getOrderGoodsList();
 			goodsList.add(goods);
 			tdOrderGoodsService.save(goods);

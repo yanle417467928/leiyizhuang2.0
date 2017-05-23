@@ -1238,6 +1238,7 @@ public class TdUserController {
 		// 更改用户的归属门店
 		user.setUpperDiySiteId(diySite.getId());
 		user.setDiyName(diySite.getTitle());
+		user.setDiyCode(diySite.getStoreCode());
 		user.setCustomerId(diySite.getCustomerId());
 		tdUserService.save(user);
 

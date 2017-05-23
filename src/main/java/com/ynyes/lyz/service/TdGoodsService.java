@@ -79,13 +79,14 @@ public class TdGoodsService {
 
 	@Autowired
 	private TdBrandService tdBrandService;
-	
+
 	@Autowired
 	private TdDiySitePriceService tdDiySitePriceService;
-	
-	// private static final String IMG_FOLDER = "F:/doc/leyizhuang/images/goods/";
 
-//	private static final String IMG_FOLDER = "/mnt/root/images/goods/";
+	// private static final String IMG_FOLDER =
+	// "F:/doc/leyizhuang/images/goods/";
+
+	// private static final String IMG_FOLDER = "/mnt/root/images/goods/";
 
 	/******** 功能部分 ***********/
 
@@ -1642,11 +1643,11 @@ public class TdGoodsService {
 		return repository.findByCodeContaining(keywords);
 	}
 
-	public List<ClientGoods> getGoodsListByCategoryIdAndSobId(Long categoryId, Long sobId) {
+	public List<ClientGoods> getGoodsListByCategoryIdAndSobId(Long categoryId, Long sobId, String diySiteCode) {
 		if (null == categoryId || null == sobId) {
 			return null;
 		}
-		Map<String, Long> result = this.getPriceListMap(sobId);
+		Map<String, Long> result = this.getPriceListMap(diySiteCode);
 		List<ClientGoods> clientGoodsList = this.getClientGoodsList(categoryId, sobId);
 		List<ClientGoods> validGoods = new ArrayList<>();
 		for (ClientGoods clientGoods : clientGoodsList) {
@@ -1723,8 +1724,16 @@ public class TdGoodsService {
 		}
 		return result;
 	}
-	
-//	private Map<String, Long> getPriceListMap(String diySiteCode) {
-//		TdDiySitePrice  = tdDiySitePriceService.findByStoreCodeAndStartDateActiveBeforeAndEndDateActiveAfter(diySiteCode);
-//	}
+
+	private Map<String, Long> getPriceListMap(String diySiteCode) {
+		Map<String, Long> result = new HashMap<>();
+		List<TdDiySitePrice> tdDiySitePriceList = tdDiySitePriceService
+				.findByStoreCodeAndStartDateActiveBeforeAndEndDateActiveAfter(diySiteCode);
+		if (null != tdDiySitePriceList && tdDiySitePriceList.size() > 0) {
+			for (TdDiySitePrice diySitePrice : tdDiySitePriceList) {
+				result.put(diySitePrice.getPriceType(), diySitePrice.getListHeaderId());
+			}
+		}
+		return result;
+	}
 }

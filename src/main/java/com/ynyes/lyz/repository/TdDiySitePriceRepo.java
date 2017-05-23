@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.ynyes.lyz.entity.TdDiySitePrice;
 
@@ -34,7 +36,12 @@ public interface TdDiySitePriceRepo extends JpaRepository<TdDiySitePrice, Serial
 
 	TdDiySitePrice findByAssignId(Long assignId);
 
-	List<TdDiySitePrice> findByStoreCodeAndStartDateActiveBeforeAndEndDateActiveAfter(String storeCode, Date startDate,
-			Date endDate);
+	@Query("select t from TdDiySitePrice t where t.storeCode = :storeCode and ("
+			+ "(t.startDateActive < :now and t.endDateActive > :now) or "
+			+ "(t.startDateActive is null and t.endDateActive < :now) or"
+			+ "(t.startDateActive < :now and t.endDateActive is null) or"
+			+ "(t.startDateActive is null and t.endDateActive is null)" + ")")
+	List<TdDiySitePrice> findByStoreCodeAndStartDateActiveBeforeAndEndDateActiveAfter(
+			@Param("storeCode") String storeCode, @Param("now") Date now);
 
 }

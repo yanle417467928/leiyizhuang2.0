@@ -61,7 +61,7 @@ public class TdDiySitePriceService {
 			return null;
 		}
 		Date now = new Date();
-		return repository.findByStoreCodeAndStartDateActiveBeforeAndEndDateActiveAfter(diySiteCode, now, now);
+		return repository.findByStoreCodeAndStartDateActiveBeforeAndEndDateActiveAfter(diySiteCode, now);
 	}
 
 }
