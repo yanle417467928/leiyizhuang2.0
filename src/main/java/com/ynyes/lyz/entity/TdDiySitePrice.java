@@ -32,6 +32,12 @@ public class TdDiySitePrice {
 	private String name;
 	
 	@Column(length = 150, nullable = false)
+	private String priceType;
+	
+	@Column(length = 150, nullable = false)
+	private String priceTypeDesc;
+	
+	@Column(length = 150, nullable = false)
 	private String storeCode;
 	
 	@Column(length = 150, nullable = false)
