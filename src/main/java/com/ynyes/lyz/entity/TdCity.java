@@ -1,5 +1,7 @@
 package com.ynyes.lyz.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,7 +15,7 @@ import javax.persistence.Id;
  */
 
 @Entity
-public class TdCity {
+public class TdCity implements Serializable {
 
 	// 城市Id
 	@Id
