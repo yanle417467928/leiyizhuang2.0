@@ -202,7 +202,7 @@
                     
                     <div id="undeliver_orders" class="some_orders">
                         <#if undeliver_order_list??&&undeliver_order_list?size gt 0>
-                            <#list undeliver_order_list as item>
+                            <#list undeliver_order_list.content as item>
                                 <ol class="order-list">
                                     <li class="li1">
                                         <label>订单号：<span>${item.orderNumber!''}</span></label>
