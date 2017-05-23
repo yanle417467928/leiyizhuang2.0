@@ -3,17 +3,22 @@ package com.ynyes.lyz.entity.user;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.ynyes.lyz.entity.TdCity;
 import com.ynyes.lyz.entity.TdShippingAddress;
 
 @Entity
@@ -25,11 +30,34 @@ public class TdUser {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
+	
+	@ManyToOne 
+	@JoinColumn(name="sobIdCity",referencedColumnName="sobIdCity")
+	private TdCity tdCity;
+	 
+	
+	
+	
+	
+	
+	
+
+	
+
 	// 收货地址
 	@OneToMany
 	@JoinColumn(name = "userId")
 	private List<TdShippingAddress> shippingAddressList;
 	
+	
+	public TdCity getTdCity() {
+		return tdCity;
+	}
+
+	public void setTdCity(TdCity tdCity) {
+		this.tdCity = tdCity;
+	}
+
 	// 用户总余额
 	@Column(length = 20, scale = 2, nullable = false)
 	private Double balance;

@@ -1231,6 +1231,10 @@ public class CallEBSImpl implements ICallEBS {
 							e.printStackTrace();
 							return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>字段END_DATE_ACTIVE解析失败</MESSAGE></STATUS></RESULTS>";
 						}
+					} else if (name.equalsIgnoreCase("PRICE_TYPE")) {
+						diySitePrice.setPriceType(value);
+					} else if (name.equalsIgnoreCase("PRICE_TYPE_DESC")) {
+						diySitePrice.setPriceTypeDesc(value);
 					} else if (name.equalsIgnoreCase("ATTRIBUTE1")) {
 						diySitePrice.setAttribute1(value);
 					} else if (name.equalsIgnoreCase("ATTRIBUTE2")) {
