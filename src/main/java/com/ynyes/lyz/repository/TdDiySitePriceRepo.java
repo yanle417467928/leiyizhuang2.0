@@ -2,6 +2,7 @@ package com.ynyes.lyz.repository;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -28,6 +29,6 @@ public interface TdDiySitePriceRepo extends JpaRepository<TdDiySitePrice, Serial
 	 * @param end
 	 * @return
 	 */
-	TdDiySitePrice findBySobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveAndEndDateActiveOrSobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveAndEndDateActiveIsNull(Long sobId, String storeCode, String custTypeCode, Date start, Date end, Long sobId2, String storeCode2, String custTypeCode2, Date start2);
+	List<TdDiySitePrice> findBySobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveBeforeAndEndDateActiveIsNullOrSobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveBeforeAndEndDateActiveAfterOrSobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveIsNull(Long sobId, String storeCode, String custTypeCode, Date start, Long sobId2, String storeCode2, String custTypeCode2, Date start2, Date end2, Long sobId3, String storeCode3, String custTypeCode3);
 	
 }

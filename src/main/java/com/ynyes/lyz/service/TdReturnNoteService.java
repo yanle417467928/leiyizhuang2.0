@@ -473,7 +473,7 @@ public class TdReturnNoteService {
 	 */
 	public double calculateOneSpread(TdDiySite diySite, TdGoods tdGoods){
 		//查询商品的零售价
-		TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, tdGoods, "LS");
+		TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, tdGoods, "ZY");
 		double retailPrice = priceListItem.getPrice();
 		
 		//查询商品的经销价

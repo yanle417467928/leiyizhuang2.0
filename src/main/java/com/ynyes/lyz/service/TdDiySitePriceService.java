@@ -1,6 +1,7 @@
 package com.ynyes.lyz.service;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,9 @@ public class TdDiySitePriceService {
 	 * @param end
 	 * @return
 	 */
-	public TdDiySitePrice getDiySitePrice(Long sobId, String storeCode, String custTypeCode, Date start, Date end){
-		return repository.findBySobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveAndEndDateActiveOrSobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveAndEndDateActiveIsNull(sobId, storeCode, custTypeCode, start, end, sobId, storeCode, custTypeCode, start);
+	public List<TdDiySitePrice> getDiySitePrice(Long sobId, String storeCode, String custTypeCode, Date start, Date end){
+		return repository.
+				findBySobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveBeforeAndEndDateActiveIsNullOrSobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveBeforeAndEndDateActiveAfterOrSobIdAndStoreCodeAndCustTypeCodeAndStartDateActiveIsNull(sobId, storeCode, custTypeCode, start, sobId, storeCode, custTypeCode, start, end, sobId, storeCode, custTypeCode);
 	}
 
 }

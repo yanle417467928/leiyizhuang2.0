@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 
+import com.ynyes.lyz.entity.TdDiySite;
 import com.ynyes.lyz.entity.TdDiySiteInventory;
 import com.ynyes.lyz.entity.TdGoods;
 import com.ynyes.lyz.entity.TdPriceListItem;
@@ -55,7 +56,23 @@ public class TdCouponGoodsService {
 		List<TdGoods> coupon_goods_list = tdGoodsService.findByIsCouponTrue();
 		if (null != coupon_goods_list && coupon_goods_list.size() > 0) {
 			for (TdGoods goods : coupon_goods_list) {
-				TdPriceListItem priceListItem = tdCommonService.getGoodsPrice(req, goods);
+//				TdPriceListItem priceListItem = tdCommonService.getGoodsPrice(req, goods);
+				//根据登录信息查询门店信息
+				TdDiySite diySite = tdCommonService.getDiySite(req);
+				String custType = "";
+				//判断门店是经销还是直营
+				if (null != diySite) {
+					String custTypeName = diySite.getCustTypeName();
+					if ("经销商".equals(custTypeName)) {
+						custType = "JX";
+					}
+					if ("直营".equals(custTypeName)) {
+						custType = "ZY";
+					}
+				}          
+				//根据门店、商品、价格类型查询商品价格信息
+				TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, goods, custType);
+				
 				if (null != priceListItem) {
 					ids.add(goods.getId());
 				}
@@ -128,7 +145,23 @@ public class TdCouponGoodsService {
 			TdGoods goods = goods_list.get(i);
 			if (null != goods) {
 				// 查找指定商品的价格
-				TdPriceListItem priceListItem = tdCommonService.getGoodsPrice(req, goods);
+//				TdPriceListItem priceListItem = tdCommonService.getGoodsPrice(req, goods);
+				//根据登录信息查询门店信息
+				TdDiySite diySite = tdCommonService.getDiySite(req);
+				String custType = "";
+				//判断门店是经销还是直营
+				if (null != diySite) {
+					String custTypeName = diySite.getCustTypeName();
+					if ("经销商".equals(custTypeName)) {
+						custType = "JX";
+					}
+					if ("直营".equals(custTypeName)) {
+						custType = "ZY";
+					}
+				}
+				//根据门店、商品、价格类型查询商品价格信息
+				TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, goods, custType);
+	
 				if (null != priceListItem && null != priceListItem.getCouponPrice()
 						&& null != priceListItem.getCouponRealPrice()) {
 					actual_goods.add(goods);
