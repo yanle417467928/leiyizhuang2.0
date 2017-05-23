@@ -8,10 +8,10 @@ $(function() {
 			$(".some_orders").css("display", "none");
 			$("#all_orders").css("display", "block");
 			if (5 == userOrderData.currentOrderType) {
-				$("#all_orders").html("");	
+				$("#user_all_order").html("");	
 			}
 			userOrderData.currentOrderType = 0;
-			if (!($("#all_orders").html().trim())) {
+			if (!($("#user_all_order").html().trim())) {
 				loadData(0);
 			}
 		} else if ("unpayed" == li_id) {
@@ -100,8 +100,8 @@ function loadData(page) {
 			} else {
 				close(1);
 				if (0 == userOrderData.currentOrderType) {
-					var html = $("#all_orders").html();
-					$("#all_orders").html(html + res);
+					var html = $("#user_all_order").html();
+					$("#user_all_order").html(html + res);
 					userOrderData.pages.all = page;
 				} else if (1 == userOrderData.currentOrderType) {
 					var html = $("#unpayed_orders").html();
