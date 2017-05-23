@@ -51,6 +51,7 @@ import com.ynyes.fitment.foundation.service.FitPriceLineService;
 import com.ynyes.lyz.entity.TdBrand;
 import com.ynyes.lyz.entity.TdDiySite;
 import com.ynyes.lyz.entity.TdDiySiteInventory;
+import com.ynyes.lyz.entity.TdDiySitePrice;
 import com.ynyes.lyz.entity.TdGoods;
 import com.ynyes.lyz.entity.TdGoodsLimit;
 import com.ynyes.lyz.entity.TdLyzParameter;
@@ -62,6 +63,7 @@ import com.ynyes.lyz.interfaces.service.TdDiySiteInventoryEbsService;
 import com.ynyes.lyz.service.TdBrandService;
 import com.ynyes.lyz.service.TdDiySiteInventoryLogService;
 import com.ynyes.lyz.service.TdDiySiteInventoryService;
+import com.ynyes.lyz.service.TdDiySitePriceService;
 import com.ynyes.lyz.service.TdDiySiteService;
 import com.ynyes.lyz.service.TdGoodsLimitService;
 import com.ynyes.lyz.service.TdGoodsService;
@@ -118,8 +120,11 @@ public class CallEBSImpl implements ICallEBS {
 	@Autowired
 	private TdDiySiteInventoryLogService tdDiySiteInventoryLogService;
 
+	@Autowired
+	private TdDiySitePriceService tdDiySitePriceService;
+
 	public String GetErpInfo(String STRTABLE, String STRTYPE, String XML) {
-		LOGGER.info("getErpInfo called, STRTABLE=" + STRTABLE +", STRTYPE=" + STRTYPE);
+		LOGGER.info("getErpInfo called, STRTABLE=" + STRTABLE + ", STRTYPE=" + STRTYPE);
 
 		if (null == STRTABLE || STRTABLE.isEmpty() || STRTABLE.equals("?")) {
 			return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>STRTABLE参数错误</MESSAGE></STATUS></RESULTS>";
@@ -718,7 +723,7 @@ public class CallEBSImpl implements ICallEBS {
 					tdGoods.setBrandTitle(tdBrand.getTitle());
 				}
 				tdGoods.setAttribute1(attribute1);
-				tdGoods.setIsWallAccessory(false);//是否是“墙面辅料”产品，默认false。用于计算运费
+				tdGoods.setIsWallAccessory(false);// 是否是“墙面辅料”产品，默认false。用于计算运费
 				tdGoodsService.save(tdGoods, "数据导入");
 			}
 			LOGGER.info("getErpInfo, OUT, code=0");
@@ -1168,9 +1173,88 @@ public class CallEBSImpl implements ICallEBS {
 			}
 			LOGGER.info("getErpInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
+		} else if (STRTABLE.equalsIgnoreCase("CUXAPP_QP_LIST_ASSIGNS_OUT")) {
+			LOGGER.info("开始解析接口数据：CUXAPP_QP_LIST_ASSIGNS_OUT");
+			return this.doWithQPList(nodeList);
 		}
 
 		return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>不支持该表数据传输：" + STRTABLE + "</MESSAGE></STATUS></RESULTS>";
+	}
+
+	private String doWithQPList(NodeList nodeList) {
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Node node = nodeList.item(i);
+			LOGGER.info("node = {}", node.toString());
+			NodeList childNodeList = node.getChildNodes();
+			LOGGER.info("开始循环遍历XML子节点");
+			for (int idx = 0; idx < childNodeList.getLength(); idx++) {
+				Node childNode = childNodeList.item(idx);
+				LOGGER.info("childNode = {}", childNode.toString());
+				TdDiySitePrice diySitePrice = new TdDiySitePrice();
+				LOGGER.info("childNode.nodeType = {}", childNode.getNodeType());
+				if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+					String name = childNode.getNodeName();
+					String value = childNode.getFirstChild().getNodeValue();
+					LOGGER.info("name = {}, value = {}", name, value);
+					if (name.equalsIgnoreCase("SOB_ID")) {
+						diySitePrice.setSobId(Long.parseLong(value));
+					} else if (name.equalsIgnoreCase("ASSIGN_ID")) {
+						diySitePrice.setAssignId(Long.parseLong(value));
+					} else if (name.equalsIgnoreCase("LIST_HEADER_ID")) {
+						diySitePrice.setListHeaderId(Long.parseLong(value));
+					} else if (name.equalsIgnoreCase("NAME")) {
+						diySitePrice.setName(value);
+					} else if (name.equalsIgnoreCase("STORE_CODE")) {
+						diySitePrice.setStoreCode(value);
+					} else if (name.equalsIgnoreCase("CUST_TYPE_CODE")) {
+						diySitePrice.setCustTypeCode(value);
+					} else if (name.equalsIgnoreCase("CUSTOMER_ID")) {
+						diySitePrice.setCustomerId(Long.parseLong(value));
+					} else if (name.equalsIgnoreCase("CUSTOMER_NUMBER")) {
+						diySitePrice.setCustomerNumber(value);
+					} else if (name.equalsIgnoreCase("CUSTOMER_NAME")) {
+						diySitePrice.setCustomerName(value);
+					} else if (name.equalsIgnoreCase("START_DATE_ACTIVE")) {
+						try {
+							Date date = sdf.parse(value);
+							diySitePrice.setStartDateActive(date);
+						} catch (ParseException e) {
+							e.printStackTrace();
+							return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>字段START_DATE_ACTIVE解析失败</MESSAGE></STATUS></RESULTS>";
+						}
+					} else if (name.equalsIgnoreCase("END_DATE_ACTIVE")) {
+						try {
+							Date date = sdf.parse(value);
+							diySitePrice.setEndDateActive(date);
+						} catch (ParseException e) {
+							e.printStackTrace();
+							return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>字段END_DATE_ACTIVE解析失败</MESSAGE></STATUS></RESULTS>";
+						}
+					} else if (name.equalsIgnoreCase("PRICE_TYPE")) {
+						diySitePrice.setPriceType(value);
+					} else if (name.equalsIgnoreCase("PRICE_TYPE_DESC")) {
+						diySitePrice.setPriceTypeDesc(value);
+					} else if (name.equalsIgnoreCase("ATTRIBUTE1")) {
+						diySitePrice.setAttribute1(value);
+					} else if (name.equalsIgnoreCase("ATTRIBUTE2")) {
+						diySitePrice.setAttribute1(value);
+					} else if (name.equalsIgnoreCase("ATTRIBUTE3")) {
+						diySitePrice.setAttribute1(value);
+					} else if (name.equalsIgnoreCase("ATTRIBUTE4")) {
+						diySitePrice.setAttribute1(value);
+					} else if (name.equalsIgnoreCase("ATTRIBUTE5")) {
+						diySitePrice.setAttribute1(value);
+					}
+				}
+				TdDiySitePrice tdDiySitePrice = tdDiySitePriceService.findByAssignId(diySitePrice.getAssignId());
+				if (null != tdDiySitePrice) {
+					diySitePrice.setId(tdDiySitePrice.getId());
+				}
+				tdDiySitePriceService.save(diySitePrice);
+			}
+		}
+		return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 	}
 
 }
