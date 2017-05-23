@@ -425,8 +425,8 @@ public class TdOrder {
 	private Double credit = 0d;
 	
 	// 经销总价
-	@Column(scale = 2, nullable = false)
-	private Double jxTotalPrice;
+	@Column(scale = 2)
+	private Double jxTotalPrice = 0d;
 	
 	public Double getRefund() {
 		return refund;

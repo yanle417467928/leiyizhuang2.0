@@ -63,4 +63,12 @@ public interface ISettlementService {
 	
 	Double countOrderGoodsDeliveryFee(TdUser user, TdOrderGoods orderGoods) throws Exception;
 	
+	/**
+	 * <p>遍历：计算经销差价的方法</p>
+	 * @param order 主单
+	 */
+	void countJX(TdOrder order);
+	
+	void returnJX(TdOrder order, Long headerId);
+	
 }

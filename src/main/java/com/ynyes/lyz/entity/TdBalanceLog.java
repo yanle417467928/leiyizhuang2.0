@@ -36,7 +36,7 @@ public class TdBalanceLog {
 	@Column(scale = 2)
 	private Double money;
 
-	// 类型（0. 代表充值；1. 代表提现; 2. 管理员修改; 3. 代表支付消费; 4.订单退款）
+	// 类型（0. 代表充值；1. 代表提现; 2. 管理员修改; 3. 代表支付消费; 4.订单退款； 5. 经销差价变更）
 	@Column
 	private Long type;
 
@@ -62,7 +62,7 @@ public class TdBalanceLog {
 	@Column(scale = 2)
 	private Double balance;
 	
-	// 管理员改变预存款的类型(0: balance 1: cashBalance 2:unCashBalance 3: 退款可提现余额；4. 退款不可提现余额）
+	// 管理员改变预存款的类型(0: balance 1: cashBalance 2:unCashBalance 3: 退款可提现余额；4. 退款不可提现余额; 5.下单返还经销商差价）
 	@Column
 	private Long balanceType;
 	

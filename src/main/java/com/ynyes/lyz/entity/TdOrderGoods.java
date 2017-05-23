@@ -167,8 +167,8 @@ public class TdOrderGoods {
 	private Long tdReturnId;
 
 	// 经销价
-	@Column(scale = 2, nullable = false)
-	private Double jxPrice;
+	@Column(scale = 2)
+	private Double jxPrice = 0d;
 
 	public String getSubOrderNumber() {
 		return subOrderNumber;
