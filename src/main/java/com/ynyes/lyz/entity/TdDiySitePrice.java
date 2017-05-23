@@ -32,6 +32,12 @@ public class TdDiySitePrice {
 	private String name;
 	
 	@Column(length = 150, nullable = false)
+	private String priceType;
+	
+	@Column(length = 150, nullable = false)
+	private String priceTypeDesc;
+	
+	@Column(length = 150, nullable = false)
 	private String storeCode;
 	
 	@Column(length = 150, nullable = false)
@@ -205,14 +211,31 @@ public class TdDiySitePrice {
 		this.attribute5 = attribute5;
 	}
 
+	public String getPriceType() {
+		return priceType;
+	}
+
+	public void setPriceType(String priceType) {
+		this.priceType = priceType;
+	}
+
+	public String getPriceTypeDesc() {
+		return priceTypeDesc;
+	}
+
+	public void setPriceTypeDesc(String priceTypeDesc) {
+		this.priceTypeDesc = priceTypeDesc;
+	}
+
 	@Override
 	public String toString() {
 		return "TdDiySitePrice [id=" + id + ", sobId=" + sobId + ", assignId=" + assignId + ", listHeaderId="
-				+ listHeaderId + ", name=" + name + ", storeCode=" + storeCode + ", custTypeCode=" + custTypeCode
-				+ ", customerId=" + customerId + ", customerNumber=" + customerNumber + ", customerName=" + customerName
-				+ ", startDateActive=" + startDateActive + ", endDateActive=" + endDateActive + ", attribute1="
-				+ attribute1 + ", attribute2=" + attribute2 + ", attribute3=" + attribute3 + ", attribute4="
-				+ attribute4 + ", attribute5=" + attribute5 + "]";
+				+ listHeaderId + ", name=" + name + ", priceType=" + priceType + ", priceTypeDesc=" + priceTypeDesc
+				+ ", storeCode=" + storeCode + ", custTypeCode=" + custTypeCode + ", customerId=" + customerId
+				+ ", customerNumber=" + customerNumber + ", customerName=" + customerName + ", startDateActive="
+				+ startDateActive + ", endDateActive=" + endDateActive + ", attribute1=" + attribute1 + ", attribute2="
+				+ attribute2 + ", attribute3=" + attribute3 + ", attribute4=" + attribute4 + ", attribute5="
+				+ attribute5 + "]";
 	}
 	
 }
