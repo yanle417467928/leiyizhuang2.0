@@ -8,10 +8,10 @@ $(function() {
 			$(".some_orders").css("display", "none");
 			$("#all_orders").css("display", "block");
 			if (5 == userOrderData.currentOrderType) {
-				$("#user_all_order").html("");	
+				$("#all_orders").html("");	
 			}
 			userOrderData.currentOrderType = 0;
-			if (!($("#user_all_order").html().trim())) {
+			if (!($("#all_orders").html().trim())) {
 				loadData(0);
 			}
 		} else if ("unpayed" == li_id) {
@@ -76,7 +76,7 @@ function loadMore() {
 	loadData(page);
 }
 
-function loadData(page) {
+/*function loadData(page) {
 	wait();
 	var keywords = null;
 	if (5 == userOrderData.currentOrderType) {
@@ -127,7 +127,58 @@ function loadData(page) {
 			}
 		}
 	});
+}*/
+
+function loadData(page) {
+	wait();
+	var keywords = null;
+	if (5 == userOrderData.currentOrderType) {
+		keywords = $("#keywords").val();
+	}
+	$.ajax({
+		url : "/user/order/load/page",
+		method : "POST",
+		data : {
+			"currentOrderType" : userOrderData.currentOrderType,
+			"currentPageNumber" : page,
+			"keywords": keywords
+		},
+		error : function() {
+			warning("亲，您的网速不给力啊");
+		},
+		success : function(res) {
+				close(1);
+				if (0 == userOrderData.currentOrderType) {
+					var html = $("#all_orders").html();
+					$("#all_orders").html(html + res);
+					userOrderData.pages.all = page;
+				} else if (1 == userOrderData.currentOrderType) {
+					var html = $("#unpayed_orders").html();
+					$("#unpayed_orders").html(html + res);
+					userOrderData.pages.unpayed = page;
+				} else if (2 == userOrderData.currentOrderType) {
+					var html = $("#undeliver_orders").html();
+					$("#undeliver_orders").html(html + res);
+					userOrderData.pages.undelivery = page;
+				} else if (3 == userOrderData.currentOrderType) {
+					var html = $("#unsignin_orders").html();
+					$("#unsignin_orders").html(html + res);
+					userOrderData.pages.unsigned = page;
+				} else if (4 == userOrderData.currentOrderType) {
+					var html = $("#uncomment_orders").html();
+					$("#uncomment_orders").html(html + res);
+					userOrderData.pages.uncommend = page;
+				} else if (5 == userOrderData.currentOrderType) {
+					var html = $("#all_orders").html();
+					$("#all_orders").html(html + res);
+					userOrderData.pages.search = page;
+				}
+				if (!res.trim()) {
+					warning("没有更多的订单了");
+				}}
+	});
 }
+
 
 /**
  * 取消订单的方法
