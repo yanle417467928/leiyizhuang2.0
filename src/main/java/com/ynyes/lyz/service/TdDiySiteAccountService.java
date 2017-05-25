@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ynyes.lyz.entity.TdDiySiteAccount;
 import com.ynyes.lyz.entity.TdOrder;
-import com.ynyes.lyz.entity.TdReturnNote;
 import com.ynyes.lyz.entity.user.TdUser;
 import com.ynyes.lyz.repository.TdDiySiteAccountRepo;
 
@@ -29,8 +28,8 @@ public class TdDiySiteAccountService {
 	@Autowired
 	private TdUserService tdUserService;
 
-	@Autowired
-	private TdReturnNoteService tdReturnNoteService;
+	// @Autowired
+	// private TdReturnNoteService tdReturnNoteService;
 
 	/**
 	 * @title 返还经销商下单的差价
@@ -77,48 +76,49 @@ public class TdDiySiteAccountService {
 	 * @date 2017年5月11日
 	 * @param tdOrder
 	 */
-	public String returnSpread(TdReturnNote tdReturnNote) {
-		String msg = "";
-		if (null == tdReturnNote) {
-			msg = "未找到退单!";
-			return msg;
-		}
-
-		// 根据order计算需要返还的差价
-		double spread = tdReturnNoteService.calculateAllSpread(tdReturnNote);
-
-		if (0.0 == spread) {
-			msg = "无需返还差价!";
-			return msg;
-		}
-
-		// 根据门店ID查询门店账号ID
-		TdDiySiteAccount tdDiySiteAccount = tdDiySiteAccountRepo.findByDiySiteId(tdReturnNote.getDiySiteId());
-
-		if (null == tdDiySiteAccount) {
-			msg = "返还差价失败!";
-			return msg;
-		}
-		// 根据门店账号ID查询user信息
-		TdUser tdUser = tdUserService.findOne(tdDiySiteAccount.getUserId());
-
-		boolean temp = isReturnSpread(tdUser, spread);
-
-		if (!temp) {
-			msg = "余额不足！";
-			return msg;
-		}
-
-		tdUser.setUnCashBalance(tdUser.getUnCashBalance() - spread);
-		// tdUser.setBalance(tdUser.getBalance() - spread);
-		// 保存
-		tdUser = tdUserService.save(tdUser);
-
-		// 日志
-
-		msg = "返还差价成功！";
-		return msg;
-	}
+	// public String returnSpread(TdReturnNote tdReturnNote) {
+	// String msg = "";
+	// if (null == tdReturnNote) {
+	// msg = "未找到退单!";
+	// return msg;
+	// }
+	//
+	// // 根据order计算需要返还的差价
+	// double spread = tdReturnNoteService.calculateAllSpread(tdReturnNote);
+	//
+	// if (0.0 == spread) {
+	// msg = "无需返还差价!";
+	// return msg;
+	// }
+	//
+	// // 根据门店ID查询门店账号ID
+	// TdDiySiteAccount tdDiySiteAccount =
+	// tdDiySiteAccountRepo.findByDiySiteId(tdReturnNote.getDiySiteId());
+	//
+	// if (null == tdDiySiteAccount) {
+	// msg = "返还差价失败!";
+	// return msg;
+	// }
+	// // 根据门店账号ID查询user信息
+	// TdUser tdUser = tdUserService.findOne(tdDiySiteAccount.getUserId());
+	//
+	// boolean temp = isReturnSpread(tdUser, spread);
+	//
+	// if (!temp) {
+	// msg = "余额不足！";
+	// return msg;
+	// }
+	//
+	// tdUser.setUnCashBalance(tdUser.getUnCashBalance() - spread);
+	// // tdUser.setBalance(tdUser.getBalance() - spread);
+	// // 保存
+	// tdUser = tdUserService.save(tdUser);
+	//
+	// // 日志
+	//
+	// msg = "返还差价成功！";
+	// return msg;
+	// }
 
 	/**
 	 * @title 判断账户余额是否大于需要扣除的返还差价

@@ -1429,11 +1429,10 @@ public class SettlementServiceImpl implements ISettlementService {
 	 */
 	@Override
 	public void returnJX(TdOrder order, Long headerId) {
-		Double activitySubPrice = null == order.getActivitySubPrice() ? 0d : order.getActivitySubPrice();
-		Double cashCoupon = null == order.getCashCoupon() ? 0d : order.getCashCoupon();
-		Double jxTotalPrice = null == order.getJxTotalPrice() ? 0d : order.getJxTotalPrice();
+//		Double activitySubPrice = null == order.getActivitySubPrice() ? 0d : order.getActivitySubPrice();
+//		Double cashCoupon = null == order.getCashCoupon() ? 0d : order.getCashCoupon();
+		Double sendBalance = null == order.getJxTotalPrice() ? 0d : order.getJxTotalPrice();
 
-		Double sendBalance = jxTotalPrice - cashCoupon - activitySubPrice;
 		sendBalance = 0d > sendBalance ? 0d : sendBalance;
 
 		Long diySiteId = order.getDiySiteId();
@@ -1464,6 +1463,7 @@ public class SettlementServiceImpl implements ISettlementService {
 		balanceLog.setCashLeft(user.getCashBalance());
 		balanceLog.setUnCashLeft(user.getUnCashBalance());
 		balanceLog.setAllLeft(user.getBalance());
+		balanceLog.setReason("消费返还经销差价");
 		return balanceLog;
 	}
 
