@@ -836,6 +836,8 @@ public class TdInterfaceService {
 
 		return null;
 	}
+	
+	
 
 	public TdCashReciptInf initCashReceiptInfWithOrderAndReceiptTypeAndMoney(TdOrder tdOrder, String receiptTtpe,
 			Double amount) {

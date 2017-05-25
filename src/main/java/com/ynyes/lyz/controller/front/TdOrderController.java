@@ -1866,6 +1866,9 @@ public class TdOrderController {
 						// 拆单钱先去扣减库存
 						tdDiySiteInventoryService.changeGoodsInventory(order, 2L, req, "发货", null);
 					}
+					
+					// 在此进行经销价的计算
+					settlementService.countJX(order);
 
 					// tdCommonService.dismantleOrder(req);
 					try {

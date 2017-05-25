@@ -3,6 +3,7 @@ package com.ynyes.lyz.service.impl.settlement;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,22 +20,32 @@ import org.springframework.stereotype.Service;
 import com.ynyes.lyz.entity.TdBalanceLog;
 import com.ynyes.lyz.entity.TdBrand;
 import com.ynyes.lyz.entity.TdCoupon;
+import com.ynyes.lyz.entity.TdDiySite;
+import com.ynyes.lyz.entity.TdDiySiteAccount;
 import com.ynyes.lyz.entity.TdOrder;
 import com.ynyes.lyz.entity.TdOrderGoods;
 import com.ynyes.lyz.entity.TdPayType;
+import com.ynyes.lyz.entity.TdPriceListItem;
 import com.ynyes.lyz.entity.delivery.TdDeliveryFeeHead;
 import com.ynyes.lyz.entity.delivery.TdDeliveryFeeLine;
 import com.ynyes.lyz.entity.delivery.TdOrderDeliveryFeeDetail;
 import com.ynyes.lyz.entity.user.CreditChangeType;
 import com.ynyes.lyz.entity.user.TdUser;
 import com.ynyes.lyz.excp.AppErrorParamsExcp;
+import com.ynyes.lyz.interfaces.entity.TdCashReciptInf;
+import com.ynyes.lyz.interfaces.service.TdCashReciptInfService;
+import com.ynyes.lyz.interfaces.service.TdInterfaceService;
+import com.ynyes.lyz.interfaces.utils.EnumUtils.INFTYPE;
 import com.ynyes.lyz.service.TdBalanceLogService;
 import com.ynyes.lyz.service.TdBrandService;
 import com.ynyes.lyz.service.TdCommonService;
 import com.ynyes.lyz.service.TdCouponService;
 import com.ynyes.lyz.service.TdDeliveryFeeHeadService;
 import com.ynyes.lyz.service.TdDeliveryFeeLineService;
+import com.ynyes.lyz.service.TdDiySiteAccountService;
+import com.ynyes.lyz.service.TdDiySiteService;
 import com.ynyes.lyz.service.TdOrderDeliveryFeeDetailService;
+import com.ynyes.lyz.service.TdOrderGoodsService;
 import com.ynyes.lyz.service.TdOrderService;
 import com.ynyes.lyz.service.TdPayTypeService;
 import com.ynyes.lyz.service.TdUserService;
@@ -79,14 +90,31 @@ public class SettlementServiceImpl implements ISettlementService {
 	@Autowired
 	private TdDeliveryFeeLineService tdDeliveryFeeLineService;
 
-//	@Autowired
-//	private TdSettingService tdSettingService;
+	// @Autowired
+	// private TdSettingService tdSettingService;
 
 	@Autowired
 	private TdDeliveryFeeHeadService tdDeliveryFeeHeadService;
 
 	@Autowired
 	private TdOrderDeliveryFeeDetailService tdOrderDeliveryFeedetailService;
+
+	@Autowired
+	private TdDiySiteService tdDiySiteService;
+
+	@Autowired
+	private TdOrderGoodsService tdOrderGoodsService;
+
+	@Autowired
+	private TdDiySiteAccountService tdDiySiteAccountService;
+	
+	@Autowired
+	private TdCashReciptInfService tdCashReciptInfService;
+	
+	@Autowired
+	private TdInterfaceService tdInterfaceService;
+
+	private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
 	@Override
 	public void orderBasicValidate(TdOrder order) throws Exception {
@@ -362,11 +390,17 @@ public class SettlementServiceImpl implements ISettlementService {
 						initSubOrder(subOrder, mainOrder);
 					}
 
+					Double jxPrice = null == orderGoods.getJxPrice() ? 0d : orderGoods.getJxPrice();
+					Long couponQuantity = null == orderGoods.getCouponNumber() ? 0L : orderGoods.getCouponNumber();
+
 					subOrder.getOrderGoodsList().add(orderGoods);
 					subOrder.setTotalGoodsPrice(
 							subOrder.getTotalGoodsPrice() + (orderGoods.getPrice() * orderGoods.getQuantity()));
 					subOrder.setTotalPrice(
 							subOrder.getTotalPrice() + (orderGoods.getPrice() * orderGoods.getQuantity()));
+					subOrder.setJxTotalPrice(
+							subOrder.getJxTotalPrice() + jxPrice * (orderGoods.getQuantity() - couponQuantity));
+
 					subOrder = tdOrderService.save(subOrder);
 					subOrderMap.put(brandId, subOrder);
 				}
@@ -424,6 +458,7 @@ public class SettlementServiceImpl implements ISettlementService {
 		subOrder.setPosPay(0d);
 		subOrder.setCashPay(0d);
 		subOrder.setBackOtherPay(0d);
+		subOrder.setJxTotalPrice(0d);
 
 		getCommonFields(subOrder, mainOrder);
 	}
@@ -1044,7 +1079,7 @@ public class SettlementServiceImpl implements ISettlementService {
 						detail.setCompanyDeliveryFeeReduce(0d);
 						detail.setConsumerDeliveryFeeFinal(0d);
 						detail.setCompanyDeliveryFeeFinal(discountedDeliveryFee);
-						
+
 						order.setDeliverFee(0d);
 						order.setReceivableFee(0d);
 
@@ -1068,7 +1103,7 @@ public class SettlementServiceImpl implements ISettlementService {
 					detail.setCompanyDeliveryFeeReduce(0d);
 					detail.setConsumerDeliveryFeeFinal(30d);
 					detail.setCompanyDeliveryFeeFinal(0d);
-					
+
 					order.setDeliverFee(30d);
 					order.setReceivableFee(30d);
 				}
@@ -1364,5 +1399,114 @@ public class SettlementServiceImpl implements ISettlementService {
 		if (!(null != order.getIsOnlinePay() && order.getIsOnlinePay()) && order.getTotalPrice() > 0) {
 			this.tdUserService.useCredit(CreditChangeType.CONSUME, order);
 		}
+	}
+
+	@Override
+	public void countJX(TdOrder order) {
+		if (null != order) {
+			Long diySiteId = order.getDiySiteId();
+			TdDiySite diySite = tdDiySiteService.findOne(diySiteId);
+			String custTypeName = diySite.getCustTypeName();
+			if (null != custTypeName && custTypeName.equalsIgnoreCase("经销商")) {
+				if (null != order.getOrderGoodsList() && order.getOrderGoodsList().size() > 0) {
+					List<TdOrderGoods> orderGoodsList = order.getOrderGoodsList();
+					for (TdOrderGoods orderGoods : orderGoodsList) {
+						TdPriceListItem jxPriceListItem = tdCommonService.secondGetGoodsPrice(diySite,
+								orderGoods.getSku(), "JX");
+						Double jxPrice = jxPriceListItem.getPrice();
+						orderGoods.setJxPrice(jxPrice);
+						tdOrderGoodsService.save(orderGoods);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * 返还经销差价的方法
+	 * 
+	 * @param order
+	 */
+	@Override
+	public void returnJX(TdOrder order, Long headerId) {
+//		Double activitySubPrice = null == order.getActivitySubPrice() ? 0d : order.getActivitySubPrice();
+//		Double cashCoupon = null == order.getCashCoupon() ? 0d : order.getCashCoupon();
+		Double sendBalance = null == order.getJxTotalPrice() ? 0d : order.getJxTotalPrice();
+
+		sendBalance = 0d > sendBalance ? 0d : sendBalance;
+
+		Long diySiteId = order.getDiySiteId();
+		TdDiySite diySite = tdDiySiteService.findOne(diySiteId);
+
+		TdUser user = this.getDiySiteUser(order, diySite);
+		user.setUnCashBalance(user.getUnCashBalance() + sendBalance);
+
+		this.createLog(order.getOrderNumber(), sendBalance, user, diySite);
+		this.sendEBS(order, diySite, user, sendBalance, headerId);
+	}
+
+	private TdBalanceLog createLog(String orderNumber, Double money, TdUser user, TdDiySite diySite) {
+		Date now = new Date();
+		TdBalanceLog balanceLog = new TdBalanceLog();
+		balanceLog.setUserId(user.getId());
+		balanceLog.setUsername(user.getUsername());
+		balanceLog.setMoney(money);
+		balanceLog.setType(5L);
+		balanceLog.setCreateTime(now);
+		balanceLog.setFinishTime(now);
+		balanceLog.setIsSuccess(Boolean.TRUE);
+		balanceLog.setBalance(user.getBalance());
+		balanceLog.setBalanceType(5L);
+		balanceLog.setOrderNumber(orderNumber);
+		balanceLog.setDiySiteId(diySite.getId());
+		balanceLog.setCityId(diySite.getCityId());
+		balanceLog.setCashLeft(user.getCashBalance());
+		balanceLog.setUnCashLeft(user.getUnCashBalance());
+		balanceLog.setAllLeft(user.getBalance());
+		balanceLog.setReason("消费返还经销差价");
+		return balanceLog;
+	}
+
+	/**
+	 * 获取返利人的方法
+	 * 
+	 * @param order
+	 * @return
+	 */
+	private TdUser getDiySiteUser(TdOrder order, TdDiySite diySite) {
+		TdDiySiteAccount diySiteAccount = tdDiySiteAccountService.findByDiySiteId(diySite.getId());
+		if (null != diySiteAccount) {
+			Long userId = diySiteAccount.getUserId();
+			return tdUserService.findOne(userId);
+		} else {
+			return null;
+		}
+	}
+
+	private void sendEBS(TdOrder order, TdDiySite diySite, TdUser user, Double amount, Long headerId) {
+		TdCashReciptInf cashInf = new TdCashReciptInf();
+		cashInf.setSobId(diySite.getRegionId());
+		cashInf.setReceiptNumber(this.createReceiptNumber());
+		cashInf.setUserid(user.getId());
+		cashInf.setUsername(user.getRealName());
+		cashInf.setUserphone(user.getUsername());
+		cashInf.setDiySiteCode(diySite.getStoreCode());
+		cashInf.setReceiptClass("经销差价");
+		cashInf.setOrderNumber(order.getOrderNumber());
+		cashInf.setProductType("JXDIF");
+		cashInf.setReceiptType("预收款");
+		cashInf.setReceiptDate(new Date());
+		cashInf.setAmount(amount);
+		cashInf.setOrderHeaderId(headerId);
+		tdCashReciptInfService.save(cashInf);
+		tdInterfaceService.ebsWithObject(cashInf, INFTYPE.CASHRECEIPTINF);
+	}
+
+	private String createReceiptNumber() {
+		Date now = new Date();
+		String middle = sdf.format(now);
+
+		int i = (int) (Math.random() * 900) + 100;
+		return "RC" + middle + i;
 	}
 }
