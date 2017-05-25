@@ -1,9 +1,12 @@
 package com.ynyes.lyz.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ynyes.lyz.entity.TdDiySite;
 import com.ynyes.lyz.entity.TdDiySiteAccount;
 import com.ynyes.lyz.entity.TdOrder;
 import com.ynyes.lyz.entity.TdReturnNote;
@@ -138,6 +141,12 @@ public class TdDiySiteAccountService {
 		}
 		return false;
 	}
+	
+	public TdDiySiteAccount save(TdDiySiteAccount tdDiySiteAccount){
+		
+		return tdDiySiteAccountRepo.save(tdDiySiteAccount);
+	}
+	
 	
 
 }
