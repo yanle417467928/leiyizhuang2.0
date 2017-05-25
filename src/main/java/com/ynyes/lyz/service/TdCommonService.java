@@ -313,6 +313,7 @@ public class TdCommonService {
 
 				orderGoods.setDeliveredQuantity(oGoods.getDeliveredQuantity());
 				orderGoods.setPoints(oGoods.getPoints());
+				orderGoods.setJxPrice(oGoods.getJxPrice());
 
 				Double unit = res.get(oGoods.getGoodsId());
 
@@ -368,6 +369,7 @@ public class TdCommonService {
 
 				orderGoods.setPrice(oGoods.getPrice());
 				orderGoods.setQuantity(oGoods.getQuantity());
+				orderGoods.setJxPrice(oGoods.getJxPrice());
 
 				orderGoods.setDeliveredQuantity(oGoods.getDeliveredQuantity());
 				orderGoods.setPoints(oGoods.getPoints());
@@ -400,6 +402,7 @@ public class TdCommonService {
 
 				orderGoods.setPrice(oGoods.getPrice());
 				orderGoods.setQuantity(oGoods.getQuantity());
+				orderGoods.setJxPrice(oGoods.getJxPrice());
 
 				orderGoods.setDeliveredQuantity(oGoods.getDeliveredQuantity());
 				orderGoods.setPoints(oGoods.getPoints());

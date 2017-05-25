@@ -2014,7 +2014,7 @@ public class TdUserController {
 
 						orderGoods.setPrice(oGoods.getPrice());
 						orderGoods.setQuantity(oGoods.getQuantity());
-
+						orderGoods.setJxPrice(oGoods.getJxPrice());
 						orderGoods.setDeliveredQuantity(oGoods.getDeliveredQuantity());
 						orderGoods.setPoints(oGoods.getPoints());
 						// tdOrderGoodsService.save(orderGoods);
