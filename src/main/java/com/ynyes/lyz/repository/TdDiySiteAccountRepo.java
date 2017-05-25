@@ -1,5 +1,7 @@
 package com.ynyes.lyz.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.ynyes.lyz.entity.TdDiySiteAccount;
@@ -21,5 +23,6 @@ public interface TdDiySiteAccountRepo extends JpaRepository<TdDiySiteAccount, Lo
 	 * @return
 	 */
 	TdDiySiteAccount findByDiySiteId(Long diySiteId);
+	
 
 }
