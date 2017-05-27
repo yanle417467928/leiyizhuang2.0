@@ -1009,7 +1009,30 @@ public class SettlementServiceImpl implements ISettlementService {
 					 * 两种情况 一种是商品金额大于1000，不向会员收取运费，只向公司收取运费；
 					 * 另一种是商品金额小于1000，只向会员收取运费，不向公司收取运费
 					 */
-					if (order.getTotalPrice() > 1000) {
+					Double totalGoodsPrice = null == order.getTotalGoodsPrice() ? 0d : order.getTotalGoodsPrice();
+					Double cashCouponFee = null == order.getCashCoupon() ? 0d : order.getCashCoupon();
+					Double activitySubFee = null == order.getActivitySubPrice() ? 0d : order.getActivitySubPrice();
+					Double proCouponFee = 0d;
+					String productCouponId = order.getProductCouponId();
+					if (null != productCouponId) {
+						String[] split = productCouponId.split(",");
+						if (null != split && split.length > 0) {
+							for (String sId : split) {
+								if (null != sId && !sId.trim().equals("")) {
+									Long id = Long.parseLong(sId);
+									TdCoupon coupon = tdCouponService.findOne(id);
+									if (null != coupon && !(null != coupon.getIsBuy() && coupon.getIsBuy())) {
+										Double couponFee = null == coupon.getPrice() ? 0d : coupon.getPrice();
+										proCouponFee += couponFee;
+									}
+								}
+							}
+						}
+					}
+
+					Double strandardFee = totalGoodsPrice - cashCouponFee - activitySubFee - proCouponFee;
+					
+					if (strandardFee > 1000) {
 
 						deliveryMap.put("user_delivery_fee", 0d);
 						double bucketsOfPaintFee = 0d;// 大桶漆配送费
