@@ -911,54 +911,64 @@ public class CallEBSImpl implements ICallEBS {
 		} // CUXAPP_QP_LIST_ASSIGNS_OUT
 		else if (STRTABLE.equalsIgnoreCase("CUXAPP_QP_LIST_ASSIGNS_OUT"))// 把价目表绑定到门店
 		{
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				Long list_header_id = null;// id
-				Long sob_id = null; // 分公司ID
-				Long customer_id = null;// 客户id
-				String name = null;// 价目表名称
-
-				Node node = nodeList.item(i);
-				NodeList childNodeList = node.getChildNodes();
-				for (int idx = 0; idx < childNodeList.getLength(); idx++) {
-					Node childNode = childNodeList.item(idx);
-
-					if (childNode.getNodeType() == Node.ELEMENT_NODE) {
-						// 比较字段名
-						if (childNode.getNodeName().equalsIgnoreCase("list_header_id")) {
-							// 有值
-							if (null != childNode.getChildNodes().item(0)) {
-								list_header_id = Long.parseLong(childNode.getChildNodes().item(0).getNodeValue());
-							}
-						} else if (childNode.getNodeName().equalsIgnoreCase("sob_id")) {
-							if (null != childNode.getChildNodes().item(0)) {
-								sob_id = Long.parseLong(childNode.getChildNodes().item(0).getNodeValue());
-							}
-						} else if (childNode.getNodeName().equalsIgnoreCase("customer_id")) {
-							if (null != childNode.getChildNodes().item(0)) {
-								customer_id = Long.parseLong(childNode.getChildNodes().item(0).getNodeValue());
-							}
-						} else if (childNode.getNodeName().equalsIgnoreCase("name")) {
-							if (null != childNode.getChildNodes().item(0)) {
-								name = childNode.getChildNodes().item(0).getNodeValue();
-							}
-						}
-					}
-				}
-				// 保存
-				// TdDiySite tdDiySite =
-				// tdDiySiteService.findByCustomerIdAndSobId(customer_id,
-				// sob_id);
-				TdDiySite tdDiySite = tdDiySiteService.findByRegionIdAndCustomerId(sob_id, customer_id);
-				if (tdDiySite == null) {
-					return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>该门店不存在，无法添加价目表</MESSAGE></STATUS></RESULTS>";
-				}
-
-				tdDiySite.setPriceListId(list_header_id);
-				tdDiySite.setPriceListName(name);
-				tdDiySiteService.save(tdDiySite);
-			}
-			LOGGER.info("getErpInfo, OUT, code=0");
-			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
+			LOGGER.info("开始解析接口数据：CUXAPP_QP_LIST_ASSIGNS_OUT");
+			return this.doWithQPList(nodeList);
+			// for (int i = 0; i < nodeList.getLength(); i++) {
+			// Long list_header_id = null;// id
+			// Long sob_id = null; // 分公司ID
+			// Long customer_id = null;// 客户id
+			// String name = null;// 价目表名称
+			//
+			// Node node = nodeList.item(i);
+			// NodeList childNodeList = node.getChildNodes();
+			// for (int idx = 0; idx < childNodeList.getLength(); idx++) {
+			// Node childNode = childNodeList.item(idx);
+			//
+			// if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+			// // 比较字段名
+			// if (childNode.getNodeName().equalsIgnoreCase("list_header_id")) {
+			// // 有值
+			// if (null != childNode.getChildNodes().item(0)) {
+			// list_header_id =
+			// Long.parseLong(childNode.getChildNodes().item(0).getNodeValue());
+			// }
+			// } else if (childNode.getNodeName().equalsIgnoreCase("sob_id")) {
+			// if (null != childNode.getChildNodes().item(0)) {
+			// sob_id =
+			// Long.parseLong(childNode.getChildNodes().item(0).getNodeValue());
+			// }
+			// } else if
+			// (childNode.getNodeName().equalsIgnoreCase("customer_id")) {
+			// if (null != childNode.getChildNodes().item(0)) {
+			// customer_id =
+			// Long.parseLong(childNode.getChildNodes().item(0).getNodeValue());
+			// }
+			// } else if (childNode.getNodeName().equalsIgnoreCase("name")) {
+			// if (null != childNode.getChildNodes().item(0)) {
+			// name = childNode.getChildNodes().item(0).getNodeValue();
+			// }
+			// }
+			// }
+			// }
+			// // 保存
+			// // TdDiySite tdDiySite =
+			// // tdDiySiteService.findByCustomerIdAndSobId(customer_id,
+			// // sob_id);
+			// TdDiySite tdDiySite =
+			// tdDiySiteService.findByRegionIdAndCustomerId(sob_id,
+			// customer_id);
+			// if (tdDiySite == null) {
+			// return
+			// "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>该门店不存在，无法添加价目表</MESSAGE></STATUS></RESULTS>";
+			// }
+			//
+			// tdDiySite.setPriceListId(list_header_id);
+			// tdDiySite.setPriceListName(name);
+			// tdDiySiteService.save(tdDiySite);
+			// }
+			// LOGGER.info("getErpInfo, OUT, code=0");
+			// return
+			// "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
 		} else if (STRTABLE.equalsIgnoreCase("CUXAPP_INV_STORE_TRANS_OUT"))// ebs库存修改
 		{
 			for (int i = 0; i < nodeList.getLength(); i++) {
@@ -1173,9 +1183,6 @@ public class CallEBSImpl implements ICallEBS {
 			}
 			LOGGER.info("getErpInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
-		} else if (STRTABLE.equalsIgnoreCase("CUXAPP_QP_LIST_ASSIGNS_OUT")) {
-			LOGGER.info("开始解析接口数据：CUXAPP_QP_LIST_ASSIGNS_OUT");
-			return this.doWithQPList(nodeList);
 		}
 
 		return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>不支持该表数据传输：" + STRTABLE + "</MESSAGE></STATUS></RESULTS>";
