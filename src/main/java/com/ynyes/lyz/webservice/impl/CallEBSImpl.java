@@ -994,6 +994,7 @@ public class CallEBSImpl implements ICallEBS {
 				if (null != tdDiySitePrice) {
 					diySitePrice.setId(tdDiySitePrice.getId());
 				}
+				diySitePrice.setSaveTime(new Date());
 				Log.info("开始存储：TdDiySitePrice = {}", diySitePrice.toString());
 				tdDiySitePriceService.save(diySitePrice);
 			}
