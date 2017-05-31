@@ -1202,7 +1202,7 @@ public class CallEBSImpl implements ICallEBS {
 				TdDiySitePrice diySitePrice = new TdDiySitePrice();
 				LOGGER.info("childNode.nodeType = {}", childNode.getNodeType());
 				String name = childNode.getNodeName();
-				String value = childNode.getFirstChild().getNodeValue();
+				String value = childNode.getNodeValue();
 				if (null != value) {
 					value = value.trim();
 				}
