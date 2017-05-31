@@ -33,6 +33,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.geronimo.mail.util.Base64;
+import org.crsh.console.jline.internal.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1200,64 +1201,66 @@ public class CallEBSImpl implements ICallEBS {
 				LOGGER.info("childNode = {}", childNode.toString());
 				TdDiySitePrice diySitePrice = new TdDiySitePrice();
 				LOGGER.info("childNode.nodeType = {}", childNode.getNodeType());
-				if (childNode.getNodeType() == Node.ELEMENT_NODE) {
-					String name = childNode.getNodeName();
-					String value = childNode.getFirstChild().getNodeValue();
-					LOGGER.info("name = {}, value = {}", name, value);
-					if (name.equalsIgnoreCase("SOB_ID")) {
-						diySitePrice.setSobId(Long.parseLong(value));
-					} else if (name.equalsIgnoreCase("ASSIGN_ID")) {
-						diySitePrice.setAssignId(Long.parseLong(value));
-					} else if (name.equalsIgnoreCase("LIST_HEADER_ID")) {
-						diySitePrice.setListHeaderId(Long.parseLong(value));
-					} else if (name.equalsIgnoreCase("NAME")) {
-						diySitePrice.setName(value);
-					} else if (name.equalsIgnoreCase("STORE_CODE")) {
-						diySitePrice.setStoreCode(value);
-					} else if (name.equalsIgnoreCase("CUST_TYPE_CODE")) {
-						diySitePrice.setCustTypeCode(value);
-					} else if (name.equalsIgnoreCase("CUSTOMER_ID")) {
-						diySitePrice.setCustomerId(Long.parseLong(value));
-					} else if (name.equalsIgnoreCase("CUSTOMER_NUMBER")) {
-						diySitePrice.setCustomerNumber(value);
-					} else if (name.equalsIgnoreCase("CUSTOMER_NAME")) {
-						diySitePrice.setCustomerName(value);
-					} else if (name.equalsIgnoreCase("START_DATE_ACTIVE")) {
-						try {
-							Date date = sdf.parse(value);
-							diySitePrice.setStartDateActive(date);
-						} catch (ParseException e) {
-							e.printStackTrace();
-							return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>字段START_DATE_ACTIVE解析失败</MESSAGE></STATUS></RESULTS>";
-						}
-					} else if (name.equalsIgnoreCase("END_DATE_ACTIVE")) {
-						try {
-							Date date = sdf.parse(value);
-							diySitePrice.setEndDateActive(date);
-						} catch (ParseException e) {
-							e.printStackTrace();
-							return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>字段END_DATE_ACTIVE解析失败</MESSAGE></STATUS></RESULTS>";
-						}
-					} else if (name.equalsIgnoreCase("PRICE_TYPE")) {
-						diySitePrice.setPriceType(value);
-					} else if (name.equalsIgnoreCase("PRICE_TYPE_DESC")) {
-						diySitePrice.setPriceTypeDesc(value);
-					} else if (name.equalsIgnoreCase("ATTRIBUTE1")) {
-						diySitePrice.setAttribute1(value);
-					} else if (name.equalsIgnoreCase("ATTRIBUTE2")) {
-						diySitePrice.setAttribute1(value);
-					} else if (name.equalsIgnoreCase("ATTRIBUTE3")) {
-						diySitePrice.setAttribute1(value);
-					} else if (name.equalsIgnoreCase("ATTRIBUTE4")) {
-						diySitePrice.setAttribute1(value);
-					} else if (name.equalsIgnoreCase("ATTRIBUTE5")) {
-						diySitePrice.setAttribute1(value);
+				String name = childNode.getNodeName();
+				String value = childNode.getFirstChild().getNodeValue();
+				if (null != value) {
+					value = value.trim();
+				}
+				LOGGER.info("name = {}, value = {}", name, value);
+				if (name.equalsIgnoreCase("SOB_ID")) {
+					diySitePrice.setSobId(Long.parseLong(value));
+				} else if (name.equalsIgnoreCase("ASSIGN_ID")) {
+					diySitePrice.setAssignId(Long.parseLong(value));
+				} else if (name.equalsIgnoreCase("LIST_HEADER_ID")) {
+					diySitePrice.setListHeaderId(Long.parseLong(value));
+				} else if (name.equalsIgnoreCase("NAME")) {
+					diySitePrice.setName(value);
+				} else if (name.equalsIgnoreCase("STORE_CODE")) {
+					diySitePrice.setStoreCode(value);
+				} else if (name.equalsIgnoreCase("CUST_TYPE_CODE")) {
+					diySitePrice.setCustTypeCode(value);
+				} else if (name.equalsIgnoreCase("CUSTOMER_ID")) {
+					diySitePrice.setCustomerId(Long.parseLong(value));
+				} else if (name.equalsIgnoreCase("CUSTOMER_NUMBER")) {
+					diySitePrice.setCustomerNumber(value);
+				} else if (name.equalsIgnoreCase("CUSTOMER_NAME")) {
+					diySitePrice.setCustomerName(value);
+				} else if (name.equalsIgnoreCase("START_DATE_ACTIVE")) {
+					try {
+						Date date = sdf.parse(value);
+						diySitePrice.setStartDateActive(date);
+					} catch (ParseException e) {
+						e.printStackTrace();
+						return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>字段START_DATE_ACTIVE解析失败</MESSAGE></STATUS></RESULTS>";
 					}
+				} else if (name.equalsIgnoreCase("END_DATE_ACTIVE")) {
+					try {
+						Date date = sdf.parse(value);
+						diySitePrice.setEndDateActive(date);
+					} catch (ParseException e) {
+						e.printStackTrace();
+						return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>字段END_DATE_ACTIVE解析失败</MESSAGE></STATUS></RESULTS>";
+					}
+				} else if (name.equalsIgnoreCase("PRICE_TYPE")) {
+					diySitePrice.setPriceType(value);
+				} else if (name.equalsIgnoreCase("PRICE_TYPE_DESC")) {
+					diySitePrice.setPriceTypeDesc(value);
+				} else if (name.equalsIgnoreCase("ATTRIBUTE1")) {
+					diySitePrice.setAttribute1(value);
+				} else if (name.equalsIgnoreCase("ATTRIBUTE2")) {
+					diySitePrice.setAttribute1(value);
+				} else if (name.equalsIgnoreCase("ATTRIBUTE3")) {
+					diySitePrice.setAttribute1(value);
+				} else if (name.equalsIgnoreCase("ATTRIBUTE4")) {
+					diySitePrice.setAttribute1(value);
+				} else if (name.equalsIgnoreCase("ATTRIBUTE5")) {
+					diySitePrice.setAttribute1(value);
 				}
 				TdDiySitePrice tdDiySitePrice = tdDiySitePriceService.findByAssignId(diySitePrice.getAssignId());
 				if (null != tdDiySitePrice) {
 					diySitePrice.setId(tdDiySitePrice.getId());
 				}
+				Log.info("开始存储：TdDiySitePrice = {}", diySitePrice.toString());
 				tdDiySitePriceService.save(diySitePrice);
 			}
 		}
