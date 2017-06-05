@@ -1,18 +1,12 @@
 package com.ynyes.lyz.controller.management;
 
-import java.util.Date;
-
 import javax.servlet.http.HttpServletRequest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.ynyes.fitment.core.constant.LoginSign;
-import com.ynyes.lyz.entity.TdManager;
 import com.ynyes.lyz.service.TdManagerLogService;
 import com.ynyes.lyz.service.TdManagerService;
 
