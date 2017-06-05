@@ -1032,7 +1032,7 @@ public class SettlementServiceImpl implements ISettlementService {
 
 					Double strandardFee = totalGoodsPrice - cashCouponFee - activitySubFee - proCouponFee;
 					
-					if (strandardFee > 1000) {
+					if (strandardFee >= 1000) {
 
 						deliveryMap.put("user_delivery_fee", 0d);
 						double bucketsOfPaintFee = 0d;// 大桶漆配送费
