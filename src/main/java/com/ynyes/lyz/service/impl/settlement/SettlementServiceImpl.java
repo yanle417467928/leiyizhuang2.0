@@ -3,7 +3,6 @@ package com.ynyes.lyz.service.impl.settlement;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,32 +19,22 @@ import org.springframework.stereotype.Service;
 import com.ynyes.lyz.entity.TdBalanceLog;
 import com.ynyes.lyz.entity.TdBrand;
 import com.ynyes.lyz.entity.TdCoupon;
-import com.ynyes.lyz.entity.TdDiySite;
-import com.ynyes.lyz.entity.TdDiySiteAccount;
 import com.ynyes.lyz.entity.TdOrder;
 import com.ynyes.lyz.entity.TdOrderGoods;
 import com.ynyes.lyz.entity.TdPayType;
-import com.ynyes.lyz.entity.TdPriceListItem;
 import com.ynyes.lyz.entity.delivery.TdDeliveryFeeHead;
 import com.ynyes.lyz.entity.delivery.TdDeliveryFeeLine;
 import com.ynyes.lyz.entity.delivery.TdOrderDeliveryFeeDetail;
 import com.ynyes.lyz.entity.user.CreditChangeType;
 import com.ynyes.lyz.entity.user.TdUser;
 import com.ynyes.lyz.excp.AppErrorParamsExcp;
-import com.ynyes.lyz.interfaces.entity.TdCashReciptInf;
-import com.ynyes.lyz.interfaces.service.TdCashReciptInfService;
-import com.ynyes.lyz.interfaces.service.TdInterfaceService;
-import com.ynyes.lyz.interfaces.utils.EnumUtils.INFTYPE;
 import com.ynyes.lyz.service.TdBalanceLogService;
 import com.ynyes.lyz.service.TdBrandService;
 import com.ynyes.lyz.service.TdCommonService;
 import com.ynyes.lyz.service.TdCouponService;
 import com.ynyes.lyz.service.TdDeliveryFeeHeadService;
 import com.ynyes.lyz.service.TdDeliveryFeeLineService;
-import com.ynyes.lyz.service.TdDiySiteAccountService;
-import com.ynyes.lyz.service.TdDiySiteService;
 import com.ynyes.lyz.service.TdOrderDeliveryFeeDetailService;
-import com.ynyes.lyz.service.TdOrderGoodsService;
 import com.ynyes.lyz.service.TdOrderService;
 import com.ynyes.lyz.service.TdPayTypeService;
 import com.ynyes.lyz.service.TdUserService;
@@ -90,8 +79,8 @@ public class SettlementServiceImpl implements ISettlementService {
 	@Autowired
 	private TdDeliveryFeeLineService tdDeliveryFeeLineService;
 
-	// @Autowired
-	// private TdSettingService tdSettingService;
+//	@Autowired
+//	private TdSettingService tdSettingService;
 
 	@Autowired
 	private TdDeliveryFeeHeadService tdDeliveryFeeHeadService;
@@ -99,23 +88,6 @@ public class SettlementServiceImpl implements ISettlementService {
 	@Autowired
 	private TdOrderDeliveryFeeDetailService tdOrderDeliveryFeedetailService;
 
-	@Autowired
-	private TdDiySiteService tdDiySiteService;
-
-	@Autowired
-	private TdOrderGoodsService tdOrderGoodsService;
-
-	@Autowired
-	private TdDiySiteAccountService tdDiySiteAccountService;
-
-	@Autowired
-	private TdCashReciptInfService tdCashReciptInfService;
-
-	@Autowired
-	private TdInterfaceService tdInterfaceService;
-
-	private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-	
 	@Override
 	public void orderBasicValidate(TdOrder order) throws Exception {
 		if (null == order) {
@@ -390,17 +362,11 @@ public class SettlementServiceImpl implements ISettlementService {
 						initSubOrder(subOrder, mainOrder);
 					}
 
-					Double jxPrice = null == orderGoods.getJxPrice() ? 0d : orderGoods.getJxPrice();
-					Long couponQuantity = null == orderGoods.getCouponNumber() ? 0L : orderGoods.getCouponNumber();
-
 					subOrder.getOrderGoodsList().add(orderGoods);
 					subOrder.setTotalGoodsPrice(
 							subOrder.getTotalGoodsPrice() + (orderGoods.getPrice() * orderGoods.getQuantity()));
 					subOrder.setTotalPrice(
 							subOrder.getTotalPrice() + (orderGoods.getPrice() * orderGoods.getQuantity()));
-					subOrder.setJxTotalPrice(
-							subOrder.getJxTotalPrice() + jxPrice * (orderGoods.getQuantity() - couponQuantity));
-
 					subOrder = tdOrderService.save(subOrder);
 					subOrderMap.put(brandId, subOrder);
 				}
@@ -458,7 +424,6 @@ public class SettlementServiceImpl implements ISettlementService {
 		subOrder.setPosPay(0d);
 		subOrder.setCashPay(0d);
 		subOrder.setBackOtherPay(0d);
-		subOrder.setJxTotalPrice(0d);
 
 		getCommonFields(subOrder, mainOrder);
 	}
@@ -716,8 +681,7 @@ public class SettlementServiceImpl implements ISettlementService {
 		// 获取真实用户
 		Long realUserId = mainOrder.getRealUserId();
 		TdUser realUser = tdUserService.findOne(realUserId);
-		System.err.println("时间01: " + new Date().getTime());
-		
+
 		// 获取原单总价
 		Double totalPrice = mainOrder.getTotalPrice();
 
@@ -751,7 +715,6 @@ public class SettlementServiceImpl implements ISettlementService {
 		// Double remainCash = 0.0;
 		// Double remainUnCash = 0.0;
 
-		System.err.println("时间2: " + new Date().getTime());
 		// 遍历当前生成的订单
 		for (TdOrder subOrder : subOrderMap.values()) {
 			if (null != subOrder) {
@@ -849,7 +812,6 @@ public class SettlementServiceImpl implements ISettlementService {
 						}
 						realUser.getBalance();
 						tdUserService.save(realUser);
-						System.err.println("时间3：" + new Date().getTime());
 					}
 				}
 			}
@@ -978,167 +940,139 @@ public class SettlementServiceImpl implements ISettlementService {
 
 	@Override
 	public Map<String, Double> countOrderDeliveryFee(TdUser user, TdOrder order) throws Exception {
-
 		Map<String, Double> deliveryMap = new HashMap<>();
-		if (order.getCity().equalsIgnoreCase("成都市") && !order.getOrderNumber().contains("FIT")) {
-			// 门店自提不收取运费，只有配送才收取运费
-			if (order.getDeliverTypeTitle().equals("门店自提")) {
+
+		// 门店自提不收取运费，只有配送才收取运费
+		if (order.getDeliverTypeTitle().equals("门店自提")) {
+			return deliveryMap;
+		} else {
+			// 如果后台有修改运费，那么，就按照修改的运费执行
+			if (null != order.getIsFixedDeliveryFee() && order.getIsFixedDeliveryFee()) {
+				deliveryMap.put("user_delivery_fee", order.getDeliverFee());
+				deliveryMap.put("company_delivery_fee", order.getCompanyDeliveryFee());
 				return deliveryMap;
 			} else {
-				// 如果后台有修改运费，那么，就按照修改的运费执行
-				if (null != order.getIsFixedDeliveryFee() && order.getIsFixedDeliveryFee()) {
-					deliveryMap.put("user_delivery_fee", order.getDeliverFee());
-					deliveryMap.put("company_delivery_fee", order.getCompanyDeliveryFee());
-					return deliveryMap;
-				} else {
 
-					TdOrderDeliveryFeeDetail detail = tdOrderDeliveryFeedetailService
-							.findByMainOrderNumber(order.getOrderNumber());
-					if (null == detail) {
-						detail = new TdOrderDeliveryFeeDetail();
-					}
-					detail.setMainOrderNumber(
-							null == order.getMainOrderNumber() ? order.getOrderNumber() : order.getMainOrderNumber());
-					detail.setDiySiteId(order.getDiySiteId());
-					detail.setDiySiteName(order.getDiySiteName());
-					detail.setOrderTime(null == order.getOrderTime() ? null : order.getOrderTime());
-					detail.setSellerUsername(order.getSellerUsername());
-					detail.setSellerRealName(order.getSellerRealName());
-					detail.setUsername(order.getUsername());
-					detail.setUserRealName(order.getRealUserRealName());
-					detail.setIsCustomerDeliveryFeeModified(false);
+				TdOrderDeliveryFeeDetail detail = tdOrderDeliveryFeedetailService
+						.findByMainOrderNumber(order.getOrderNumber());
+				if (null == detail) {
+					detail = new TdOrderDeliveryFeeDetail();
+				}
+				detail.setMainOrderNumber(
+						null == order.getMainOrderNumber() ? order.getOrderNumber() : order.getMainOrderNumber());
+				detail.setDiySiteId(order.getDiySiteId());
+				detail.setDiySiteName(order.getDiySiteName());
+				detail.setOrderTime(null == order.getOrderTime() ? null : order.getOrderTime());
+				detail.setSellerUsername(order.getSellerUsername());
+				detail.setSellerRealName(order.getSellerRealName());
+				detail.setUsername(order.getUsername());
+				detail.setUserRealName(order.getRealUserRealName());
+				detail.setIsCustomerDeliveryFeeModified(false);
 
-					/*
-					 * 两种情况 一种是商品金额大于1000，不向会员收取运费，只向公司收取运费；
-					 * 另一种是商品金额小于1000，只向会员收取运费，不向公司收取运费
-					 */
-					Double totalGoodsPrice = null == order.getTotalGoodsPrice() ? 0d : order.getTotalGoodsPrice();
-					Double cashCouponFee = null == order.getCashCoupon() ? 0d : order.getCashCoupon();
-					Double activitySubFee = null == order.getActivitySubPrice() ? 0d : order.getActivitySubPrice();
-					Double proCouponFee = 0d;
-					String productCouponId = order.getProductCouponId();
-					if (null != productCouponId) {
-						String[] split = productCouponId.split(",");
-						if (null != split && split.length > 0) {
-							for (String sId : split) {
-								if (null != sId && !sId.trim().equals("")) {
-									Long id = Long.parseLong(sId);
-									TdCoupon coupon = tdCouponService.findOne(id);
-									if (null != coupon && !(null != coupon.getIsBuy() && coupon.getIsBuy())) {
-										Double couponFee = null == coupon.getPrice() ? 0d : coupon.getPrice();
-										proCouponFee += couponFee;
-									}
-								}
+				/*
+				 * 两种情况 一种是商品金额大于1000，不向会员收取运费，只向公司收取运费；
+				 * 另一种是商品金额小于1000，只向会员收取运费，不向公司收取运费
+				 */
+				if (order.getTotalPrice() > 1000) {
+
+					deliveryMap.put("user_delivery_fee", 0d);
+					double bucketsOfPaintFee = 0d;// 大桶漆配送费
+					double nitrolacquerFee = 0d;// 硝基漆10L配送费
+					double carpentryPaintFee = 0d;// 小桶漆/木器漆配送费
+					double belowFourKiloFee = 0d;// 4kg以下漆类配送费
+
+					long count = 0;
+
+					Map<Long, TdOrderGoods> orderGoodsMap = this.countOrderGoodsNumber(order);
+					for (TdOrderGoods orderGoods : orderGoodsMap.values()) {
+						TdDeliveryFeeHead tdDeliveryFeeHead = tdDeliveryFeeHeadService
+								.findBySobIdAndGoodsId(user.getCityId(), orderGoods.getGoodsId());
+						Double fee;
+						if (null != tdDeliveryFeeHead) {
+							fee = this.countOrderGoodsDeliveryFee(user, orderGoods);
+						} else {
+							fee = 0d;
+						}
+
+						if (null != fee && fee > 0d) {
+							count += orderGoods.getQuantity();
+							switch (tdDeliveryFeeHead.getGoodsTypeId()) {
+							case 1:
+								bucketsOfPaintFee += fee;
+								break;
+							case 2:
+								nitrolacquerFee += fee;
+								break;
+							case 3:
+								carpentryPaintFee += fee;
+								break;
+							case 4:
+								belowFourKiloFee += fee;
+								break;
+							default:
+								break;
 							}
 						}
-					}
 
-					Double strandardFee = totalGoodsPrice - cashCouponFee - activitySubFee - proCouponFee;
-					
-					if (strandardFee >= 1000) {
+						double allDeliveryFee = bucketsOfPaintFee + nitrolacquerFee + carpentryPaintFee
+								+ belowFourKiloFee;
 
-						deliveryMap.put("user_delivery_fee", 0d);
-						double bucketsOfPaintFee = 0d;// 大桶漆配送费
-						double nitrolacquerFee = 0d;// 硝基漆10L配送费
-						double carpentryPaintFee = 0d;// 小桶漆/木器漆配送费
-						double belowFourKiloFee = 0d;// 4kg以下漆类配送费
-
-						long count = 0;
-
-						Map<Long, TdOrderGoods> orderGoodsMap = this.countOrderGoodsNumber(order);
-						for (TdOrderGoods orderGoods : orderGoodsMap.values()) {
-							TdDeliveryFeeHead tdDeliveryFeeHead = tdDeliveryFeeHeadService
-									.findBySobIdAndGoodsId(user.getCityId(), orderGoods.getGoodsId());
-							Double fee;
-							if (null != tdDeliveryFeeHead) {
-								fee = this.countOrderGoodsDeliveryFee(user, orderGoods);
-							} else {
-								fee = 0d;
-							}
-
-							if (null != fee && fee > 0d) {
-								count += orderGoods.getQuantity();
-								switch (tdDeliveryFeeHead.getGoodsTypeId()) {
-								case 1:
-									bucketsOfPaintFee += fee;
-									break;
-								case 2:
-									nitrolacquerFee += fee;
-									break;
-								case 3:
-									carpentryPaintFee += fee;
-									break;
-								case 4:
-									belowFourKiloFee += fee;
-									break;
-								default:
-									break;
-								}
-							}
-
-							double allDeliveryFee = bucketsOfPaintFee + nitrolacquerFee + carpentryPaintFee
-									+ belowFourKiloFee;
-
-							double discount = 1d;
-							if (count >= 20 && count <= 99) {
-								discount = 0.75d;
-							} else if (count >= 100) {
-								discount = 0.6d;
-							}
-
-							double discountedDeliveryFee = allDeliveryFee * discount;
-							double subDeliveryFee = allDeliveryFee * (1d - discount);
-
-							deliveryMap.put("company_delivery_fee", discountedDeliveryFee);
-
-							detail.setBucketsOfPaintFee(bucketsOfPaintFee);
-							detail.setNitrolacquerFee(nitrolacquerFee);
-							detail.setCarpentryPaintFee(carpentryPaintFee);
-							detail.setBelowFourKiloFee(belowFourKiloFee);
-							detail.setWallAccessories(0d);
-							detail.setConsumerDeliveryFee(0d);
-							detail.setCompanyDeliveryFee(allDeliveryFee);
-							detail.setConsumerDeliveryFeeAdjust(0d);
-							detail.setCompanyDeliveryFeeAdjust(0d);
-							detail.setConsumerDeliveryFeeDiscount(0d);
-							detail.setCompanyDeliveryFeeDiscount(subDeliveryFee);
-							detail.setConsumerDeliveryFeeReduce(0d);
-							detail.setCompanyDeliveryFeeReduce(0d);
-							detail.setConsumerDeliveryFeeFinal(0d);
-							detail.setCompanyDeliveryFeeFinal(discountedDeliveryFee);
-
-							order.setDeliverFee(0d);
-							order.setReceivableFee(0d);
-
+						double discount = 1d;
+						if (count >= 20 && count <= 99) {
+							discount = 0.75d;
+						} else if (count >= 100) {
+							discount = 0.6d;
 						}
-					} else {
-						deliveryMap.put("user_delivery_fee", 30d);
-						deliveryMap.put("company_delivery_fee", 0d);
 
-						detail.setBucketsOfPaintFee(0d);
-						detail.setNitrolacquerFee(0d);
-						detail.setCarpentryPaintFee(0d);
-						detail.setBelowFourKiloFee(0d);
+						double discountedDeliveryFee = allDeliveryFee * discount;
+						double subDeliveryFee = allDeliveryFee * (1d - discount);
+
+						deliveryMap.put("company_delivery_fee", discountedDeliveryFee);
+
+						detail.setBucketsOfPaintFee(bucketsOfPaintFee);
+						detail.setNitrolacquerFee(nitrolacquerFee);
+						detail.setCarpentryPaintFee(carpentryPaintFee);
+						detail.setBelowFourKiloFee(belowFourKiloFee);
 						detail.setWallAccessories(0d);
-						detail.setConsumerDeliveryFee(30d);
-						detail.setCompanyDeliveryFee(0d);
+						detail.setConsumerDeliveryFee(0d);
+						detail.setCompanyDeliveryFee(allDeliveryFee);
 						detail.setConsumerDeliveryFeeAdjust(0d);
 						detail.setCompanyDeliveryFeeAdjust(0d);
 						detail.setConsumerDeliveryFeeDiscount(0d);
-						detail.setCompanyDeliveryFeeDiscount(0d);
+						detail.setCompanyDeliveryFeeDiscount(subDeliveryFee);
 						detail.setConsumerDeliveryFeeReduce(0d);
 						detail.setCompanyDeliveryFeeReduce(0d);
-						detail.setConsumerDeliveryFeeFinal(30d);
-						detail.setCompanyDeliveryFeeFinal(0d);
+						detail.setConsumerDeliveryFeeFinal(0d);
+						detail.setCompanyDeliveryFeeFinal(discountedDeliveryFee);
+						
+						order.setDeliverFee(0d);
+						order.setReceivableFee(0d);
 
-						order.setDeliverFee(30d);
-						order.setReceivableFee(30d);
 					}
+				} else {
+					deliveryMap.put("user_delivery_fee", 30d);
+					deliveryMap.put("company_delivery_fee", 0d);
+
+					detail.setBucketsOfPaintFee(0d);
+					detail.setNitrolacquerFee(0d);
+					detail.setCarpentryPaintFee(0d);
+					detail.setBelowFourKiloFee(0d);
+					detail.setWallAccessories(0d);
+					detail.setConsumerDeliveryFee(30d);
+					detail.setCompanyDeliveryFee(0d);
+					detail.setConsumerDeliveryFeeAdjust(0d);
+					detail.setCompanyDeliveryFeeAdjust(0d);
+					detail.setConsumerDeliveryFeeDiscount(0d);
+					detail.setCompanyDeliveryFeeDiscount(0d);
+					detail.setConsumerDeliveryFeeReduce(0d);
+					detail.setCompanyDeliveryFeeReduce(0d);
+					detail.setConsumerDeliveryFeeFinal(30d);
+					detail.setCompanyDeliveryFeeFinal(0d);
+					
+					order.setDeliverFee(30d);
+					order.setReceivableFee(30d);
 				}
 			}
-		} else {
-			deliveryMap.put("user_delivery_fee", 0d);
-			deliveryMap.put("company_delivery_fee", 0d);
 		}
 		return deliveryMap;
 	}
@@ -1431,117 +1365,4 @@ public class SettlementServiceImpl implements ISettlementService {
 			this.tdUserService.useCredit(CreditChangeType.CONSUME, order);
 		}
 	}
-
-	@Override
-	public void countJX(TdOrder order) {
-		if (null != order) {
-			Long diySiteId = order.getDiySiteId();
-			TdDiySite diySite = tdDiySiteService.findOne(diySiteId);
-			String custTypeName = diySite.getCustTypeName();
-			if (null != custTypeName && custTypeName.equalsIgnoreCase("经销商")) {
-				if (null != order.getOrderGoodsList() && order.getOrderGoodsList().size() > 0) {
-					List<TdOrderGoods> orderGoodsList = order.getOrderGoodsList();
-					for (TdOrderGoods orderGoods : orderGoodsList) {
-						TdPriceListItem jxPriceListItem = tdCommonService.secondGetGoodsPrice(diySite,
-								orderGoods.getSku(), "JX");
-						Double jxPrice = jxPriceListItem.getPrice();
-						orderGoods.setJxPrice(jxPrice);
-						tdOrderGoodsService.save(orderGoods);
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * 返还经销差价的方法
-	 * 
-	 * @param order
-	 */
-	@Override
-	public void returnJX(TdOrder order, Long headerId) {
-		// Double activitySubPrice = null == order.getActivitySubPrice() ? 0d :
-		// order.getActivitySubPrice();
-		// Double cashCoupon = null == order.getCashCoupon() ? 0d :
-		// order.getCashCoupon();
-		Double sendBalance = null == order.getJxTotalPrice() ? 0d : order.getJxTotalPrice();
-
-		sendBalance = 0d > sendBalance ? 0d : sendBalance;
-
-		Long diySiteId = order.getDiySiteId();
-		TdDiySite diySite = tdDiySiteService.findOne(diySiteId);
-
-		TdUser user = this.getDiySiteUser(order, diySite);
-		user.setUnCashBalance(user.getUnCashBalance() + sendBalance);
-
-		this.createLog(order.getOrderNumber(), sendBalance, user, diySite);
-		this.sendEBS(order, diySite, user, sendBalance, headerId);
-	}
-
-	private TdBalanceLog createLog(String orderNumber, Double money, TdUser user, TdDiySite diySite) {
-		Date now = new Date();
-		TdBalanceLog balanceLog = new TdBalanceLog();
-		balanceLog.setUserId(user.getId());
-		balanceLog.setUsername(user.getUsername());
-		balanceLog.setMoney(money);
-		balanceLog.setType(5L);
-		balanceLog.setCreateTime(now);
-		balanceLog.setFinishTime(now);
-		balanceLog.setIsSuccess(Boolean.TRUE);
-		balanceLog.setBalance(user.getBalance());
-		balanceLog.setBalanceType(5L);
-		balanceLog.setOrderNumber(orderNumber);
-		balanceLog.setDiySiteId(diySite.getId());
-		balanceLog.setCityId(diySite.getCityId());
-		balanceLog.setCashLeft(user.getCashBalance());
-		balanceLog.setUnCashLeft(user.getUnCashBalance());
-		balanceLog.setAllLeft(user.getBalance());
-		balanceLog.setReason("消费返还经销差价");
-		return balanceLog;
-	}
-
-	/**
-	 * 获取返利人的方法
-	 * 
-	 * @param order
-	 * @return
-	 */
-	private TdUser getDiySiteUser(TdOrder order, TdDiySite diySite) {
-		TdDiySiteAccount diySiteAccount = tdDiySiteAccountService.findByDiySiteId(diySite.getId());
-		if (null != diySiteAccount) {
-			Long userId = diySiteAccount.getUserId();
-			return tdUserService.findOne(userId);
-		} else {
-			return null;
-		}
-	}
-
-	private void sendEBS(TdOrder order, TdDiySite diySite, TdUser user, Double amount, Long headerId) {
-		TdCashReciptInf cashInf = new TdCashReciptInf();
-		cashInf.setSobId(diySite.getRegionId());
-		cashInf.setReceiptNumber(this.createReceiptNumber());
-		cashInf.setUserid(user.getId());
-		cashInf.setUsername(user.getRealName());
-		cashInf.setUserphone(user.getUsername());
-		cashInf.setDiySiteCode(diySite.getStoreCode());
-		cashInf.setReceiptClass("经销差价");
-		cashInf.setOrderNumber(order.getOrderNumber());
-		cashInf.setProductType("JXDIF");
-		cashInf.setReceiptType("预收款");
-		cashInf.setReceiptDate(new Date());
-		cashInf.setAmount(amount);
-		cashInf.setOrderHeaderId(headerId);
-		tdCashReciptInfService.save(cashInf);
-		tdInterfaceService.ebsWithObject(cashInf, INFTYPE.CASHRECEIPTINF);
-	}
-
-	private String createReceiptNumber() {
-		Date now = new Date();
-		String middle = sdf.format(now);
-
-		int i = (int) (Math.random() * 900) + 100;
-		return "RC" + middle + i;
-	}
-	
-	
 }

@@ -32,14 +32,13 @@ public class FitGoodsController extends FitBasicController {
 			LOGGER.debug("进入控制器，根据商品分类ID，获取可售商品，参数：categoryId = {}", categoryId);
 			FitEmployee employee = this.getLoginEmployee(request);
 			LOGGER.debug("获取当前登录用户的信息，得到装饰公司id = {}", null == employee ? null : employee.getCompanyId());
-			List<ClientGoods> someGoods = this.bizGoodsService.getGoodsByCategoryId(categoryId,
-					employee.getCompanyId());
+			List<ClientGoods> someGoods = this.bizGoodsService.getGoodsByCategoryId(categoryId, employee.getCompanyId());
 			LOGGER.debug("查询完成，查询共计{}件商品", someGoods.size());
 			map.addAttribute("some_goods", someGoods);
 			return "/fitment/goods_list";
 		} catch (Exception e) {
 			e.printStackTrace();
-			LOGGER.warn(e.getMessage());
+				LOGGER.warn(e.getMessage());
 			return "fitment/500";
 		}
 	}

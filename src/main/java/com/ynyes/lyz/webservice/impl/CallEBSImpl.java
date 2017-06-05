@@ -33,7 +33,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.geronimo.mail.util.Base64;
-import org.crsh.console.jline.internal.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -912,91 +911,51 @@ public class CallEBSImpl implements ICallEBS {
 		} // CUXAPP_QP_LIST_ASSIGNS_OUT
 		else if (STRTABLE.equalsIgnoreCase("CUXAPP_QP_LIST_ASSIGNS_OUT"))// 把价目表绑定到门店
 		{
-			LOGGER.info("开始解析接口数据：CUXAPP_QP_LIST_ASSIGNS_OUT，nodeList.length = {}", nodeList.getLength());
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			for (int i = 0; i < nodeList.getLength(); i++) {
+				Long list_header_id = null;// id
+				Long sob_id = null; // 分公司ID
+				Long customer_id = null;// 客户id
+				String name = null;// 价目表名称
+
 				Node node = nodeList.item(i);
-				LOGGER.info("node = {}", node);
 				NodeList childNodeList = node.getChildNodes();
-				LOGGER.info("开始循环遍历XML子节点，childNodeList = {}", childNodeList.toString());
-				TdDiySitePrice diySitePrice = new TdDiySitePrice();
 				for (int idx = 0; idx < childNodeList.getLength(); idx++) {
 					Node childNode = childNodeList.item(idx);
-					LOGGER.info("childNode = {}", childNode);
-					LOGGER.info("childNode.nodeType = {}", childNode.getNodeType());
+
 					if (childNode.getNodeType() == Node.ELEMENT_NODE) {
-						String name = childNode.getNodeName();
-						String value = null;
-						if (null != childNode.getChildNodes().item(0)) {
-							value = childNode.getChildNodes().item(0).getNodeValue();
-						}
-						if (null != value) {
-							value = value.trim();
-						}
-						LOGGER.info("name = {}, value = {}", name, value);
-						if (name.equalsIgnoreCase("SOB_ID")) {
-							diySitePrice.setSobId(Long.parseLong(value));
-						} else if (name.equalsIgnoreCase("ASSIGN_ID")) {
-							diySitePrice.setAssignId(Long.parseLong(value));
-						} else if (name.equalsIgnoreCase("LIST_HEADER_ID")) {
-							diySitePrice.setListHeaderId(Long.parseLong(value));
-						} else if (name.equalsIgnoreCase("NAME")) {
-							diySitePrice.setName(value);
-						} else if (name.equalsIgnoreCase("STORE_CODE")) {
-							diySitePrice.setStoreCode(value);
-						} else if (name.equalsIgnoreCase("CUST_TYPE_CODE")) {
-							diySitePrice.setCustTypeCode(value);
-						} else if (name.equalsIgnoreCase("CUSTOMER_ID")) {
-							diySitePrice.setCustomerId(Long.parseLong(value));
-						} else if (name.equalsIgnoreCase("CUSTOMER_NUMBER")) {
-							diySitePrice.setCustomerNumber(value);
-						} else if (name.equalsIgnoreCase("CUSTOMER_NAME")) {
-							diySitePrice.setCustomerName(value);
-						} else if (name.equalsIgnoreCase("START_DATE_ACTIVE")) {
-							if (null != value) {
-								try {
-									Date date = sdf.parse(value);
-									diySitePrice.setStartDateActive(date);
-								} catch (ParseException e) {
-									e.printStackTrace();
-									return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>字段START_DATE_ACTIVE解析失败</MESSAGE></STATUS></RESULTS>";
-								}
+						// 比较字段名
+						if (childNode.getNodeName().equalsIgnoreCase("list_header_id")) {
+							// 有值
+							if (null != childNode.getChildNodes().item(0)) {
+								list_header_id = Long.parseLong(childNode.getChildNodes().item(0).getNodeValue());
 							}
-						} else if (name.equalsIgnoreCase("END_DATE_ACTIVE")) {
-							if (null != value) {
-								try {
-									Date date = sdf.parse(value);
-									diySitePrice.setEndDateActive(date);
-								} catch (ParseException e) {
-									e.printStackTrace();
-									return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>字段END_DATE_ACTIVE解析失败</MESSAGE></STATUS></RESULTS>";
-								}
+						} else if (childNode.getNodeName().equalsIgnoreCase("sob_id")) {
+							if (null != childNode.getChildNodes().item(0)) {
+								sob_id = Long.parseLong(childNode.getChildNodes().item(0).getNodeValue());
 							}
-						} else if (name.equalsIgnoreCase("PRICE_TYPE")) {
-							diySitePrice.setPriceType(value);
-						} else if (name.equalsIgnoreCase("PRICE_TYPE_DESC")) {
-							diySitePrice.setPriceTypeDesc(value);
-						} else if (name.equalsIgnoreCase("ATTRIBUTE1")) {
-							diySitePrice.setAttribute1(value);
-						} else if (name.equalsIgnoreCase("ATTRIBUTE2")) {
-							diySitePrice.setAttribute1(value);
-						} else if (name.equalsIgnoreCase("ATTRIBUTE3")) {
-							diySitePrice.setAttribute1(value);
-						} else if (name.equalsIgnoreCase("ATTRIBUTE4")) {
-							diySitePrice.setAttribute1(value);
-						} else if (name.equalsIgnoreCase("ATTRIBUTE5")) {
-							diySitePrice.setAttribute1(value);
+						} else if (childNode.getNodeName().equalsIgnoreCase("customer_id")) {
+							if (null != childNode.getChildNodes().item(0)) {
+								customer_id = Long.parseLong(childNode.getChildNodes().item(0).getNodeValue());
+							}
+						} else if (childNode.getNodeName().equalsIgnoreCase("name")) {
+							if (null != childNode.getChildNodes().item(0)) {
+								name = childNode.getChildNodes().item(0).getNodeValue();
+							}
 						}
 					}
 				}
-				TdDiySitePrice tdDiySitePrice = tdDiySitePriceService
-						.findByAssignId(diySitePrice.getAssignId());
-				if (null != tdDiySitePrice) {
-					diySitePrice.setId(tdDiySitePrice.getId());
+				// 保存
+				// TdDiySite tdDiySite =
+				// tdDiySiteService.findByCustomerIdAndSobId(customer_id,
+				// sob_id);
+				TdDiySite tdDiySite = tdDiySiteService.findByRegionIdAndCustomerId(sob_id, customer_id);
+				if (tdDiySite == null) {
+					return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>该门店不存在，无法添加价目表</MESSAGE></STATUS></RESULTS>";
 				}
-				diySitePrice.setSaveTime(new Date());
-				Log.info("开始存储：TdDiySitePrice = {}", diySitePrice.toString());
-				tdDiySitePriceService.save(diySitePrice);
+
+				tdDiySite.setPriceListId(list_header_id);
+				tdDiySite.setPriceListName(name);
+				tdDiySiteService.save(tdDiySite);
 			}
 			LOGGER.info("getErpInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
@@ -1214,9 +1173,89 @@ public class CallEBSImpl implements ICallEBS {
 			}
 			LOGGER.info("getErpInfo, OUT, code=0");
 			return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
+		} else if (STRTABLE.equalsIgnoreCase("CUXAPP_QP_LIST_ASSIGNS_OUT")) {
+			LOGGER.info("开始解析接口数据：CUXAPP_QP_LIST_ASSIGNS_OUT");
+			return this.doWithQPList(nodeList);
 		}
 
 		return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>不支持该表数据传输：" + STRTABLE + "</MESSAGE></STATUS></RESULTS>";
 	}
+
+	private String doWithQPList(NodeList nodeList) {
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Node node = nodeList.item(i);
+			LOGGER.info("node = {}", node.toString());
+			NodeList childNodeList = node.getChildNodes();
+			LOGGER.info("开始循环遍历XML子节点");
+			for (int idx = 0; idx < childNodeList.getLength(); idx++) {
+				Node childNode = childNodeList.item(idx);
+				LOGGER.info("childNode = {}", childNode.toString());
+				TdDiySitePrice diySitePrice = new TdDiySitePrice();
+				LOGGER.info("childNode.nodeType = {}", childNode.getNodeType());
+				if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+					String name = childNode.getNodeName();
+					String value = childNode.getFirstChild().getNodeValue();
+					LOGGER.info("name = {}, value = {}", name, value);
+					if (name.equalsIgnoreCase("SOB_ID")) {
+						diySitePrice.setSobId(Long.parseLong(value));
+					} else if (name.equalsIgnoreCase("ASSIGN_ID")) {
+						diySitePrice.setAssignId(Long.parseLong(value));
+					} else if (name.equalsIgnoreCase("LIST_HEADER_ID")) {
+						diySitePrice.setListHeaderId(Long.parseLong(value));
+					} else if (name.equalsIgnoreCase("NAME")) {
+						diySitePrice.setName(value);
+					} else if (name.equalsIgnoreCase("STORE_CODE")) {
+						diySitePrice.setStoreCode(value);
+					} else if (name.equalsIgnoreCase("CUST_TYPE_CODE")) {
+						diySitePrice.setCustTypeCode(value);
+					} else if (name.equalsIgnoreCase("CUSTOMER_ID")) {
+						diySitePrice.setCustomerId(Long.parseLong(value));
+					} else if (name.equalsIgnoreCase("CUSTOMER_NUMBER")) {
+						diySitePrice.setCustomerNumber(value);
+					} else if (name.equalsIgnoreCase("CUSTOMER_NAME")) {
+						diySitePrice.setCustomerName(value);
+					} else if (name.equalsIgnoreCase("START_DATE_ACTIVE")) {
+						try {
+							Date date = sdf.parse(value);
+							diySitePrice.setStartDateActive(date);
+						} catch (ParseException e) {
+							e.printStackTrace();
+							return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>字段START_DATE_ACTIVE解析失败</MESSAGE></STATUS></RESULTS>";
+						}
+					} else if (name.equalsIgnoreCase("END_DATE_ACTIVE")) {
+						try {
+							Date date = sdf.parse(value);
+							diySitePrice.setEndDateActive(date);
+						} catch (ParseException e) {
+							e.printStackTrace();
+							return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>字段END_DATE_ACTIVE解析失败</MESSAGE></STATUS></RESULTS>";
+						}
+					} else if (name.equalsIgnoreCase("PRICE_TYPE")) {
+						diySitePrice.setPriceType(value);
+					} else if (name.equalsIgnoreCase("PRICE_TYPE_DESC")) {
+						diySitePrice.setPriceTypeDesc(value);
+					} else if (name.equalsIgnoreCase("ATTRIBUTE1")) {
+						diySitePrice.setAttribute1(value);
+					} else if (name.equalsIgnoreCase("ATTRIBUTE2")) {
+						diySitePrice.setAttribute1(value);
+					} else if (name.equalsIgnoreCase("ATTRIBUTE3")) {
+						diySitePrice.setAttribute1(value);
+					} else if (name.equalsIgnoreCase("ATTRIBUTE4")) {
+						diySitePrice.setAttribute1(value);
+					} else if (name.equalsIgnoreCase("ATTRIBUTE5")) {
+						diySitePrice.setAttribute1(value);
+					}
+				}
+				TdDiySitePrice tdDiySitePrice = tdDiySitePriceService.findByAssignId(diySitePrice.getAssignId());
+				if (null != tdDiySitePrice) {
+					diySitePrice.setId(tdDiySitePrice.getId());
+				}
+				tdDiySitePriceService.save(diySitePrice);
+			}
+		}
+		return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
+	}
+
 }
 // END SNIPPET: service

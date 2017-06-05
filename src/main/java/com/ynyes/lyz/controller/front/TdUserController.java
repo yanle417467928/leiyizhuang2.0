@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.ynyes.lyz.entity.OrderGoodsTemp;
 import com.ynyes.lyz.entity.TdActivity;
 import com.ynyes.lyz.entity.TdActivityGift;
 import com.ynyes.lyz.entity.TdActivityGiftList;
@@ -39,7 +38,6 @@ import com.ynyes.lyz.entity.TdDeliveryInfo;
 import com.ynyes.lyz.entity.TdDeliveryInfoDetail;
 import com.ynyes.lyz.entity.TdDistrict;
 import com.ynyes.lyz.entity.TdDiySite;
-import com.ynyes.lyz.entity.TdDiySiteAccount;
 import com.ynyes.lyz.entity.TdDiySiteInventory;
 import com.ynyes.lyz.entity.TdGeoInfo;
 import com.ynyes.lyz.entity.TdGoods;
@@ -62,10 +60,8 @@ import com.ynyes.lyz.entity.TdWareHouse;
 import com.ynyes.lyz.entity.user.CreditChangeType;
 import com.ynyes.lyz.entity.user.TdUser;
 import com.ynyes.lyz.entity.user.TdUserCreditLog;
-import com.ynyes.lyz.interfaces.entity.TdCashRefundInf;
 import com.ynyes.lyz.interfaces.service.TdInterfaceService;
 import com.ynyes.lyz.interfaces.utils.INFConstants;
-import com.ynyes.lyz.interfaces.utils.EnumUtils.INFTYPE;
 import com.ynyes.lyz.service.TdActivityService;
 import com.ynyes.lyz.service.TdArticleCategoryService;
 import com.ynyes.lyz.service.TdArticleService;
@@ -77,7 +73,6 @@ import com.ynyes.lyz.service.TdCouponService;
 import com.ynyes.lyz.service.TdDeliveryInfoDetailService;
 import com.ynyes.lyz.service.TdDeliveryInfoService;
 import com.ynyes.lyz.service.TdDistrictService;
-import com.ynyes.lyz.service.TdDiySiteAccountService;
 import com.ynyes.lyz.service.TdDiySiteInventoryService;
 import com.ynyes.lyz.service.TdDiySiteService;
 import com.ynyes.lyz.service.TdGeoInfoService;
@@ -209,9 +204,6 @@ public class TdUserController {
 
 	@Autowired
 	private TdUserCreditLogService tdUserCreditLogService;
-
-	@Autowired
-	private TdDiySiteAccountService tdDiySiteAccountService;
 
 	/**
 	 * 跳转到个人中心的方法（后期会进行修改，根据不同的角色，跳转的页面不同）
@@ -382,6 +374,7 @@ public class TdUserController {
 			orderPage = this.tdOrderService.findByOrderTypeAndUser(currentOrderType, user, currentPageNumber);
 		}
 
+		
 		map.addAttribute("orderPage", orderPage);
 		return "/client/user_order_page_data";
 	}
@@ -426,10 +419,9 @@ public class TdUserController {
 				if (null != userCollect) {
 					// 调用公共方法查询价格
 					TdGoods goods = tdGoodsService.findOne(userCollect.getGoodsId());
-					// TdPriceListItem priceListItem =
-					// tdCommonService.getGoodsPrice(req, goods);
+//					TdPriceListItem priceListItem = tdCommonService.getGoodsPrice(req, goods);
 					String custType = "";
-					// 判断门店是经销还是直营
+					//判断门店是经销还是直营
 					if (null != diySite) {
 						String custTypeName = diySite.getCustTypeName();
 						if ("经销商".equals(custTypeName)) {
@@ -439,9 +431,9 @@ public class TdUserController {
 							custType = "ZY";
 						}
 					}
-					// 根据门店、商品、价格类型查询商品价格信息
+					//根据门店、商品、价格类型查询商品价格信息
 					TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, goods, custType);
-
+					
 					// TdPriceListItem priceListItem = tdPriceListItemService
 					// .findByPriceListIdAndGoodsId(diySite.getPriceListId(),
 					// userCollect.getGoodsId());
@@ -543,10 +535,9 @@ public class TdUserController {
 			if (null != recentVisit) {
 				// 获取指定商品的价目表项
 				TdGoods goods = tdGoodsService.findOne(recentVisit.getGoodsId());
-				// TdPriceListItem priceListItem =
-				// tdCommonService.getGoodsPrice(req, goods);
+//				TdPriceListItem priceListItem = tdCommonService.getGoodsPrice(req, goods);
 				String custType = "";
-				// 判断门店是经销还是直营
+				//判断门店是经销还是直营
 				if (null != diySite) {
 					String custTypeName = diySite.getCustTypeName();
 					if ("经销商".equals(custTypeName)) {
@@ -556,9 +547,9 @@ public class TdUserController {
 						custType = "ZY";
 					}
 				}
-				// 根据门店、商品、价格类型查询商品价格信息
+				//根据门店、商品、价格类型查询商品价格信息
 				TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, goods, custType);
-
+				
 				// TdPriceListItem priceListItem = tdPriceListItemService
 				// .findByPriceListIdAndGoodsId(diySite.getPriceListId(),recentVisit.getGoodsId()
 				// );
@@ -1275,7 +1266,6 @@ public class TdUserController {
 		// 更改用户的归属门店
 		user.setUpperDiySiteId(diySite.getId());
 		user.setDiyName(diySite.getTitle());
-		user.setDiyCode(diySite.getStoreCode());
 		user.setCustomerId(diySite.getCustomerId());
 		tdUserService.save(user);
 
@@ -1537,35 +1527,6 @@ public class TdUserController {
 
 		// 根据问题跟踪表-20160120第55号（序号），一个分单取消的时候，与其相关联的所有分单也取消掉
 		List<TdOrder> list = tdOrderService.findByOrderNumberContaining(newOrderNumber);
-
-		// 判断是否是经销商订单，如果是经销商订单，就要判断用户的余额够不够扣除经销差价
-		Long diySiteId = order.getDiySiteId();
-		TdDiySite diySite = tdDiySiteService.findOne(diySiteId);
-		if (null != diySite && null != diySite.getCustTypeName() && "经销商".equalsIgnoreCase(diySite.getCustTypeName())) {
-			Double jxReturn = 0d;
-			for (TdOrder subOrder : list) {
-				Double subJX = null == subOrder.getJxTotalPrice() ? 0d : subOrder.getJxTotalPrice();
-				jxReturn += subJX;
-			}
-			// 获取经销商门店的财务账户
-			TdDiySiteAccount tdDiySiteAccount = tdDiySiteAccountService.findByDiySiteId(diySiteId);
-			if (null == tdDiySiteAccount) {
-				res.put("message", "严重错误：未查询到经销商货款账号，请联系管理员");
-				return res;
-			}
-
-			TdUser jxUser = tdUserService.findOne(tdDiySiteAccount.getUserId());
-			if (null == jxUser) {
-				res.put("message", "严重错误：未查询到经销商货款账号，请联系管理员");
-				return res;
-			}
-
-			if (jxUser.getBalance() < jxReturn) {
-				res.put("message", "经销商货款账号金额不足（需要返回" + jxReturn + "元经销差价）");
-				return res;
-			}
-		}
-
 		Double totalPrice = 0d;
 		// 进行遍历操作
 		if (null != list && list.size() > 0) {
@@ -1582,18 +1543,10 @@ public class TdUserController {
 
 						// 通知物流
 						TdReturnNote returnNote = tdCommonService.MakeReturnNote(subOrder, 0L, "");
-
 						tdCommonService.sendBackMsgToWMS(returnNote);
 
 						// 在此进行资金和优惠券的退还
 						tdPriceCountService.cashAndCouponBack(subOrder, realUser, returnNote);
-
-						// 扣除经销差价
-						List<TdCashRefundInf> cashRefundList = tdReturnNoteService.doActionWithReturnCash(returnNote,
-								user, diySite);
-						for (TdCashRefundInf cashRefundInf : cashRefundList) {
-							tdInterfaceService.ebsWithObject(cashRefundInf, INFTYPE.CASHREFUNDINF);
-						}
 					}
 					subOrder.setStatusId(7L);
 					subOrder.setCancelTime(new Date());
@@ -2014,7 +1967,7 @@ public class TdUserController {
 
 						orderGoods.setPrice(oGoods.getPrice());
 						orderGoods.setQuantity(oGoods.getQuantity());
-						orderGoods.setJxPrice(oGoods.getJxPrice());
+
 						orderGoods.setDeliveredQuantity(oGoods.getDeliveredQuantity());
 						orderGoods.setPoints(oGoods.getPoints());
 						// tdOrderGoodsService.save(orderGoods);
@@ -2278,9 +2231,6 @@ public class TdUserController {
 			// 2016-07-20存储退钱退券明细信息
 			returnNote = this.getReturnDetail(orderId, infos, returnNote);
 
-			// 2017-05-24 计算需要扣减多少的经销差价
-			returnNote = this.countJXPrice(returnNote);
-
 			tdOrderService.save(order);
 			tdReturnNoteService.save(returnNote);
 			tdInterfaceService.initReturnOrder(returnNote, INFConstants.INF_RETURN_ORDER_SUB_INT);
@@ -2485,11 +2435,9 @@ public class TdUserController {
 											// 查找到指定id的商品
 											TdGoods goods = tdGoodsService.findOne(id);
 											// 查找指定商品的价格
-											// TdPriceListItem priceListItem =
-											// tdCommonService.getGoodsPrice(req,
-											// goods);
+//											TdPriceListItem priceListItem = tdCommonService.getGoodsPrice(req, goods);
 											String custType = "";
-											// 判断门店是经销还是直营
+											//判断门店是经销还是直营
 											if (null != diySite) {
 												String custTypeName = diySite.getCustTypeName();
 												if ("经销商".equals(custTypeName)) {
@@ -2499,10 +2447,9 @@ public class TdUserController {
 													custType = "ZY";
 												}
 											}
-											// 根据门店、商品、价格类型查询商品价格信息
-											TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite,
-													goods, custType);
-
+											//根据门店、商品、价格类型查询商品价格信息
+											TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, goods, custType);
+											
 											TdOrderGoods orderGoods = new TdOrderGoods();
 											orderGoods.setBrandId(goods.getBrandId());
 											orderGoods.setBrandTitle(goods.getBrandTitle());
@@ -2689,8 +2636,7 @@ public class TdUserController {
 		}
 
 		// 分页查询退货单
-		Page<TdReturnNote> returnNoteList = tdReturnNoteService
-				.findByUsernameAndRemarkInfoNotOrSellerUsernameAndRemarkInfoNot(username, "用户取消订单，退货", page, size);
+		Page<TdReturnNote> returnNoteList = tdReturnNoteService.findByUsernameAndRemarkInfoNotOrSellerUsernameAndRemarkInfoNot(username, "用户取消订单，退货", page, size);
 		// List<TdReturnNote>
 		// returnNoteList=tdReturnNoteService.findByUsername(username);
 
@@ -3181,85 +3127,6 @@ public class TdUserController {
 		}
 		res.put("infos", infos);
 		return res;
-	}
-
-	private TdReturnNote countJXPrice(TdReturnNote returnNote) {
-		// 获取对应的订单
-		String orderNumber = returnNote.getOrderNumber();
-		TdOrder order = tdOrderService.findByOrderNumber(orderNumber);
-		List<TdOrderGoods> orderGoodsList = order.getOrderGoodsList();
-		List<TdOrderGoods> presentedList = order.getPresentedList();
-		List<TdOrderGoods> giftGoodsList = order.getGiftGoodsList();
-
-		Map<Long, OrderGoodsTemp> map = new HashMap<>();
-
-		if (null != orderGoodsList && orderGoodsList.size() > 0) {
-			for (TdOrderGoods orderGoods : orderGoodsList) {
-				Long quantity = orderGoods.getQuantity();
-				Long goodsId = orderGoods.getGoodsId();
-				Double jxPrice = orderGoods.getJxPrice();
-				Double lsPrice = orderGoods.getPrice();
-
-				OrderGoodsTemp orderGoodsTemp = map.get(goodsId);
-				orderGoodsTemp = null == orderGoodsTemp ? new OrderGoodsTemp() : orderGoodsTemp;
-				orderGoodsTemp.setGoodsId(goodsId);
-				orderGoodsTemp.setJxPrice(jxPrice);
-				orderGoodsTemp.setLsPrice(lsPrice);
-				orderGoodsTemp.setQuantity(orderGoodsTemp.getQuantity() + quantity);
-
-				map.put(goodsId, orderGoodsTemp);
-			}
-		}
-		if (null != presentedList && presentedList.size() > 0) {
-			for (TdOrderGoods orderGoods : presentedList) {
-				Long quantity = orderGoods.getQuantity();
-				Long goodsId = orderGoods.getGoodsId();
-
-				OrderGoodsTemp orderGoodsTemp = map.get(goodsId);
-				orderGoodsTemp = null == orderGoodsTemp ? new OrderGoodsTemp() : orderGoodsTemp;
-				orderGoodsTemp.setGoodsId(goodsId);
-				orderGoodsTemp.setQuantity(orderGoodsTemp.getQuantity() + quantity);
-				orderGoodsTemp.setFreeCount(orderGoodsTemp.getFreeCount() + quantity);
-
-				map.put(goodsId, orderGoodsTemp);
-			}
-		}
-		if (null != giftGoodsList && giftGoodsList.size() > 0) {
-			for (TdOrderGoods orderGoods : giftGoodsList) {
-				Long quantity = orderGoods.getQuantity();
-				Long goodsId = orderGoods.getGoodsId();
-
-				OrderGoodsTemp orderGoodsTemp = map.get(goodsId);
-				orderGoodsTemp = null == orderGoodsTemp ? new OrderGoodsTemp() : orderGoodsTemp;
-				orderGoodsTemp.setGoodsId(goodsId);
-				orderGoodsTemp.setQuantity(orderGoodsTemp.getQuantity() + quantity);
-				orderGoodsTemp.setFreeCount(orderGoodsTemp.getFreeCount() + quantity);
-
-				map.put(goodsId, orderGoodsTemp);
-			}
-		}
-
-		Double allJXPrice = 0d;
-
-		// 遍历退单商品，计算退货要扣减的经销差价
-		List<TdOrderGoods> returnGoodsList = returnNote.getReturnGoodsList();
-		for (TdOrderGoods orderGoods : returnGoodsList) {
-			Long goodsId = orderGoods.getGoodsId();
-			Long quantity = orderGoods.getQuantity();
-			OrderGoodsTemp orderGoodsTemp = map.get(goodsId);
-
-			Long freeCount = orderGoodsTemp.getFreeCount();
-			Double lsPrice = orderGoodsTemp.getLsPrice();
-			Double jxPrice = orderGoodsTemp.getJxPrice();
-
-			if (quantity > freeCount) {
-				allJXPrice += (lsPrice - jxPrice) * (quantity - freeCount);
-			}
-		}
-
-		returnNote.setJxReturn(allJXPrice);
-
-		return returnNote;
 	}
 
 	private TdReturnNote getReturnDetail(Long orderId, String params, TdReturnNote returnNote) {
