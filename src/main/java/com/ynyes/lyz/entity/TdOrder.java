@@ -423,11 +423,31 @@ public class TdOrder {
 	// 装饰公司使用的信用额度
 	@Column(scale = 2, nullable = false)
 	private Double credit = 0d;
-	
+
 	// 经销总价
 	@Column(scale = 2)
 	private Double jxTotalPrice = 0d;
+
+	// 产品券优惠券金额
+	@Column(scale = 2)
+	private Double proCouponFee;
+
+	// 调色费
+	@Column(scale = 2)
+	private Double colorFee = 0d;
+
+	// 会员差价金额
+	@Column(scale = 2)
+	private Double difFee = 0d;
+
+	// 代收金额
+	@Column(scale = 2)
+	private Double notPayed = 0d;
 	
+	// 收货人是否是主家
+	@Column
+	private Boolean receiverIsMember = Boolean.FALSE;
+
 	public Double getRefund() {
 		return refund;
 	}
@@ -1210,6 +1230,48 @@ public class TdOrder {
 
 	public void setJxTotalPrice(Double jxTotalPrice) {
 		this.jxTotalPrice = jxTotalPrice;
+	}
+
+	public Double getColorFee() {
+		return colorFee;
+	}
+
+	public void setColorFee(Double colorFee) {
+		this.colorFee = colorFee;
+	}
+
+	public Double getDifFee() {
+		return difFee;
+	}
+
+	public void setDifFee(Double difFee) {
+		this.difFee = difFee;
+	}
+
+	public Double getNotPayed() {
+		notPayed = totalGoodsPrice + deliverFee + upstairsFee + colorFee - activitySubPrice - cashCoupon
+				- proCouponFee - difFee - cashBalanceUsed - unCashBalanceUsed - otherPay;
+		return notPayed;
+	}
+
+	public void setNotPayed(Double notPayed) {
+		this.notPayed = notPayed;
+	}
+
+	public Double getProCouponFee() {
+		return proCouponFee;
+	}
+
+	public void setProCouponFee(Double proCouponFee) {
+		this.proCouponFee = proCouponFee;
+	}
+
+	public Boolean getReceiverIsMember() {
+		return receiverIsMember;
+	}
+
+	public void setReceiverIsMember(Boolean receiverIsMember) {
+		this.receiverIsMember = receiverIsMember;
 	}
 
 }
