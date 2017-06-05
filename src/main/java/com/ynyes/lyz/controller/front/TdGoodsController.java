@@ -127,7 +127,7 @@ public class TdGoodsController {
 		}
 		// 获取指定id分类下的所有商品和其价格
 		List<ClientGoods> clientGoodsList = tdGoodsService.getGoodsListByCategoryIdAndSobId(categoryId,
-				user.getCityId());
+				user.getCityId(), user.getDiyCode());
 		// tdCommonService.getGoodsAndPrice(req, map, categoryId);
 		map.addAttribute("clientGoodsList", clientGoodsList);
 		return "/client/normal_goods";
@@ -174,9 +174,9 @@ public class TdGoodsController {
 		String username = (String) req.getSession().getAttribute("username");
 		TdUser user = tdUserService.findByUsernameAndIsEnableTrue(username);
 		// 获取指定id分类下的所有商品和其价格
-//		tdCommonService.getGoodsAndPrice(req, map, categoryId);
+		// tdCommonService.getGoodsAndPrice(req, map, categoryId);
 		List<ClientGoods> clientGoodsList = tdGoodsService.getGoodsListByCategoryIdAndSobId(categoryId,
-				user.getCityId());
+				user.getCityId(), user.getDiyCode());
 		map.addAttribute("clientGoodsList", clientGoodsList);
 		return "/client/sub_step_goods";
 	}
