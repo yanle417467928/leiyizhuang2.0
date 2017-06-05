@@ -170,14 +170,6 @@ public class TdPriceCountService {
 		// }
 
 		// Double fee = 0d;
-		try {
-			Map<String, Double> depiveryFeeMap = new HashMap<>();
-			depiveryFeeMap = settlementService.countOrderDeliveryFee(user, order);
-			order.setDeliverFee(depiveryFeeMap.get("user_delivery_fee"));
-			order.setCompanyDeliveryFee(depiveryFeeMap.get("company_delivery_fee"));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
 		// 如果订单的配送方式是到店支付，则不计算运费（新增：电子券订单也不计算运费 —— @Date 2016年4月27日）
 		String title = order.getDeliverTypeTitle();
@@ -270,6 +262,15 @@ public class TdPriceCountService {
 		order.setTotalPrice(order.getTotalPrice() - activitySubPrice);
 		if (0 > order.getTotalPrice()) {
 			order.setTotalPrice(0.00);
+		}
+		
+		try {
+			Map<String, Double> depiveryFeeMap = new HashMap<>();
+			depiveryFeeMap = settlementService.countOrderDeliveryFee(user, order);
+			order.setDeliverFee(depiveryFeeMap.get("user_delivery_fee"));
+			order.setCompanyDeliveryFee(depiveryFeeMap.get("company_delivery_fee"));
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		order.setIsFixedDeliveryFee(isFixedDeliveryFee);
