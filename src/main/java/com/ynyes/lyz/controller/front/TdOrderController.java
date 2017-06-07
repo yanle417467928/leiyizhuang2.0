@@ -12,6 +12,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -112,6 +114,8 @@ public class TdOrderController {
 
 	@Autowired
 	private TdUpstairsSettingService tdUpstairsSettingService;
+	
+	private final Logger LOG = LoggerFactory.getLogger(TdOrderController.class);
 
 	/**
 	 * 清空部分信息的控制器
@@ -365,9 +369,24 @@ public class TdOrderController {
 			totalGoods += orderPresentList.size();
 		}
 
+		Long userType = user.getUserType();
+
+		// 是否显示“收货人是否是主家”
+		if (userType.equals(1l) || userType.equals(2L) || userType.equals(3L)) {
+			map.addAttribute("showReceiverIsMember", Boolean.TRUE);
+		} else if (userType.equals(0L)) {
+			if (null != user.getSellerId()) {
+				map.addAttribute("showReceiverIsMember", Boolean.TRUE);
+			} else {
+				map.addAttribute("showReceiverIsMember", Boolean.FALSE);
+			}
+		}
+
 		// 计算上楼费
 		Double countUpstairsFee = tdUpstairsSettingService.countUpstairsFee(order_temp);
 		order_temp.setUpstairsFee(countUpstairsFee);
+		
+		order_temp.getNotPayedFee();
 
 		map.addAttribute("totalGoods", totalGoods);
 		map.addAttribute("order", order_temp);
@@ -440,6 +459,30 @@ public class TdOrderController {
 			}
 		}
 		req.getSession().setAttribute("order_temp", order);
+
+		res.put("status", 0);
+		return res;
+	}
+
+	@RequestMapping(value = "/checkbox/save", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> orderCheckboxSave(HttpServletRequest request) {
+		Map<String, Object> res = new HashMap<>();
+		res.put("status", -1);
+		TdOrder order = (TdOrder) request.getSession().getAttribute("order_temp");
+
+		if (null != order) {
+			try {
+				order.setReceiverIsMember(!order.getReceiverIsMember());
+				tdOrderService.save(order);
+			} catch (Exception e) {
+				e.printStackTrace();
+				LOG.error("变更\"收货人是否为主家\"状态发生错误：{}", e.getMessage());
+				res.put("message", "发生意外的错误，请稍后重试或联系管理员");
+				return res;
+			}
+		}
+		request.getSession().setAttribute("order_temp", order);
 
 		res.put("status", 0);
 		return res;
@@ -1144,7 +1187,7 @@ public class TdOrderController {
 		if (null == permits[1]) {
 			permits[1] = 0.00;
 		}
-
+		
 		if (0L == type) {
 			if (0L == status) {
 				if (null == brandId) {
@@ -1322,10 +1365,10 @@ public class TdOrderController {
 								tdOrderGoodsService.save(orderGoods);
 								productCouponId += coupon.getId() + ",";
 								order.setProductCouponId(productCouponId);
-								coupon.setRealPrice(orderGoods.getPrice());
+								
 								req.getSession().setAttribute("order_temp", order);
 								// 存储产品券的实际使用价值
-								coupon.setRealPrice(orderGoods.getPrice());
+//								coupon.setRealPrice(orderGoods.getPrice());
 
 								// 判断是否为购买的产品券，如果是，则记录
 								if (null != coupon.getIsBuy() && coupon.getIsBuy()) {
@@ -1363,6 +1406,14 @@ public class TdOrderController {
 									Long couponId = Long.valueOf(sCouponId);
 									if (null != couponId && couponId.longValue() != coupon.getId().longValue()) {
 										ids += (sCouponId + ",");
+										// 如果真实用户是会员，那么产品券的价值相当于商品的会员价
+										Long realUserId = order.getRealUserId();
+										TdUser realUser = tdUserService.findOne(realUserId);
+										if (null != realUser && null != realUser.getSellerId()) {
+											coupon.setRealPrice(orderGoods.getRealPrice());
+										} else {
+											coupon.setRealPrice(orderGoods.getPrice());
+										}
 										TdCoupon tempCoupon = tdCouponService.findOne(couponId);
 										if (null != tempCoupon && null != tempCoupon.getIsBuy()
 												&& tempCoupon.getIsBuy()) {
@@ -1866,7 +1917,7 @@ public class TdOrderController {
 				if (order.getOrderNumber().contains("XN")) {
 					// 门店自提 确认发货时扣库存
 					if (!"门店自提".equals(order.getDeliverTypeTitle())) {
-						// 拆单钱先去扣减库存
+						// 拆单前先去扣减库存
 						tdDiySiteInventoryService.changeGoodsInventory(order, 2L, req, "发货", null);
 					}
 

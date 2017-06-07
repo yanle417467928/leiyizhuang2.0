@@ -32,10 +32,10 @@ spring:
   profiles: dev
   jpa:
     show-sql: true
-    hibernate:
-      naming:
-        strategy: org.hibernate.cfg.ImprovedNamingStrategy
-  datasource:
+    hibernate: 
+      ddl-auto: update
+      naming_strategy: org.hibernate.cfg.ImprovedNamingStrategy
+  datasource: 
     url: jdbc:mysql://localhost:3306/lyz?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false
     username: root
     password: root

@@ -237,6 +237,7 @@ public class TdPriceCountService {
 			}
 
 			// 开始计算产品券产品券的价值
+			order.setProCouponFee(0d);
 			String productCouponId = order.getProductCouponId();
 			// 拆分产品券
 			if (null != productCouponId && !"".equals(productCouponId)) {
@@ -251,12 +252,19 @@ public class TdPriceCountService {
 								&& null != coupon.getIsOutDate() && null != coupon.getIsUsed() && !coupon.getIsOutDate()
 								&& !coupon.getIsUsed()) {
 							// 遍历所有的已选商品，查找与优惠券对应的商品，获取其价格
+							order.setProCouponFee(order.getProCouponFee() + coupon.getRealPrice());
 							order.setTotalPrice(order.getTotalPrice() - coupon.getRealPrice());
 						}
 					}
 				}
 			}
 		}
+
+		order = this.memberDiscount(order);
+
+		// 计算会员差价优惠额
+		Double difFee = null == order.getDifFee() ? 0d : order.getDifFee();
+		order.setTotalPrice(order.getTotalPrice() - difFee);
 
 		// 计算上楼费
 		Double upstairsFee = tdUpstairSettingService.countUpstairsFee(order);
@@ -323,6 +331,26 @@ public class TdPriceCountService {
 		results.put("isCoupon", canUseBalance);
 
 		return results;
+	}
+
+	private TdOrder memberDiscount(TdOrder order) {
+		Long realUserId = order.getRealUserId();
+		TdUser user = tdUserService.findOne(realUserId);
+
+		if (null != user && null != user.getSellerId()) {
+			List<TdOrderGoods> orderGoodsList = order.getOrderGoodsList();
+			if (null != orderGoodsList && orderGoodsList.size() > 0) {
+				Double memberDiscount = 0d;
+				for (TdOrderGoods orderGoods : orderGoodsList) {
+					Double price = null == orderGoods.getPrice() ? 0d : orderGoods.getPrice();
+					Double realPrice = null == orderGoods.getRealPrice() ? 0d : orderGoods.getRealPrice();
+					Long quantity = null == orderGoods.getQuantity() ? 0L : orderGoods.getQuantity();
+					memberDiscount += (price - realPrice) * quantity;
+				}
+				order.setDifFee(memberDiscount);
+			}
+		}
+		return order;
 	}
 
 	/**
@@ -1384,7 +1412,7 @@ public class TdPriceCountService {
 														buy_list.remove(tdCoupon);
 														buy_pro_coupon_condition.put(goodsId, buy_list);
 													}
-													
+
 													tdCouponService.save(proCoupon);
 													total -= unit;
 													number--;
@@ -2401,11 +2429,12 @@ public class TdPriceCountService {
 			for (TdOrderGoods tdOrderGood : orderGoods) {
 				TdGoods good = tdGoodsService.findOne(tdOrderGood.getGoodsId());
 				// 获取指定商品的价目表项
-//				TdPriceListItem priceListItem = tdCommonService.getGoodsPrice(req, good);
-				//根据登录信息查询门店信息
+				// TdPriceListItem priceListItem =
+				// tdCommonService.getGoodsPrice(req, good);
+				// 根据登录信息查询门店信息
 				TdDiySite diySite = tdCommonService.getDiySite(req);
 				String custType = "";
-				//判断门店是经销还是直营
+				// 判断门店是经销还是直营
 				if (null != diySite) {
 					String custTypeName = diySite.getCustTypeName();
 					if ("经销商".equals(custTypeName)) {
@@ -2415,9 +2444,9 @@ public class TdPriceCountService {
 						custType = "ZY";
 					}
 				}
-				//根据门店、商品、价格类型查询商品价格信息
+				// 根据门店、商品、价格类型查询商品价格信息
 				TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, good, custType);
-	
+
 				if (null != priceListItem) {// 检查非空
 					// 修改订单商品中的价格为最新价格
 					tdOrderGood.setPrice(priceListItem.getSalePrice());

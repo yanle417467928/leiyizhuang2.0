@@ -48,6 +48,36 @@ function userRemark(old_remark) {
 	});
 }
 
+function changeCheckBox() {
+	// 开启等待图标
+	wait();
+
+	// 发送异步请求
+	$.ajax({
+		url : "/order/checkbox/save",
+		timeout : 10000,
+		type : "post",
+		error : function(XMLHttpRequest, textStatus, errorThrown) {
+			// 关闭等待响应的图标
+			close(1);
+			warning("亲，您的网速不给力啊");
+		},
+		success : function(res) {
+			// 关闭等待图标
+			close(100);
+			if (0 == res.status) {
+				;
+			} else {
+				if (res.message) {
+					warning(res.message);
+				} else {
+					warning("亲，您的网速不给力啊");
+				}
+			}
+		}
+	});
+}
+
 /**
  * 获取本店所有会员信息的方法
  * 

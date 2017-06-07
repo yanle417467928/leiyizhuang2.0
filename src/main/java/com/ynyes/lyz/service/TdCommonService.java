@@ -1654,10 +1654,10 @@ public class TdCommonService {
 		virtual.setUpstairsFee(tdUpstairsSettingService.countUpstairsFee(virtual));
 		tdOrderService.save(virtual);
 
-		// 2017-06-05修改：给新的属性设置值
-
 		return virtual;
 	}
+
+	
 
 	/**
 	 * 查找用户已选获得的赠品 增加活动id zp

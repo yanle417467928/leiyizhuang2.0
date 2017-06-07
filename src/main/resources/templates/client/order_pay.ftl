@@ -273,24 +273,76 @@
                         </a>
                     </div>
                 </section>
+                     
+ 				<#if showReceiverIsMember??&&showReceiverIsMember>
+	                <section class="invoice-info">
+	                    <label>收货人是否是主家</label>
+	                    <div>
+	                    	<input type="checkbox" style="height:40px;line-height:40px;width:18px;"
+                    		<#if order.receiverIsMember??&&order.receiverIsMember>checked</#if>
+                    		onchange="changeCheckBox();">
+                		</div>
+	                </section>
+                </#if>
+                                
                 <!-- 商品费用 -->
                 <section class="pro-price">
                     <div class="div1">
                         <label>商品价值</label>
                         <div>￥<span><#if order??&&order.totalGoodsPrice??>${order.totalGoodsPrice?string("0.00")}<#else>0.00</#if><span></div>
                     </div>
-                    <div class="div1">
-                        <label>运费</label>
-                        <div>￥<#if order??&&order.deliverFee??&&!(isFree??&&isFree)>${order.deliverFee?string("0.00")}<#else>0.00</#if></div>
-                    </div>
-                    <div class="div1">
-                        <label>上楼费</label>
-                        <div>￥<#if order??&&order.upstairsFee??>${order.upstairsFee?string("0.00")}<#else>0.00</#if></div>
-                    </div>
+                    <#if order.colorFee??&&order.colorFee gt 0>
+	                    <div class="div1">
+	                        <label>运费</label>
+	                        <div>￥${order.colorFee?string("0.00")}</div>
+	                    </div>
+                    </#if>
+                    <#if order.deliverFee??&&order.deliverFee gt 0>
+	                    <div class="div1">
+	                        <label>运费</label>
+	                        <div>￥<#if order??&&order.deliverFee??&&!(isFree??&&isFree)>${order.deliverFee?string("0.00")}<#else>0.00</#if></div>
+	                    </div>
+                    </#if>
+                    <#if order.upstairsFee??&&order.upstairsFee gt 0>
+	                    <div class="div1">
+	                        <label>上楼费</label>
+	                        <div>￥<#if order??&&order.upstairsFee??>${order.upstairsFee?string("0.00")}<#else>0.00</#if></div>
+	                    </div>
+                    </#if>
+                    <#if order.difFee??&&order.difFee gt 0>
+	                    <div class="div1">
+	                        <label>会员折扣</label>
+	                        <div>￥<span>-${order.difFee?string("0.00")}<span></div>
+	                    </div>
+                    </#if>
+                    <#if order.cashCoupon??&&order.cashCoupon gt 0>
+	                    <div class="div1">
+	                        <label>现金券减免</label>
+	                        <div>￥<span>-${order.cashCoupon?string("0.00")}<span></div>
+	                    </div>
+                    </#if>
+                    <#if order.proCouponFee??&&order.proCouponFee gt 0>
+	                    <div class="div1">
+	                        <label>产品券减免</label>
+	                        <div>￥<span>-${order.proCouponFee?string("0.00")}<span></div>
+	                    </div>
+                    </#if>
+                    <#if order.actualPay??&&order.actualPay gt 0>
+	                    <div class="div1">
+	                        <label>预存款减免</label>
+	                        <div>￥<span>-${order.actualPay?string("0.00")}<span></div>
+	                    </div>
+                    </#if>
                     <#if order??&&order.activitySubPrice??&&order.activitySubPrice gt 0>
 	                    <div class="div1">
 	                        <label>促销扣减</label>
 	                        <div>￥<span><#if order??&&order.activitySubPrice??>-${order.activitySubPrice?string("0.00")}<#else>-0.00</#if><span></div>
+	                    </div>
+                    </#if>
+                    <#if order.notPayedFee??&&order.notPayedFee gt 0>
+	                    <div class="div1" style="display:none">
+	                        <label>应付</label>
+	                        <div>￥<span>${order.notPayedFee?string("0.00")}</span></div>
 	                    </div>
                     </#if>
                 </section>

@@ -378,7 +378,7 @@ public class TdOrder {
 
 	// 促销减少的金额
 	@Column(scale = 2)
-	private Double activitySubPrice;
+	private Double activitySubPrice = 0d;
 
 	// 是否以一口价的形式收取运费
 	@Column
@@ -442,8 +442,8 @@ public class TdOrder {
 
 	// 代收金额
 	@Column(scale = 2)
-	private Double notPayed = 0d;
-	
+	private Double notPayedFee = 0d;
+
 	// 收货人是否是主家
 	@Column
 	private Boolean receiverIsMember = Boolean.FALSE;
@@ -1248,14 +1248,25 @@ public class TdOrder {
 		this.difFee = difFee;
 	}
 
-	public Double getNotPayed() {
-		notPayed = totalGoodsPrice + deliverFee + upstairsFee + colorFee - activitySubPrice - cashCoupon
+	public Double getNotPayedFee() {
+		totalGoodsPrice = null == totalGoodsPrice ? 0d : totalGoodsPrice;
+		deliverFee = null == deliverFee ? 0d : deliverFee;
+		upstairsFee = null == upstairsFee ? 0d : upstairsFee;
+		colorFee = null == colorFee ? 0d : colorFee;
+		activitySubPrice = null == activitySubPrice ? 0d : activitySubPrice;
+		cashCoupon = null == cashCoupon ? 0d : cashCoupon;
+		proCouponFee = null == proCouponFee ? 0d : proCouponFee;
+		difFee = null == difFee ? 0d : difFee;
+		cashBalanceUsed = null == cashBalanceUsed ? 0d : cashBalanceUsed;
+		unCashBalanceUsed = null == unCashBalanceUsed ? 0d : unCashBalanceUsed;
+		otherPay = null == otherPay ? 0d : otherPay;
+		notPayedFee = totalGoodsPrice + deliverFee + upstairsFee + colorFee - activitySubPrice - cashCoupon
 				- proCouponFee - difFee - cashBalanceUsed - unCashBalanceUsed - otherPay;
-		return notPayed;
+		return notPayedFee;
 	}
 
-	public void setNotPayed(Double notPayed) {
-		this.notPayed = notPayed;
+	public void setNotPayedFee(Double notPayedFee) {
+		this.notPayedFee = notPayedFee;
 	}
 
 	public Double getProCouponFee() {
