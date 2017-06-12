@@ -2389,19 +2389,19 @@ public class TdOrderController {
 				// tdCommonService.getGoodsPrice(req, good);
 				// 根据登录信息查询门店信息
 				TdDiySite diySite = tdCommonService.getDiySite(req);
-				String custType = "";
-				// 判断门店是经销还是直营
-				if (null != diySite) {
-					String custTypeName = diySite.getCustTypeName();
-					if ("经销商".equals(custTypeName)) {
-						custType = "JX";
-					}
-					if ("直营".equals(custTypeName)) {
-						custType = "ZY";
-					}
-				}
+//				String custType = "";
+//				// 判断门店是经销还是直营
+//				if (null != diySite) {
+//					String custTypeName = diySite.getCustTypeName();
+//					if ("经销商".equals(custTypeName)) {
+//						custType = "JX";
+//					}
+//					if ("直营".equals(custTypeName)) {
+//						custType = "ZY";
+//					}
+//				}
 				// 根据门店、商品、价格类型查询商品价格信息
-				TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, good, custType);
+				TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, good, "ZY");
 
 				if (null != priceListItem) {// 检查非空
 					// 修改订单商品中的价格为最新价格
@@ -2445,19 +2445,19 @@ public class TdOrderController {
 				// goods);
 				// 根据登录信息查询门店信息
 				TdDiySite diySite = tdCommonService.getDiySite(req);
-				String custType = "";
-				// 判断门店是经销还是直营
-				if (null != diySite) {
-					String custTypeName = diySite.getCustTypeName();
-					if ("经销商".equals(custTypeName)) {
-						custType = "JX";
-					}
-					if ("直营".equals(custTypeName)) {
-						custType = "ZY";
-					}
-				}
+//				String custType = "";
+//				// 判断门店是经销还是直营
+//				if (null != diySite) {
+//					String custTypeName = diySite.getCustTypeName();
+//					if ("经销商".equals(custTypeName)) {
+//						custType = "JX";
+//					}
+//					if ("直营".equals(custTypeName)) {
+//						custType = "ZY";
+//					}
+//				}
 				// 根据门店、商品、价格类型查询商品价格信息
-				TdPriceListItem price = tdCommonService.secondGetGoodsPrice(diySite, goods, custType);
+				TdPriceListItem price = tdCommonService.secondGetGoodsPrice(diySite, goods, "ZY");
 
 				if (price == null) {
 					return true;

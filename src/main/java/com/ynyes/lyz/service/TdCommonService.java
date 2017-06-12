@@ -612,7 +612,7 @@ public class TdCommonService {
 		}
 
 		// 获取商品价格中间表信息
-		List<TdDiySitePrice> diySitePriceList = tdDiySitePriceService.getDiySitePrice(sobId, storeCode, custType,
+		List<TdDiySitePrice> diySitePriceList = tdDiySitePriceService.getDiySitePrice(sobId, storeCode,
 				priceType, new Date(), new Date());
 
 		if (null == diySitePriceList || diySitePriceList.size() == 0 || diySitePriceList.size() > 1) {
@@ -706,7 +706,7 @@ public class TdCommonService {
 		}
 
 		// 获取商品价格中间表信息
-		List<TdDiySitePrice> diySitePriceList = tdDiySitePriceService.getDiySitePrice(sobId, storeCode, custType,
+		List<TdDiySitePrice> diySitePriceList = tdDiySitePriceService.getDiySitePrice(sobId, storeCode,
 				priceType, new Date(), new Date());
 
 		if (null == diySitePriceList || diySitePriceList.size() == 0 || diySitePriceList.size() > 1) {
@@ -837,19 +837,19 @@ public class TdCommonService {
 						// this.getGoodsPrice(req, goods);
 						// 根据登录信息查询门店信息
 						TdDiySite diySite = this.getDiySite(req);
-						String custType = "";
-						// 判断门店是经销还是直营
-						if (null != diySite) {
-							String custTypeName = diySite.getCustTypeName();
-							if ("经销商".equals(custTypeName)) {
-								custType = "JX";
-							}
-							if ("直营".equals(custTypeName)) {
-								custType = "ZY";
-							}
-						}
+//						String custType = "";
+//						// 判断门店是经销还是直营
+//						if (null != diySite) {
+//							String custTypeName = diySite.getCustTypeName();
+//							if ("经销商".equals(custTypeName)) {
+//								custType = "JX";
+//							}
+//							if ("直营".equals(custTypeName)) {
+//								custType = "ZY";
+//							}
+//						}
 						// 根据门店、商品、价格类型查询商品价格信息
-						TdPriceListItem priceListItem = this.secondGetGoodsPrice(diySite, goods, custType);
+						TdPriceListItem priceListItem = this.secondGetGoodsPrice(diySite, goods, "ZY");
 
 						if (null != priceListItem) {
 							putaway.add(goods);
@@ -956,19 +956,19 @@ public class TdCommonService {
 					// 查找指定商品的价格
 					// TdPriceListItem priceListItem = this.getGoodsPrice(req,
 					// goods);
-					String custType = "";
-					// 判断门店是经销还是直营
-					if (null != diySite) {
-						String custTypeName = diySite.getCustTypeName();
-						if ("经销商".equals(custTypeName)) {
-							custType = "JX";
-						}
-						if ("直营".equals(custTypeName)) {
-							custType = "ZY";
-						}
-					}
+//					String custType = "";
+//					// 判断门店是经销还是直营
+//					if (null != diySite) {
+//						String custTypeName = diySite.getCustTypeName();
+//						if ("经销商".equals(custTypeName)) {
+//							custType = "JX";
+//						}
+//						if ("直营".equals(custTypeName)) {
+//							custType = "ZY";
+//						}
+//					}
 					// 根据门店、商品、价格类型查询商品价格信息
-					TdPriceListItem priceListItem = this.secondGetGoodsPrice(diySite, goods, custType);
+					TdPriceListItem priceListItem = this.secondGetGoodsPrice(diySite, goods, "ZY");
 
 					if (null != priceListItem && null != priceListItem.getSalePrice()
 							&& null != priceListItem.getRealSalePrice()) {
@@ -3601,20 +3601,20 @@ public class TdCommonService {
 										// this.getGoodsPrice(req, goods);
 										// 根据登录信息查询门店信息
 										TdDiySite diySite = this.getDiySite(req);
-										String custType = "";
-										// 判断门店是经销还是直营
-										if (null != diySite) {
-											String custTypeName = diySite.getCustTypeName();
-											if ("经销商".equals(custTypeName)) {
-												custType = "JX";
-											}
-											if ("直营".equals(custTypeName)) {
-												custType = "ZY";
-											}
-										}
+//										String custType = "";
+//										// 判断门店是经销还是直营
+//										if (null != diySite) {
+//											String custTypeName = diySite.getCustTypeName();
+//											if ("经销商".equals(custTypeName)) {
+//												custType = "JX";
+//											}
+//											if ("直营".equals(custTypeName)) {
+//												custType = "ZY";
+//											}
+//										}
 										// 根据门店、商品、价格类型查询商品价格信息
 										TdPriceListItem priceListItem = this.secondGetGoodsPrice(diySite, goods,
-												custType);
+												"ZY");
 
 										TdOrderGoods orderGoods = new TdOrderGoods();
 										orderGoods.setBrandId(goods.getBrandId());
@@ -3711,19 +3711,19 @@ public class TdCommonService {
 							// this.getGoodsPrice(req, goods);
 							// 根据登录信息查询门店信息
 							TdDiySite diySite = this.getDiySite(req);
-							String custType = "";
-							// 判断门店是经销还是直营
-							if (null != diySite) {
-								String custTypeName = diySite.getCustTypeName();
-								if ("经销商".equals(custTypeName)) {
-									custType = "JX";
-								}
-								if ("直营".equals(custTypeName)) {
-									custType = "ZY";
-								}
-							}
+//							String custType = "";
+//							// 判断门店是经销还是直营
+//							if (null != diySite) {
+//								String custTypeName = diySite.getCustTypeName();
+//								if ("经销商".equals(custTypeName)) {
+//									custType = "JX";
+//								}
+//								if ("直营".equals(custTypeName)) {
+//									custType = "ZY";
+//								}
+//							}
 							// 根据门店、商品、价格类型查询商品价格信息
-							TdPriceListItem priceListItem = this.secondGetGoodsPrice(diySite, goods, custType);
+							TdPriceListItem priceListItem = this.secondGetGoodsPrice(diySite, goods, "ZY");
 
 							Double price = 0.00;
 							if (null != priceListItem && null != priceListItem.getSalePrice()) {
@@ -3813,20 +3813,20 @@ public class TdCommonService {
 											// this.getGoodsPrice(req, goods);
 											// 根据登录信息查询门店信息
 											TdDiySite diySite = this.getDiySite(req);
-											String custType = "";
-											// 判断门店是经销还是直营
-											if (null != diySite) {
-												String custTypeName = diySite.getCustTypeName();
-												if ("经销商".equals(custTypeName)) {
-													custType = "JX";
-												}
-												if ("直营".equals(custTypeName)) {
-													custType = "ZY";
-												}
-											}
+//											String custType = "";
+//											// 判断门店是经销还是直营
+//											if (null != diySite) {
+//												String custTypeName = diySite.getCustTypeName();
+//												if ("经销商".equals(custTypeName)) {
+//													custType = "JX";
+//												}
+//												if ("直营".equals(custTypeName)) {
+//													custType = "ZY";
+//												}
+//											}
 											// 根据门店、商品、价格类型查询商品价格信息
 											TdPriceListItem priceListItem = this.secondGetGoodsPrice(diySite, goods,
-													custType);
+													"ZY");
 
 											TdOrderGoods orderGoods = new TdOrderGoods();
 											orderGoods.setBrandId(goods.getBrandId());
@@ -4054,19 +4054,19 @@ public class TdCommonService {
 					// goods);
 					// 根据登录信息查询门店信息
 					TdDiySite diySite = this.getDiySite(req);
-					String custType = "";
-					// 判断门店是经销还是直营
-					if (null != diySite) {
-						String custTypeName = diySite.getCustTypeName();
-						if ("经销商".equals(custTypeName)) {
-							custType = "JX";
-						}
-						if ("直营".equals(custTypeName)) {
-							custType = "ZY";
-						}
-					}
+//					String custType = "";
+//					// 判断门店是经销还是直营
+//					if (null != diySite) {
+//						String custTypeName = diySite.getCustTypeName();
+//						if ("经销商".equals(custTypeName)) {
+//							custType = "JX";
+//						}
+//						if ("直营".equals(custTypeName)) {
+//							custType = "ZY";
+//						}
+//					}
 					// 根据门店、商品、价格类型查询商品价格信息
-					TdPriceListItem priceListItem = this.secondGetGoodsPrice(diySite, goods, custType);
+					TdPriceListItem priceListItem = this.secondGetGoodsPrice(diySite, goods, "ZY");
 
 					Double goodsPrice = priceListItem.getCouponPrice() * quantity;
 					if (0.00 != totalGoodsPrice.doubleValue()) {
