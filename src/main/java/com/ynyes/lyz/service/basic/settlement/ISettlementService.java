@@ -71,4 +71,14 @@ public interface ISettlementService {
 	
 	void returnJX(TdOrder order, Long headerId);
 	
+	/**
+	 * @title 根据version更新用户余额
+	 * @describe 
+	 * @author Generation Road
+	 * @date 2017年6月6日
+	 * @param variableAmount
+	 * @param user
+	 */
+	TdUser modifyBalance(Double variableAmount, TdUser user);
+	
 }

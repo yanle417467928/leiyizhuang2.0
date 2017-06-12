@@ -454,4 +454,16 @@ public class TdUserService {
 			tdUserCreditService.createLogByCondition(type, seller, orderNumber, amount);
 		}
 	}
+	
+	/**
+	 * @title 根据version更新用户余额
+	 * @describe 
+	 * @author Generation Road
+	 * @date 2017年6月6日
+	 * @param tdUser
+	 * @return
+	 */
+	public int modifyBalace(TdUser tdUser){
+		return repository.update(tdUser.getCashBalance(), tdUser.getUnCashBalance(), tdUser.getId(), tdUser.getVersion());
+	}
 }

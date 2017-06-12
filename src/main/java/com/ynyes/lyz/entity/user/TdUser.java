@@ -1,5 +1,6 @@
 package com.ynyes.lyz.entity.user;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -12,6 +13,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.ynyes.lyz.entity.TdShippingAddress;
@@ -157,6 +160,11 @@ public class TdUser {
 	// 导购欠款额度限制
 	@Column(scale = 2, nullable = false)
 	private Double creditLimit = 0d;
+	
+	//更改版本
+	@Column(length = 15, nullable = false, columnDefinition = "timestamp")
+	@Generated(GenerationTime.ALWAYS)
+	private Timestamp version;
 	
 	public Long getId() {
 		return id;
@@ -424,6 +432,15 @@ public class TdUser {
 		this.creditLimit = creditLimit;
 	}
 
+	
+	public Timestamp getVersion() {
+		return version;
+	}
+
+	public void setVersion(Timestamp version) {
+		this.version = version;
+	}
+
 	@Override
 	public String toString() {
 		return "TdUser [id=" + id + ", shippingAddressList=" + shippingAddressList + ", balance=" + balance
@@ -435,6 +452,9 @@ public class TdUser {
 				+ birthday + ", customerId=" + customerId + ", opUser=" + opUser + ", isLogin=" + isLogin
 				+ ", lastVisitTime=" + lastVisitTime + ", loginSession=" + loginSession + ", sellerId=" + sellerId
 				+ ", sellerName=" + sellerName + ", diyCode=" + diyCode + ", isCashOnDelivery=" + isCashOnDelivery
-				+ ", identityType=" + identityType + ", credit=" + credit + ", creditLimit=" + creditLimit + "]";
+				+ ", identityType=" + identityType + ", credit=" + credit + ", creditLimit=" + creditLimit
+				+ ", version=" + version + "]";
 	}
+
+	
 }

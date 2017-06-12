@@ -31,6 +31,7 @@ import com.ynyes.lyz.entity.delivery.TdDeliveryFeeLine;
 import com.ynyes.lyz.entity.delivery.TdOrderDeliveryFeeDetail;
 import com.ynyes.lyz.entity.user.CreditChangeType;
 import com.ynyes.lyz.entity.user.TdUser;
+import com.ynyes.lyz.excp.AppConcurrentExcp;
 import com.ynyes.lyz.excp.AppErrorParamsExcp;
 import com.ynyes.lyz.interfaces.entity.TdCashReciptInf;
 import com.ynyes.lyz.interfaces.service.TdCashReciptInfService;
@@ -113,7 +114,7 @@ public class SettlementServiceImpl implements ISettlementService {
 
 	@Autowired
 	private TdInterfaceService tdInterfaceService;
-
+	
 	private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
 	@Override
@@ -210,21 +211,40 @@ public class SettlementServiceImpl implements ISettlementService {
 	@Override
 	public void disminlate(HttpServletRequest req, TdOrder mainOrder, Boolean isFitmentOrder) throws Exception {
 		Double deliveryFee = mainOrder.getDeliverFee();
+		
+		//设置需扣减用户预存款
+		setbalanceUsed(mainOrder);
 		// 创建一个Map集合存储所有的分单，键值对规则为K-V：【品牌ID】-【分单】
 		Map<Long, TdOrder> subOrderMap = new HashMap<>();
 		// 拆分商品和小辅料
 		disminlateOrderGoodsList(subOrderMap, mainOrder);
 		// 拆分优惠券
 		disminlateCoupon(subOrderMap, mainOrder);
+		//设置拆分会员差价
+		disminlateDifFee(subOrderMap, mainOrder);
 		// 获取赠品
 		getPresentAndGift(req, subOrderMap);
 		// 设置运费
 		setDeliveryFee(subOrderMap, mainOrder);
 		// 拆分预存款
 		disminlateBalance(subOrderMap, mainOrder);
+		
+		//拆分调色费
+		
+		//计算代收金额
+		for (TdOrder subOrder : subOrderMap.values()) {
+			if (null != subOrder) {
+				subOrder.getNotPayedFee();
+				
+			}
+		}
 		// 存储及发送订单
 		saveAndSend(req, subOrderMap, mainOrder, deliveryFee);
 	}
+
+	
+
+	
 
 	/**
 	 * <p>
@@ -398,6 +418,7 @@ public class SettlementServiceImpl implements ISettlementService {
 							subOrder.getTotalGoodsPrice() + (orderGoods.getPrice() * orderGoods.getQuantity()));
 					subOrder.setTotalPrice(
 							subOrder.getTotalPrice() + (orderGoods.getPrice() * orderGoods.getQuantity()));
+					
 					subOrder.setJxTotalPrice(
 							subOrder.getJxTotalPrice() + jxPrice * (orderGoods.getQuantity() - couponQuantity));
 
@@ -600,6 +621,11 @@ public class SettlementServiceImpl implements ISettlementService {
 													subOrder.setProductCoupon(
 															subOrder.getProductCoupon() + (orderGoods.getGoodsTitle()
 																	+ "【" + orderGoods.getSku() + "】*1,"));
+													if (null == subOrder.getProCouponFee()) {
+														subOrder.setProCouponFee(0.00);
+													}
+													//拆分产品券优惠券金额
+													subOrder.setProCouponFee(subOrder.getProCouponFee() + coupon.getRealPrice());
 												}
 											}
 										}
@@ -754,6 +780,7 @@ public class SettlementServiceImpl implements ISettlementService {
 		for (TdOrder subOrder : subOrderMap.values()) {
 			if (null != subOrder) {
 				Double subPrice = subOrder.getTotalPrice();
+				//扣减会员差价
 				if (null == subPrice || 0.00 == subPrice) {
 					subOrder.setUnCashBalanceUsed(0.00);
 					subOrder.setCashBalanceUsed(0.00);
@@ -796,7 +823,10 @@ public class SettlementServiceImpl implements ISettlementService {
 
 						// 不可提现预存款
 						if (new Double(scale2_uncash).doubleValue() != 0d) {
-							realUser.setUnCashBalance(realUser.getUnCashBalance() - Double.valueOf(scale2_uncash));
+//							realUser.setUnCashBalance(realUser.getUnCashBalance() - Double.valueOf(scale2_uncash));
+							//对预存款更新进行并发控制
+							realUser = modifyBalance(Double.valueOf(scale2_uncash), realUser);
+							
 							TdBalanceLog balanceLog = new TdBalanceLog();
 							balanceLog.setUserId(subOrder.getRealUserId());
 							balanceLog.setUsername(subOrder.getUsername());
@@ -822,7 +852,10 @@ public class SettlementServiceImpl implements ISettlementService {
 						}
 						// 可提现预存款
 						if (new Double(scale2_cash).doubleValue() != 0d) {
-							realUser.setCashBalance(realUser.getCashBalance() - Double.valueOf(scale2_cash));
+//							realUser.setCashBalance(realUser.getCashBalance() - Double.valueOf(scale2_cash));
+							//对预存款更新进行并发控制
+							realUser = modifyBalance(Double.valueOf(scale2_cash), realUser);
+							
 							TdBalanceLog balanceLog = new TdBalanceLog();
 							balanceLog.setUserId(subOrder.getRealUserId());
 							balanceLog.setUsername(subOrder.getUsername());
@@ -845,8 +878,8 @@ public class SettlementServiceImpl implements ISettlementService {
 							tdBalanceLogService.save(balanceLog);
 							// remainCash += Double.valueOf(scale2_cash);
 						}
-						realUser.getBalance();
-						tdUserService.save(realUser);
+//						realUser.getBalance();
+//						tdUserService.save(realUser);
 					}
 				}
 			}
@@ -855,10 +888,13 @@ public class SettlementServiceImpl implements ISettlementService {
 		// 2016-12-17:完成分单预存款的扣减之后，扣减支付上楼费的预存款
 		Double upstairsBalancePayed = mainOrder.getUpstairsBalancePayed();
 		Double unCashBalance = realUser.getUnCashBalance();
-		Double cashBalance = realUser.getCashBalance();
+//		Double cashBalance = realUser.getCashBalance();
 		if (upstairsBalancePayed > 0) {
 			if (unCashBalance >= upstairsBalancePayed) {
-				realUser.setUnCashBalance(realUser.getUnCashBalance() - upstairsBalancePayed);
+//				realUser.setUnCashBalance(realUser.getUnCashBalance() - upstairsBalancePayed);
+				//对预存款更新进行并发控制
+				realUser = modifyBalance(upstairsBalancePayed, realUser);
+				
 				TdBalanceLog balanceLog = new TdBalanceLog();
 				balanceLog.setUserId(mainOrder.getRealUserId());
 				balanceLog.setUsername(mainOrder.getUsername());
@@ -882,7 +918,10 @@ public class SettlementServiceImpl implements ISettlementService {
 				tdBalanceLogService.save(balanceLog);
 			} else {
 				if (unCashBalance > 0) {
-					realUser.setUnCashBalance(0d);
+//					realUser.setUnCashBalance(0d);
+					//对预存款更新进行并发控制
+					realUser = modifyBalance(unCashBalance, realUser);
+					
 					TdBalanceLog balanceLog = new TdBalanceLog();
 					balanceLog.setUserId(mainOrder.getRealUserId());
 					balanceLog.setUsername(mainOrder.getUsername());
@@ -905,7 +944,10 @@ public class SettlementServiceImpl implements ISettlementService {
 					balanceLog.setAllLeft(realUser.getBalance());
 					tdBalanceLogService.save(balanceLog);
 				}
-				realUser.setCashBalance(cashBalance + unCashBalance - upstairsBalancePayed);
+//				realUser.setCashBalance(cashBalance + unCashBalance - upstairsBalancePayed);
+				//对预存款更新进行并发控制
+				realUser = modifyBalance(upstairsBalancePayed - unCashBalance, realUser);
+				
 				TdBalanceLog balanceLog = new TdBalanceLog();
 				balanceLog.setUserId(mainOrder.getRealUserId());
 				balanceLog.setUsername(mainOrder.getUsername());
@@ -928,7 +970,8 @@ public class SettlementServiceImpl implements ISettlementService {
 				balanceLog.setAllLeft(realUser.getBalance());
 				tdBalanceLogService.save(balanceLog);
 			}
-			tdUserService.save(realUser);
+//			tdUserService.save(realUser);
+			
 		}
 
 		this.costCredit(mainOrder);
@@ -1538,5 +1581,117 @@ public class SettlementServiceImpl implements ISettlementService {
 
 		int i = (int) (Math.random() * 900) + 100;
 		return "RC" + middle + i;
+	}
+	
+	/**
+	 * @title 根据version更新用户余额
+	 * @describe 
+	 * @author Generation Road
+	 * @date 2017年6月6日
+	 * @param variableAmount
+	 * @param user
+	 */
+	@Override
+	public TdUser modifyBalance(Double variableAmount, TdUser user){
+		
+		if (null == user) {
+			return user;
+		}
+		if (null == variableAmount || 0.0 == variableAmount || variableAmount > user.getBalance()) {
+			return user;
+		}
+		
+		Double unCashBalance = user.getUnCashBalance();
+		Double cashBalance = user.getCashBalance();
+		//先扣除不可提现预存款，在扣除可提现预存款
+		if (variableAmount <= unCashBalance) {
+			user.setUnCashBalance(unCashBalance - variableAmount);
+		}else {
+			variableAmount = variableAmount - unCashBalance;
+			user.setUnCashBalance(0.0);
+			user.setCashBalance(cashBalance - variableAmount);
+		}
+		
+		int row = tdUserService.modifyBalace(user);
+		//并发控制，判断version是否改变
+		if (1 != row) {
+			throw new AppConcurrentExcp("账号余额信息过期！");
+		}
+		return user;
+	}
+	
+	
+	/**
+	 * @title 设置会员差价
+	 * @describe 
+	 * @author Generation Road
+	 * @date 2017年6月8日
+	 * @param subOrderMap
+	 * @param mainOrder
+	 */
+	private void disminlateDifFee(Map<Long, TdOrder> subOrderMap, TdOrder mainOrder) {
+		// 遍历当前生成的订单
+		for (TdOrder subOrder : subOrderMap.values()) {
+			if (null != subOrder) {
+				//遍历订单商品信息
+				List<TdOrderGoods> orderGoodsList = subOrder.getOrderGoodsList();
+				if (null != orderGoodsList && orderGoodsList.size() > 0) {
+					for (TdOrderGoods orderGoods : orderGoodsList) {
+						if (null != orderGoods) {
+							//设置会员差价
+							subOrder.setDifFee(subOrder.getDifFee() + (orderGoods.getPrice() - orderGoods.getRealPrice()) * orderGoods.getQuantity());
+							subOrder.setTotalPrice(subOrder.getTotalPrice() - subOrder.getDifFee());
+						}
+					}
+				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * @title 设置需扣减用户预存款
+	 * @describe 
+	 * @author Generation Road
+	 * @date 2017年6月12日
+	 * @param mainOrder
+	 */
+	private void setbalanceUsed(TdOrder mainOrder) {
+		
+		// 获取真实用户
+		Long realUserId = mainOrder.getRealUserId();
+		TdUser realUser = tdUserService.findOne(realUserId);
+		// 获取用户的不可体现余额
+		Double unCashBalance = realUser.getUnCashBalance();
+		if (null == unCashBalance) {
+			unCashBalance = 0.00;
+		}
+
+		// 获取用户的可提现余额
+		Double cashBalance = realUser.getCashBalance();
+		if (null == cashBalance) {
+			cashBalance = 0.00;
+		}
+
+		Double balance = realUser.getBalance();
+		if (null == balance) {
+			balance = 0.00;
+		}
+
+		// 如果用户的不可提现余额大于或等于订单的预存款使用额，则表示改单用的全部都是不可提现余额
+		if (unCashBalance >= mainOrder.getActualPay()) {
+			// 修改：2016-08-26余额在拆单时扣减
+			// realUser.setUnCashBalance(realUser.getUnCashBalance() -
+			// order_temp.getActualPay());
+			mainOrder.setUnCashBalanceUsed(mainOrder.getActualPay());
+		} else {
+			// realUser.setCashBalance(
+			// realUser.getCashBalance() + realUser.getUnCashBalance() -
+			// order_temp.getActualPay());
+			// realUser.setUnCashBalance(0.0);
+			mainOrder.setUnCashBalanceUsed(realUser.getUnCashBalance());
+			mainOrder.setCashBalanceUsed(mainOrder.getActualPay() - realUser.getUnCashBalance());
+		}
+		tdOrderService.save(mainOrder);
 	}
 }
