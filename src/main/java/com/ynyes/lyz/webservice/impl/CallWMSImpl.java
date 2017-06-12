@@ -1294,11 +1294,6 @@ public class CallWMSImpl implements ICallWMS {
 					}
 				}
 			}
-			Long count = this.tdTbwRecdService.countByGcodeAndRecNo(gcode, recNo);
-			if (count > 0) {
-				LOGGER.info("getWMSInfo, OUT, 该数据已经成功接收，请勿重复传输");
-				return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>该数据已经成功接收，请勿重复传输</MESSAGE></STATUS></RESULTS>";
-			}
 			// 保存 修改
 			TdTbwRecd recd = new TdTbwRecd();
 			recd.setOwnerNo(ownerNo);
@@ -1350,14 +1345,19 @@ public class CallWMSImpl implements ICallWMS {
 			}
 			if (tdGoods == null) {
 				LOGGER.info("getWMSInfo, OUT, 商品编码为：" + gcode + "的商品不存在或者不可用");
-				return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>商品编码为：" + gcode + "的商品不存在或者不可用</MESSAGE></STATUS></RESULTS>";
+				return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>商品编码为：" + gcode
+						+ "的商品不存在或者不可用</MESSAGE></STATUS></RESULTS>";
 			}
-
+			Long count = this.tdTbwRecdService.countByGcodeAndRecNo(gcode, recNo);
+			if (count > 0) {
+				LOGGER.info("getWMSInfo, OUT, 该数据已经成功接收，请勿重复传输");
+				return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>该数据已经成功接收，请勿重复传输</MESSAGE></STATUS></RESULTS>";
+			}
+			
 			tdTbwRecdService.save(recd);
 		}
 		LOGGER.info("getWMSInfo, OUT, code=0");
-		return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
-	}
+		return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";}
 
 	private String tbwRecM(NodeList nodeList) {
 		for (int i = 0; i < nodeList.getLength(); i++) {
@@ -2568,201 +2568,264 @@ public class CallWMSImpl implements ICallWMS {
 
 	private String tbwOmM(NodeList nodeList) {
 		for (int i = 0; i < nodeList.getLength(); i++) {
-			String cWhNo = null;// 仓库
-			String cOwnerNo = null;// 委托业主
-			String cOmNo = null;// 调拨单号
-			String cOmType = null;// 调拨单类型(一般调拨)
-			String cDWhNo = null;// 目的仓
-			String cPoType = null;// 原单号类型(一般调拨)
-			String cPoNo = null;// 原单号
-			String cAddress = null;// 地址
-			String cPostCode = null;// 邮编
-			Double cTotalMoney = null;// 总金额
-			Double cTotalTax = null;// 总税额
-			String cUmoutDt = null;// 退货日期
-			String cOpStatus = null;// 作业状态(初始，定位，发单，完成)
-			String cCreateFlag = null;// 创建识标（WMS,ERP）
-			String cNote = null;// 备注
-			String cMkUserno = null;// 建立人
-			String cMkDt = null;// 建立时间
-			String cModifiedUserno = null;// 修改人
-			String cModifiedDt = null;// 修改时间
-			String cUploadStatus = null;// 上传状态
-			String cUploadFilename = null;// 上传文档
-			Long cCompanyId = null; // 城市id；
+			// 仓库编号
+			String cWhNo = null;
+			// 委托业主
+			String cOwnerNo = null;
+			// 验收单号(当类型是红冲时为:红冲单号)
+			String cRecNo = null;
+			// 打印次数
+			Integer cPrintTimes = null;
+			// 验收汇总
+			String cGatherRecNo = null;
+			// 进货汇总
+			String cGatherNo = null;
+			// 进货单分类(存储型、越库型)
+			String cInClass = null;
+			// 进货单号(当类型是红冲时为:验收单号)
+			String cInNo = null;
+			// 进货单类型(一般订单，紧急订单,红冲多，红冲少)
+			String cInType = null;
+			// 供应商编码
+			String cProviderNo = null;
+			// 月台
+			String cPlatNo = null;
+			// 验收人员
+			String cRecUserno = null;
+			// 操作工具(表单,pda,电子标签)
+			String cOpTools = null;
+			// 操作状态(初始、作业中、完成、结案)
+			String cOpStatus = null;
+			// 开始操作时间
+			String cBeginDt = null;
+			// 结束操作时间
+			String cEndDt = null;
+			// 备注
+			String cNote = null;
+			// 建立人员
+			String cMkUserno = null;
+			// 建立时间
+			String cMkDt = null;
+			// 修改人员
+			String cModifiedUserno = null;
+			// 修改时间
+			String cModifiedDt = null;
+			// 采购单号
+			String cPoNo = null;
+			// 城市sobId
+			Long cCompanyId = null;// 分公司Id
 
 			Node node = nodeList.item(i);
 			NodeList childNodeList = node.getChildNodes();
+
 			// 遍历所有TABLE中的字段
 			for (int idx = 0; idx < childNodeList.getLength(); idx++) {
 				Node childNode = childNodeList.item(idx);
-				if (childNode.getNodeName().equalsIgnoreCase("c_wh_no")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cWhNo = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_owner_no")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cOwnerNo = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_om_no")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cOmNo = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_om_type")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cOmType = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_d_wh_no")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cDWhNo = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_po_type")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cPoType = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_po_no")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cPoNo = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_address")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cAddress = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_post_code")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cPostCode = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_total_money")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cTotalMoney = Double.parseDouble(childNode.getChildNodes().item(0).getNodeValue());
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_total_tax")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cTotalTax = Double.parseDouble(childNode.getChildNodes().item(0).getNodeValue());
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_umout_dt")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cUmoutDt = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_op_status")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cOpStatus = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_create_flag")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cCreateFlag = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_note")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cNote = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_mk_userno")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cMkUserno = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_mk_dt")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cMkDt = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_modified_userno")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cModifiedUserno = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_modified_dt")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cModifiedDt = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_upload_status")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cUploadStatus = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_upload_filename")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cUploadFilename = childNode.getChildNodes().item(0).getNodeValue();
-					}
-				} else if (childNode.getNodeName().equalsIgnoreCase("c_company_id")) {
-					if (null != childNode.getChildNodes().item(0)) {
-						cCompanyId = Long.parseLong(childNode.getChildNodes().item(0).getNodeValue());
+
+				if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+					if (childNode.getNodeName().equalsIgnoreCase("c_wh_no")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cWhNo = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_owner_no")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cOwnerNo = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_rec_no")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cRecNo = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_wh_no")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cWhNo = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_print_times")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cPrintTimes = Integer.parseInt(childNode.getChildNodes().item(0).getNodeValue());
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_gather_rec_no")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cGatherRecNo = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_gather_no")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cGatherNo = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_in_class")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cInClass = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_in_no")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cInNo = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_in_type")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cInType = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_provider_no")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cProviderNo = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_plat_no")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cPlatNo = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_rec_userno")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cRecUserno = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_op_tools")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cOpTools = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_op_status")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cOpStatus = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_begin_dt")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cBeginDt = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_end_dt")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cEndDt = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_note")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cNote = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_mk_userno")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cMkUserno = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_mk_dt")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cMkDt = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_modified_userno")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cModifiedUserno = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_modified_dt")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cModifiedDt = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_po_no")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cPoNo = childNode.getChildNodes().item(0).getNodeValue();
+						}
+					} else if (childNode.getNodeName().equalsIgnoreCase("c_company_id")) {
+						if (null != childNode.getChildNodes().item(0)) {
+							cCompanyId = Long.parseLong(childNode.getChildNodes().item(0).getNodeValue());
+						}
 					}
 				}
 			}
-			TdTbOmM tbOmM = tdTbOmMService.findByCOmNo(cOmNo);
-			if (tbOmM == null) {
-				tbOmM = new TdTbOmM();
+			// 保存修改
+			TdTbwRecm recm = tdTbwRecmService.findByCRecNo(cRecNo);
+			if (recm == null) {
+				recm = new TdTbwRecm();
 			}
-			tbOmM.setcWhNo(cWhNo);
-			tbOmM.setcOwnerNo(cOwnerNo);
-			tbOmM.setcOmNo(cOmNo);
-			tbOmM.setcOmType(cOmType);
-			tbOmM.setcDWhNo(cDWhNo);
-			tbOmM.setcPoType(cPoType);
-			tbOmM.setcPoNo(cPoNo);
-			tbOmM.setcAddress(cAddress);
-			tbOmM.setcPostCode(cPostCode);
-			tbOmM.setcTotalMoney(cTotalMoney);
-			tbOmM.setcTotalTax(cTotalTax);
-			tbOmM.setcUmoutDt(DateFromString(cUmoutDt));
-			tbOmM.setcOpStatus(cOpStatus);
-			tbOmM.setcCreateFlag(cCreateFlag);
-			tbOmM.setcNote(cNote);
-			tbOmM.setcMkUserno(cMkUserno);
-			tbOmM.setcMkDt(DateFromString(cMkDt));
-			tbOmM.setcModifiedUserno(cModifiedUserno);
-			tbOmM.setcModifiedDt(DateFromString(cModifiedDt));
-			tbOmM.setcUploadStatus(cUploadStatus);
-			tbOmM.setcUploadFilename(cUploadFilename);
-			tbOmM.setcCompanyId(cCompanyId);
-			tdTbOmMService.save(tbOmM);
-			if (StringUtils.isBlank(cUploadStatus)
-					|| (!cUploadStatus.equalsIgnoreCase("in") && !cUploadStatus.equalsIgnoreCase("out"))) {
-				return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>c_upload_status：" + cUploadStatus
-						+ " 为空或者不属于\"in\"且不属于\"out\"</MESSAGE></STATUS></RESULTS>";
+			recm.setcWhNo(cWhNo);
+			recm.setcOwnerNo(cOwnerNo);
+			recm.setcRecNo(cRecNo);
+			recm.setcPrintTimes(cPrintTimes);
+			recm.setcGatherRecNo(cGatherRecNo);
+			recm.setcGatherNo(cGatherNo);
+			recm.setcInClass(cInClass);
+			recm.setcInNo(cInNo);
+			recm.setcInType(cInType);
+			recm.setcProviderNo(cProviderNo);
+			recm.setcPlatNo(cPlatNo);
+			recm.setcRecUserno(cRecUserno);
+			recm.setcOpTools(cOpTools);
+			recm.setcOpStatus(cOpStatus);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			if (cBeginDt != null) {
+				try {
+					Date c_beginDt = sdf.parse(cBeginDt);
+					recm.setcBeginDt(c_beginDt);
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
 			}
-			List<TdTbOmD> tbOmDs = tdTbOmDService.findByCOmNo(cOmNo);
-			for (TdTbOmD tdTbOmD : tbOmDs) {
-				String cGcode = tdTbOmD.getcGcode();
-				TdGoods tdGoods = tdGoodsService.findByCode(cGcode);
-				if (tdGoods == null) {
-					return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>商品编码为：" + cGcode + "的商品不存在或者不可用</MESSAGE></STATUS></RESULTS>";
+			if (cEndDt != null) {
+				try {
+					Date c_endDt = sdf.parse(cEndDt);
+					recm.setcEndDt(c_endDt);
+				} catch (ParseException e) {
+					e.printStackTrace();
 				}
-				TdCity tdCity = tdCityService.findBySobIdCity(cCompanyId);
-				if (tdCity == null) {
-					return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>城市编码为：" + cCompanyId + "的城市不存在</MESSAGE></STATUS></RESULTS>";
+			}
+			recm.setcNote(cNote);
+			recm.setcMkUserno(cMkUserno);
+			if (cMkDt != null) {
+				try {
+					Date c_mkD = sdf.parse(cMkDt);
+					recm.setcMkDt(c_mkD);
+				} catch (ParseException e) {
+					e.printStackTrace();
 				}
-				TdDiySiteInventory inventory = tdDiySiteInventoryService.findByGoodsCodeAndRegionIdAndDiySiteIdIsNull(cGcode,
-						cCompanyId);
+			}
+			recm.setcModifiedUserno(cModifiedUserno);
+			if (cModifiedDt != null) {
+				try {
+					Date c_modifi = sdf.parse(cModifiedDt);
+					recm.setcModifiedDt(c_modifi);
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			}
+			recm.setcPoNo(cPoNo);
+			recm.setcCompanyId(cCompanyId);
+			recm.setInitTime(new Date());
+			tdTbwRecmService.save(recm);
+			if (cCompanyId == null) {
+				LOGGER.info("getWMSInfo, OUT, 城市编码不存在");
+				return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>城市编码不存在</MESSAGE></STATUS></RESULTS>";
+			}
+			List<TdTbwRecd> tbwRecds = tdTbwRecdService.findByRecNo(cRecNo);
+			if (tbwRecds == null || tbwRecds.size() < 1) {
+				LOGGER.info("getWMSInfo, OUT, " + cRecNo + "：未找到明细");
+				return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>" + cRecNo + "：未找到明细</MESSAGE></STATUS></RESULTS>";
+			}
+			for (TdTbwRecd tdTbwRecd : tbwRecds) {
+				String gcode = tdTbwRecd.getGcode();
+				TdDiySiteInventory inventory = tdDiySiteInventoryService
+						.findByGoodsCodeAndRegionIdAndDiySiteIdIsNull(gcode, cCompanyId);
 				if (inventory == null) {
 					inventory = new TdDiySiteInventory();
-					inventory.setGoodsCode(tdGoods.getCode());
-					inventory.setGoodsId(tdGoods.getId());
-					inventory.setCategoryId(tdGoods.getCategoryId());
-					inventory.setCategoryIdTree(tdGoods.getCategoryIdTree());
-					inventory.setCategoryTitle(tdGoods.getCategoryTitle());
-					inventory.setGoodsTitle(tdGoods.getTitle());
-					inventory.setRegionId(cCompanyId);
-					inventory.setRegionName(tdCity.getCityName());
+					TdCity city = tdCityService.findOne(cCompanyId);
+					TdGoods goods = tdGoodsService.findByCode(gcode);
+					inventory.setRegionId(city.getId());
+					inventory.setRegionName(city.getCityName());
+					inventory.setGoodsId(goods.getId());
+					inventory.setGoodsTitle(goods.getTitle());
+					inventory.setGoodsCode(goods.getCode());
+					inventory.setInventory(0L);
+					inventory.setCategoryId(goods.getCategoryId());
+					inventory.setCategoryTitle(goods.getCategoryTitle());
+					inventory.setCategoryIdTree(goods.getCategoryIdTree());
+					
+//					return "<RESULTS><STATUS><CODE>1</CODE><MESSAGE>城市编码为：" + cCompanyId + "的城市不存在或SKU为" + gcode
+//							+ "的商品不存在</MESSAGE></STATUS></RESULTS>";
 				}
-
-				Double doubleFromStr = tdTbOmD.getcWaveQty();
-				doubleFromStr = doubleFromStr * 100;
-				Long cRecQty = doubleFromStr.longValue();
-				cRecQty = cRecQty / 100;
-				if (cUploadStatus.equalsIgnoreCase("in")) {
-					inventory.setInventory(inventory.getInventory() + cRecQty);
-					tdDiySiteInventoryService.save(inventory);
-					tdDiySiteInventoryLogService.saveChangeLog(inventory, cRecQty, null, null,
-							TdDiySiteInventoryLog.CHANGETYPE_CITY_YC_ADD);
-				} else if (cUploadStatus.equalsIgnoreCase("out")) {
-					inventory.setInventory(inventory.getInventory() - cRecQty);
-					tdDiySiteInventoryService.save(inventory);
-					tdDiySiteInventoryLogService.saveChangeLog(inventory, -cRecQty, null, null,
-							TdDiySiteInventoryLog.CHANGETYPE_CITY_BS_SUB);
-				}
+				Double.parseDouble(tdTbwRecd.getRecQty());
+				Double cRecQty = Double.parseDouble(tdTbwRecd.getRecQty());
+				cRecQty = cRecQty * 100;
+				Long recQtyFromDouble = cRecQty.longValue();
+				recQtyFromDouble = recQtyFromDouble / 100;
+				inventory.setInventory(inventory.getInventory() + recQtyFromDouble);
+				tdDiySiteInventoryService.save(inventory);
+				tdDiySiteInventoryLogService.saveChangeLog(inventory, recQtyFromDouble, null, null,
+						TdDiySiteInventoryLog.CHANGETYPE_CITY_ADD);
 			}
 		}
 
 		LOGGER.info("getWMSInfo, OUT, code=0");
 		return "<RESULTS><STATUS><CODE>0</CODE><MESSAGE></MESSAGE></STATUS></RESULTS>";
+		
 	}
 
 	private String tbwWasteView(NodeList nodeList) {
