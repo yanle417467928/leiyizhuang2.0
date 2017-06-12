@@ -50,41 +50,30 @@ public interface TdOrderRepo extends PagingAndSortingRepository<TdOrder, Long>, 
 	// = ?1 order by orderTime desc")
 	List<TdOrder> findByStatusIdOrderByOrderTimeDesc(Long statusid);
 
-	@Query("select o from TdOrder o where o.statusId= ?1 and o.sendTime > ?2 and o.orderNumber in ?3 group by o.mainOrderNumber order by o.id desc")
-	List<TdOrder> findDistinctMainOrderNumberByStatusIdAndDeliveryTimeAfterAndOrderNumberInOrderByIdDesc(Long statusId,
-			Date time, List<String> orderNumbers);
+	@Query(value = "select o.* from td_order o inner join (SELECT  b.sub_order_number FROM td_delivery_info a inner join td_delivery_info_detail b on a.task_no = b.task_no where a.driver = ?1 and b.sub_order_number is not null) c on o.order_number = c.sub_order_number where o.status_id= ?2 and o.send_time > ?3  group by o.main_order_number order by o.id desc", nativeQuery = true)
+	List<TdOrder> findDistinctMainOrderNumberByDriverAndStatusIdAndDeliveryTimeAfterOrderByIdDesc(String driver, Long statusId, Date time);
 
-	@Query("select o from TdOrder o where o.statusId= ?1 and o.sendTime > ?2 and o.orderNumber in ?3 or o.statusId= ?4 and o.sendTime > ?5 and o.orderNumber in ?6 group by o.mainOrderNumber order by o.id desc")
-	List<TdOrder> findDistinctMainOrderNumberByStatusIdAndDeliveryTimeAfterAndOrderNumberInOrStatusIdAndDeliveryTimeAfterAndOrderNumberInOrderByIdDesc(
-			Long statusId, Date time, List<String> orderNumbers, Long statusId2, Date time2,
-			List<String> orderNumbers2);
+	@Query(value = "select o.* from td_order o inner join (SELECT  b.sub_order_number FROM td_delivery_info a inner join td_delivery_info_detail b on a.task_no = b.task_no where a.driver = ?1 and b.sub_order_number is not null) c on o.order_number = c.sub_order_number where o.status_id in ?2 and o.send_time > ?3  group by o.main_order_number order by o.id desc", nativeQuery = true)
+	List<TdOrder> findDistinctMainOrderNumberByDriverAndStatusIdsAndDeliveryTimeAfterOrderByIdDesc(String driver, List<Long> statusIds, Date time);
 
-	@Query("select o from TdOrder o where o.statusId= ?1 and o.sendTime Between ?2 and ?3 and o.orderNumber in ?4 group by o.mainOrderNumber order by o.id desc")
-	List<TdOrder> findDistinctMainOrderNumberByStatusIdAndDeliveryTimeBetweenAndOrderNumberInOrderByIdDesc(
-			Long statusId, Date start, Date end, List<String> orderNumbers);
+	@Query(value = "select o.* from td_order o inner join (SELECT  b.sub_order_number FROM td_delivery_info a inner join td_delivery_info_detail b on a.task_no = b.task_no where a.driver = ?1 and b.sub_order_number is not null) c on o.order_number = c.sub_order_number where o.status_id= ?2 and o.send_time between ?3 and ?4 group by o.main_order_number order by o.id desc", nativeQuery = true)
+	List<TdOrder> findDistinctMainOrderNumberByDriverAndStatusIdAndDeliveryTimeBetweenOrderByIdDesc(String driver, Long statusId, Date start, Date end );
 
-	@Query("select o from TdOrder o where o.statusId= ?1 and o.sendTime Between ?2 and ?3 and o.orderNumber in ?4 or o.statusId= ?5 and o.sendTime Between ?6 and ?7 and o.orderNumber in ?8 group by o.mainOrderNumber order by o.id desc")
-	List<TdOrder> findDistinctMainOrderNumberByStatusIdAndDeliveryTimeBetweenAndOrderNumberInOrStatusIdAndOrderTimeBetweenAndOrderNumberInOrderByIdDesc(
-			Long statusId, Date start, Date end, List<String> orderNumbers, Long statusId2, Date start2, Date end2,
-			List<String> orderNumbers2);
+	@Query(value = "select o.* from td_order o inner join (SELECT  b.sub_order_number FROM td_delivery_info a inner join td_delivery_info_detail b on a.task_no = b.task_no where a.driver = ?1 and b.sub_order_number is not null) c on o.order_number = c.sub_order_number where o.status_id in ?2 and o.send_time between ?3 and ?4 group by o.main_order_number order by o.id desc", nativeQuery = true)
+	List<TdOrder> findDistinctMainOrderNumberByDriverAndStatusIdsAndDeliveryTimeBetweenOrderByIdDesc(String drver, List<Long> statusIds, Date start, Date end);
 
-	@Query("select count(Distinct o.mainOrderNumber) from TdOrder o where o.statusId= ?1 and o.sendTime > ?2 and o.orderNumber in ?3  order by o.id desc")
-	Integer countDistinctMainOrderNumberByStatusIdAndDeliveryTimeAfterAndOrderNumberInOrderByIdDesc(Long statusId,
-			Date time, List<String> orderNumbers);
+	@Query(value = "select count(1) from (select o.* from td_order o inner join (SELECT  b.sub_order_number FROM td_delivery_info a inner join td_delivery_info_detail b on a.task_no = b.task_no where a.driver = ?1 and b.sub_order_number is not null) c on o.order_number = c.sub_order_number where o.status_id= ?2 and o.send_time > ?3 group by o.main_order_number) t", nativeQuery = true)
+	Integer countDistinctMainOrderNumberByDriverAndStatusIdAndDeliveryTimeAfter(String driver, Long statusId,
+			Date time );
 
-	@Query("select count(Distinct o.mainOrderNumber) from TdOrder o where o.statusId= ?1 and o.sendTime > ?2 and o.orderNumber in ?3 or o.statusId= ?4 and o.sendTime > ?5 and o.orderNumber in ?6  order by o.id desc")
-	Integer countDistinctMainOrderNumberByStatusIdAndDeliveryTimeAfterAndOrderNumberInOrStatusIdAndDeliveryTimeAfterAndOrderNumberInOrderByIdDesc(
-			Long statusId, Date time, List<String> orderNumbers, Long statusId2, Date time2,
-			List<String> orderNumbers2);
+	@Query(value = "select count(1) from (select o.* from td_order o inner join (SELECT  b.sub_order_number FROM td_delivery_info a inner join td_delivery_info_detail b on a.task_no = b.task_no where a.driver = ?1 and b.sub_order_number is not null) c on o.order_number = c.sub_order_number where o.status_id in ?2 and o.send_time > ?3 group by o.main_order_number) t", nativeQuery = true)
+	Integer countDistinctMainOrderNumberByDriverAndStatusIdsAndDeliveryTimeAfter(String driver, List<Long> statusIds, Date time);
 
-	@Query("select count(Distinct o.mainOrderNumber) from TdOrder o where o.statusId= ?1 and o.sendTime Between ?2 and ?3 and o.orderNumber in ?4  order by o.id desc")
-	Integer countDistinctMainOrderNumberByStatusIdAndDeliveryTimeBetweenAndOrderNumberInOrderByIdDesc(Long statusId,
-			Date start, Date end, List<String> orderNumbers);
+	@Query(value = "select count(1) from (select o.* from td_order o inner join (SELECT  b.sub_order_number FROM td_delivery_info a inner join td_delivery_info_detail b on a.task_no = b.task_no where a.driver = ?1 and b.sub_order_number is not null) c on o.order_number = c.sub_order_number where o.status_id= ?2 and o.send_time between ?3 and ?4 group by o.main_order_number) t", nativeQuery = true)
+	Integer countDistinctMainOrderNumberByDriverAndStatusIdAndDeliveryTimeBetween(String driver, Long statusId, Date start, Date end);
 
-	@Query("select count(Distinct o.mainOrderNumber) from TdOrder o where o.statusId= ?1 and o.sendTime Between ?2 and ?3 and o.orderNumber in ?4 or o.statusId= ?5 and o.sendTime Between ?6 and ?7 and o.orderNumber in ?8 order by o.id desc")
-	Integer countDistinctMainOrderNumberByStatusIdAndDeliveryTimeBetweenAndOrderNumberInOrStatusIdAndDeliveryTimeBetweenAndOrderNumberInOrderByIdDesc(
-			Long statusId, Date start, Date end, List<String> orderNumbers, Long statusId2, Date start2, Date end2,
-			List<String> orderNumbers2);
+	@Query(value = "select count(1) from (select o.* from td_order o inner join (SELECT  b.sub_order_number FROM td_delivery_info a inner join td_delivery_info_detail b on a.task_no = b.task_no where a.driver = ?1 and b.sub_order_number is not null) c on o.order_number = c.sub_order_number where o.status_id in ?2 and o.send_time between ?3 and ?4 group by o.main_order_number) t", nativeQuery = true)
+	Integer countDistinctMainOrderNumberByDriverAndStatusIdsAndDeliveryTimeBetween(String driver, List<Long> statusIds, Date start, Date end);
 
 	Page<TdOrder> findByUsernameAndStatusIdNotOrderByIdDesc(String username, Long statusId, Pageable page);
 

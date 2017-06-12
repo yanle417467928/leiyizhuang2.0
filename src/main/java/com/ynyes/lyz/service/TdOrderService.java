@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.beust.jcommander.internal.Lists;
 import com.ynyes.lyz.entity.TdDiySite;
 import com.ynyes.lyz.entity.TdGoods;
 import com.ynyes.lyz.entity.TdOrder;
@@ -378,94 +379,87 @@ public class TdOrderService {
 		return repository.countByStatusId(statusId);
 	}
 
-	public List<TdOrder> findByStatusIdAndDeliveryTimeAfter(Long statusId, Date time, List<String> orderNumberList) {
-		if (null == statusId || null == time || null == orderNumberList || orderNumberList.size() == 0) {
+	public List<TdOrder> findByDriverAndStatusIdAndDeliveryTimeAfter(String driver, Long statusId, Date time) {
+		if (null == driver || null == statusId || null == time) {
 			return null;
 		}
 
-		return repository.findDistinctMainOrderNumberByStatusIdAndDeliveryTimeAfterAndOrderNumberInOrderByIdDesc(
-				statusId, time, orderNumberList);
+		return repository.findDistinctMainOrderNumberByDriverAndStatusIdAndDeliveryTimeAfterOrderByIdDesc( driver, statusId, time);
 	}
 
-	public List<TdOrder> findByStatusIdAndDeliveryTimeAfterOrStatusIdAndDeliveryTimeAfter(Long statusId, Long statusId2,
-			List<String> orderNumberList, Date time) {
-		if (null == statusId || null == statusId2 || null == time) {
+	public List<TdOrder> findByDriverAndStatusIdsAndDeliveryTimeAfter(String driver, Long statusId, Long statusId2, Date time) {
+		if (null == driver || null == statusId || null == statusId2 || null == time) {
 			return null;
 		}
+		List<Long> statusIds= Lists.newArrayList();
+		statusIds.add(statusId);
+		statusIds.add(statusId2);
+
+		return repository .findDistinctMainOrderNumberByDriverAndStatusIdsAndDeliveryTimeAfterOrderByIdDesc(driver, statusIds, time );
+	}
+
+	public List<TdOrder> findByDriverAndStatusIdAndDeliveryTimeBetween(String driver, Long statusId, Date start, Date end) {
+
+		if (null == driver || null == statusId || null == start || null == end) {
+			return null;
+		}
+		
+		return repository.findDistinctMainOrderNumberByDriverAndStatusIdAndDeliveryTimeBetweenOrderByIdDesc(driver, statusId, start, end);
+	}
+
+	public List<TdOrder> findByDriverAndStatusIdsAndDeliveryTimeBetween(String driver, Long statusId,
+			Long statusId2, Date start, Date end) {
+
+		if (null == driver || null == statusId || null == statusId2 || null == start || null == end) {
+			return null;
+		}
+		List<Long> statusIds= Lists.newArrayList();
+		statusIds.add(statusId);
+		statusIds.add(statusId2);
 
 		return repository
-				.findDistinctMainOrderNumberByStatusIdAndDeliveryTimeAfterAndOrderNumberInOrStatusIdAndDeliveryTimeAfterAndOrderNumberInOrderByIdDesc(
-						statusId, time, orderNumberList, statusId2, time, orderNumberList);
+				.findDistinctMainOrderNumberByDriverAndStatusIdsAndDeliveryTimeBetweenOrderByIdDesc(driver, statusIds, start, end);
 	}
 
-	public List<TdOrder> findByStatusIdAndDeliveryTimeBetween(Long statusId, List<String> orderNumberList, Date start,
-			Date end) {
-
-		if (null == statusId || null == start || null == end || null == orderNumberList
-				|| orderNumberList.size() == 0) {
+	public Integer countByStatusIdAndDeliveryTimeAfter(String driver, Long statusId, Date time) {
+		if (null == driver || null == statusId || null == time) {
 			return null;
 		}
 
-		return repository.findDistinctMainOrderNumberByStatusIdAndDeliveryTimeBetweenAndOrderNumberInOrderByIdDesc(
-				statusId, start, end, orderNumberList);
+		return repository.countDistinctMainOrderNumberByDriverAndStatusIdAndDeliveryTimeAfter(driver, statusId, time);
 	}
 
-	public List<TdOrder> findByStatusIdAndDeliveryTimeBetweenOrStatusIdAndOrderTimeBetween(Long statusId,
-			Long statusId2, List<String> orderNumberList, Date start, Date end) {
-
-		if (null == statusId || null == statusId2 || null == start || null == end || null == orderNumberList
-				|| orderNumberList.size() == 0) {
+	public Integer countByDriverAndStatusIdsAndDeliveryTimeAfter(String driver, Long statusId, Long statusId2, Date time) {
+		if (null == driver || null == statusId || null == statusId2 || null == time) {
 			return null;
 		}
+		List<Long> statusIds= Lists.newArrayList();
+		statusIds.add(statusId);
+		statusIds.add(statusId2);
+
+		return repository.countDistinctMainOrderNumberByDriverAndStatusIdsAndDeliveryTimeAfter(driver, statusIds, time);
+	}
+
+	public Integer countByDriverAndStatusIdAndDeliveryTimeBetween(String driver, Long statusId, Date start, Date end) {
+
+		if (null == driver || null == statusId || null == start || null == end) {
+			return null;
+		}
+
+		return repository.countDistinctMainOrderNumberByDriverAndStatusIdAndDeliveryTimeBetween(driver, statusId, start, end);
+	}
+
+	public Integer countByDriverAndStatusIdsAndDeliveryTimeBetween(String driver, Long statusId, Long statusId2, Date start, Date end) {
+
+		if (null == driver || null == statusId || null == statusId2 || null == start || null == end) {
+			return null;
+		}
+		List<Long> statusIds= Lists.newArrayList();
+		statusIds.add(statusId);
+		statusIds.add(statusId2);
 
 		return repository
-				.findDistinctMainOrderNumberByStatusIdAndDeliveryTimeBetweenAndOrderNumberInOrStatusIdAndOrderTimeBetweenAndOrderNumberInOrderByIdDesc(
-						statusId, start, end, orderNumberList, statusId2, start, end, orderNumberList);
-	}
-
-	public Integer countByStatusIdAndDeliveryTimeAfter(Long statusId, Date time, List<String> orderNumberList) {
-		if (null == statusId || null == time || null == orderNumberList || orderNumberList.size() == 0) {
-			return null;
-		}
-
-		return repository.countDistinctMainOrderNumberByStatusIdAndDeliveryTimeAfterAndOrderNumberInOrderByIdDesc(
-				statusId, time, orderNumberList);
-	}
-
-	public Integer countByStatusIdAndDeliveryTimeAfterOrStatusIdAndDeliveryTimeAfter(Long statusId, Long statusId2,
-			List<String> orderNumberList, Date time) {
-		if (null == statusId || null == statusId2 || null == time) {
-			return null;
-		}
-
-		return repository
-				.countDistinctMainOrderNumberByStatusIdAndDeliveryTimeAfterAndOrderNumberInOrStatusIdAndDeliveryTimeAfterAndOrderNumberInOrderByIdDesc(
-						statusId, time, orderNumberList, statusId2, time, orderNumberList);
-	}
-
-	public Integer countByStatusIdAndDeliveryTimeBetween(Long statusId, List<String> orderNumberList, Date start,
-			Date end) {
-
-		if (null == statusId || null == start || null == end || null == orderNumberList
-				|| orderNumberList.size() == 0) {
-			return null;
-		}
-
-		return repository.countDistinctMainOrderNumberByStatusIdAndDeliveryTimeBetweenAndOrderNumberInOrderByIdDesc(
-				statusId, start, end, orderNumberList);
-	}
-
-	public Integer countByStatusIdAndDeliveryTimeBetweenOrStatusIdAndOrderTimeBetween(Long statusId, Long statusId2,
-			List<String> orderNumberList, Date start, Date end) {
-
-		if (null == statusId || null == statusId2 || null == start || null == end || null == orderNumberList
-				|| orderNumberList.size() == 0) {
-			return null;
-		}
-
-		return repository
-				.countDistinctMainOrderNumberByStatusIdAndDeliveryTimeBetweenAndOrderNumberInOrStatusIdAndDeliveryTimeBetweenAndOrderNumberInOrderByIdDesc(
-						statusId, start, end, orderNumberList, statusId2, start, end, orderNumberList);
+				.countDistinctMainOrderNumberByDriverAndStatusIdsAndDeliveryTimeBetween(driver, statusIds, start, end);
 	}
 
 	/**

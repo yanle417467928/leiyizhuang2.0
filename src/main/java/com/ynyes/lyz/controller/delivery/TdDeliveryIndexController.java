@@ -85,9 +85,6 @@ public class TdDeliveryIndexController {
 	private TdReturnNoteService tdReturnNoteService;
 
 	@Autowired
-	private TdDeliveryInfoService tdDeliveryInfoService;
-
-	@Autowired
 	private TdCommonService tdCommonService;
 
 	@Autowired
@@ -319,51 +316,49 @@ public class TdDeliveryIndexController {
 			map.addAttribute("days", days);
 		}
 
-		// 查看本配送员所有的订单号
-		List<String> orderNumberList = queryOrderNumberList(user.getOpUser());
-
 		List<TdOrder> orderList = null;
 
-		if (null != startDate && orderNumberList.size() > 0) {
+		int countType1 = 0;
+		int countType2 = 0;
+		if (null != startDate) {
 			if (null != endDate) {
 				if (type.equals(1)) {
-					orderList = tdOrderService.findByStatusIdAndDeliveryTimeBetweenOrStatusIdAndOrderTimeBetween(5L, 6L,
-							orderNumberList, startDate, endDate);
+					orderList = tdOrderService.findByDriverAndStatusIdsAndDeliveryTimeBetween(user.getOpUser(), 5L, 6L, startDate, endDate);
+					if(null != orderList) {
+						countType1 = orderList.size();
+					}
+					countType2 = tdOrderService.countByDriverAndStatusIdAndDeliveryTimeBetween(user.getOpUser(), 4L, startDate, endDate);
 				} else if (type.equals(2)) {
-					orderList = tdOrderService.findByStatusIdAndDeliveryTimeBetween(4L, orderNumberList, startDate,
-							endDate);
+					orderList = tdOrderService.findByDriverAndStatusIdAndDeliveryTimeBetween(user.getOpUser(), 4L, startDate, endDate);
+					if(null != orderList) {
+						countType2 = orderList.size();
+					}
+					countType1 = tdOrderService.countByDriverAndStatusIdsAndDeliveryTimeBetween(user.getOpUser(), 5L, 6L, startDate, endDate);
 				} else if (type.equals(3)) {
-					orderList = tdOrderService.findByStatusIdAndDeliveryTimeBetween(3L, orderNumberList, startDate,
-							endDate);
+//					orderList = tdOrderService.findByDriverAndStatusIdAndDeliveryTimeBetween(user.getOpUser(), 3L, startDate, endDate);
 				}
-
-				map.addAttribute("count_type_1",
-						tdOrderService.countByStatusIdAndDeliveryTimeBetweenOrStatusIdAndOrderTimeBetween(5L, 6L,
-								orderNumberList, startDate, endDate));
-				map.addAttribute("count_type_2",
-						tdOrderService.countByStatusIdAndDeliveryTimeBetween(4L, orderNumberList, startDate, endDate));
-				map.addAttribute("count_type_3",
-						tdOrderService.countByStatusIdAndDeliveryTimeBetween(3L, orderNumberList, startDate, endDate));
 			} else {
 				if (type.equals(1)) {
-					orderList = tdOrderService.findByStatusIdAndDeliveryTimeAfterOrStatusIdAndDeliveryTimeAfter(5L, 6L,
-							orderNumberList, startDate);
+					orderList = tdOrderService.findByDriverAndStatusIdsAndDeliveryTimeAfter(user.getOpUser(), 5L, 6L, startDate);
+					if(null != orderList) {
+						countType1 = orderList.size();
+					}
+					countType2 = tdOrderService.countByStatusIdAndDeliveryTimeAfter(user.getOpUser(), 4L, startDate);
 				} else if (type.equals(2)) {
-					orderList = tdOrderService.findByStatusIdAndDeliveryTimeAfter(4L, startDate, orderNumberList);
+					orderList = tdOrderService.findByDriverAndStatusIdAndDeliveryTimeAfter(user.getOpUser(), 4L, startDate);
+					if(null != orderList) {
+						countType2 = orderList.size();
+					}
+					countType1 = tdOrderService.countByDriverAndStatusIdsAndDeliveryTimeAfter(user.getOpUser(), 5L, 6L, startDate);
 				} else if (type.equals(3)) {
-					orderList = tdOrderService.findByStatusIdAndDeliveryTimeAfter(3L, startDate, orderNumberList);
+//					orderList = tdOrderService.findByDriverAndStatusIdAndDeliveryTimeAfter(user.getOpUser(), 3L, startDate);
 				}
-
-				map.addAttribute("count_type_1",
-						tdOrderService.countByStatusIdAndDeliveryTimeAfterOrStatusIdAndDeliveryTimeAfter(5L, 6L,
-								orderNumberList, startDate));
-				map.addAttribute("count_type_2",
-						tdOrderService.countByStatusIdAndDeliveryTimeAfter(4L, startDate, orderNumberList));
-				map.addAttribute("count_type_3",
-						tdOrderService.countByStatusIdAndDeliveryTimeAfter(3L, startDate, orderNumberList));
 			}
 		}
 
+
+		map.addAttribute("count_type_1", countType1);
+		map.addAttribute("count_type_2", countType2);
 		map.addAttribute("order_list", orderList);
 
 		return "/client/delivery_list";
@@ -1136,47 +1131,4 @@ public class TdDeliveryIndexController {
 		// }
 		// }
 	}
-
-	/**
-	 * 查询快递员配送的订单号
-	 * 
-	 * @param opUser
-	 *            快递员编号
-	 * @return 订单号集合
-	 * @author zp
-	 */
-	private List<String> queryOrderNumberList(String opUser) {
-
-		List<String> orderNumberList = new ArrayList<String>();
-		
-		orderNumberList = tdDeliveryInfoService.findSubOrderNumberByOpUser(opUser);
-
-		// 根据快递员编号找task_no
-		/*List<TdDeliveryInfo> deliveryInfoList = tdDeliveryInfoService.findDistinctTaskNoByDriver(opUser);
-
-		if (null != deliveryInfoList && deliveryInfoList.size() > 0) {
-			List<String> taskNoList = new ArrayList<String>();
-
-			for (TdDeliveryInfo deInfo : deliveryInfoList) {
-				taskNoList.add(deInfo.getTaskNo());
-			}
-
-			if (taskNoList.size() > 0)
-
-			{
-				List<TdDeliveryInfoDetail> detailList = tdDeliveryInfoDetailService
-						.findDistinctSubOrderNumberByTaskNoIn(taskNoList);
-
-				if (null != detailList && detailList.size() > 0) {
-					for (TdDeliveryInfoDetail detail : detailList) {
-						if (null != detail.getSubOrderNumber() && !detail.getSubOrderNumber().isEmpty()) {
-							orderNumberList.add(detail.getSubOrderNumber());
-						}
-					}
-				}
-			}
-		}*/
-		return orderNumberList;
-	}
-
 }
