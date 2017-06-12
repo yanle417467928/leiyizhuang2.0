@@ -59,19 +59,19 @@ public class TdCouponGoodsService {
 //				TdPriceListItem priceListItem = tdCommonService.getGoodsPrice(req, goods);
 				//根据登录信息查询门店信息
 				TdDiySite diySite = tdCommonService.getDiySite(req);
-				String custType = "";
-				//判断门店是经销还是直营
-				if (null != diySite) {
-					String custTypeName = diySite.getCustTypeName();
-					if ("经销商".equals(custTypeName)) {
-						custType = "JX";
-					}
-					if ("直营".equals(custTypeName)) {
-						custType = "ZY";
-					}
-				}          
+//				String custType = "";
+//				//判断门店是经销还是直营
+//				if (null != diySite) {
+//					String custTypeName = diySite.getCustTypeName();
+//					if ("经销商".equals(custTypeName)) {
+//						custType = "JX";
+//					}
+//					if ("直营".equals(custTypeName)) {
+//						custType = "ZY";
+//					}
+//				}          
 				//根据门店、商品、价格类型查询商品价格信息
-				TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, goods, custType);
+				TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, goods, "ZY");
 				
 				if (null != priceListItem) {
 					ids.add(goods.getId());
@@ -148,19 +148,19 @@ public class TdCouponGoodsService {
 //				TdPriceListItem priceListItem = tdCommonService.getGoodsPrice(req, goods);
 				//根据登录信息查询门店信息
 				TdDiySite diySite = tdCommonService.getDiySite(req);
-				String custType = "";
-				//判断门店是经销还是直营
-				if (null != diySite) {
-					String custTypeName = diySite.getCustTypeName();
-					if ("经销商".equals(custTypeName)) {
-						custType = "JX";
-					}
-					if ("直营".equals(custTypeName)) {
-						custType = "ZY";
-					}
-				}
+//				String custType = "";
+//				//判断门店是经销还是直营
+//				if (null != diySite) {
+//					String custTypeName = diySite.getCustTypeName();
+//					if ("经销商".equals(custTypeName)) {
+//						custType = "JX";
+//					}
+//					if ("直营".equals(custTypeName)) {
+//						custType = "ZY";
+//					}
+//				}
 				//根据门店、商品、价格类型查询商品价格信息
-				TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, goods, custType);
+				TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, goods, "ZY");
 	
 				if (null != priceListItem && null != priceListItem.getCouponPrice()
 						&& null != priceListItem.getCouponRealPrice()) {
