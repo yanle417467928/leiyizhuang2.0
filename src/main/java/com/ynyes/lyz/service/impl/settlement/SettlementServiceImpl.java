@@ -235,7 +235,6 @@ public class SettlementServiceImpl implements ISettlementService {
 		for (TdOrder subOrder : subOrderMap.values()) {
 			if (null != subOrder) {
 				subOrder.getNotPayedFee();
-				
 			}
 		}
 		// 存储及发送订单

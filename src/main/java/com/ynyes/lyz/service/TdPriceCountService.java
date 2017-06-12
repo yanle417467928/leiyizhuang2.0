@@ -736,6 +736,13 @@ public class TdPriceCountService {
 		// result参数中key代表商品的id，Double数组中依次存储：0. 商品的购买单价；1. 商品的购买数量；
 		// 2. 商品的总价；3.退货单价
 		Map<Long, Double[]> result = new HashMap<>();
+		
+		Boolean isMemberOrder = Boolean.FALSE;
+		// 判断该订单是否属于会员价
+		if (null != order.getDifFee() && order.getDifFee() > 0) {
+			isMemberOrder = Boolean.TRUE;
+		}
+		
 		if (null != order) {
 			List<TdOrderGoods> goodsList = order.getOrderGoodsList();
 			List<TdOrderGoods> presentedList = order.getPresentedList();
@@ -744,7 +751,12 @@ public class TdPriceCountService {
 					if (null != orderGoods) {
 						Long goodsId = orderGoods.getGoodsId();
 						Long quantity = orderGoods.getQuantity();
-						Double price = orderGoods.getPrice();
+						Double price;
+						if (isMemberOrder) {
+							price = orderGoods.getRealPrice();
+						} else {
+							price = orderGoods.getPrice();
+						}
 						if (null == quantity) {
 							quantity = 0L;
 						}

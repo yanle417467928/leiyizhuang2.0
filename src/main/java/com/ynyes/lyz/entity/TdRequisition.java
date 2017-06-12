@@ -137,6 +137,25 @@ public class TdRequisition {
 	@Column(scale = 2, nullable = false)
 	private Double deliveryFee = 0d;
 
+	// 调色费
+	@Column(scale = 2, nullable = false)
+	private Double colorFee = 0d;
+
+	// 表示所有的折扣金额，当前包括：满减促销折扣，现金券折扣，产品券折扣和会员差价折扣
+	@Column(scale = 2, nullable = false)
+	private Double discount = 0d;
+
+	// 表示用户已经使用的预存款金额
+	@Column(scale = 2, nullable = false)
+	private Double balanceUsed = 0d;
+
+	// 表示是否是主家收货
+	@Column(length = 5, nullable = false)
+	private String memberReceiver = "FALSE";
+
+	@Column(scale = 2, nullable = false)
+	private Double totalGoodsPrice = 0d;
+
 	public String getSellerRealName() {
 		return sellerRealName;
 	}
@@ -369,6 +388,46 @@ public class TdRequisition {
 		this.deliveryFee = deliveryFee;
 	}
 
+	public Double getColorFee() {
+		return colorFee;
+	}
+
+	public void setColorFee(Double colorFee) {
+		this.colorFee = colorFee;
+	}
+
+	public Double getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(Double discount) {
+		this.discount = discount;
+	}
+
+	public Double getBalanceUsed() {
+		return balanceUsed;
+	}
+
+	public void setBalanceUsed(Double balanceUsed) {
+		this.balanceUsed = balanceUsed;
+	}
+
+	public String getMemberReceiver() {
+		return memberReceiver;
+	}
+
+	public void setMemberReceiver(String memberReceiver) {
+		this.memberReceiver = memberReceiver;
+	}
+
+	public Double getTotalGoodsPrice() {
+		return totalGoodsPrice;
+	}
+
+	public void setTotalGoodsPrice(Double totalGoodsPrice) {
+		this.totalGoodsPrice = totalGoodsPrice;
+	}
+
 	@Override
 	public String toString() {
 		return "TdRequisition [id=" + id + ", diySiteTitle=" + diySiteTitle + ", diySiteId=" + diySiteId
@@ -380,7 +439,56 @@ public class TdRequisition {
 				+ ", orderTime=" + orderTime + ", typeId=" + typeId + ", remarkInfo=" + remarkInfo + ", diySiteTel="
 				+ diySiteTel + ", diyCode=" + diyCode + ", sellerRealName=" + sellerRealName + ", sellerTel="
 				+ sellerTel + ", goodsQuantity=" + goodsQuantity + ", upstairsAll=" + upstairsAll + ", upstairsLeft="
-				+ upstairsLeft + ", deliveryFee=" + deliveryFee + "]";
+				+ upstairsLeft + ", deliveryFee=" + deliveryFee + ", colorFee=" + colorFee + ", discount=" + discount
+				+ ", balanceUsed=" + balanceUsed + ", memberReceiver=" + memberReceiver + "]";
+	}
+
+	public String toXml() {
+		StringBuilder builder = new StringBuilder();
+		
+		builder.append("<ERP><TABLE>");
+		
+		builder.append("<ID>").append(this.id).append("</ID>");
+		builder.append("<CANCEL_TIME></CANCEL_TIME>");
+		builder.append("<CHECK_TIME></CHECK_TIME>");
+		builder.append("<DIY_SITE_ADDRESS></DIY_SITE_ADDRESS>");
+		builder.append("<DIY_SITE_ID>").append(this.diySiteId).append("</DIY_SITE_ID>");
+		builder.append("<DIY_SITE_TEL>").append(this.diySiteTel).append("</DIY_SITE_TEL>");
+		builder.append("<MANAGER_REMARK_INFO></MANAGER_REMARK_INFO>");
+		builder.append("<REMARK_INFO>").append(this.remarkInfo).append("</REMARK_INFO>");
+		builder.append("<REQUISITION_NUMBER></REQUISITION_NUMBER>");
+		builder.append("<STATUS_ID></STATUS_ID>");
+		builder.append("<TYPE_ID></TYPE_ID>");
+		builder.append("<CUSTOMER_NAME>").append(this.customerName).append("</CUSTOMER_NAME>");
+		builder.append("<CUSTOMER_ID>").append(this.customerId).append("</CUSTOMER_ID>");
+		builder.append("<DELIVERY_TIME>").append(this.deliveryTime).append("</DELIVERY_TIME>");
+		builder.append("<ORDER_NUMBER>").append(this.orderNumber).append("</ORDER_NUMBER>");
+		builder.append("<RECEIVE_ADDRESS>").append(this.receiveAddress).append("</RECEIVE_ADDRESS>");
+		builder.append("<RECEIVE_NAME>").append(this.receiveName).append("</RECEIVE_NAME>");
+		builder.append("<RECEIVE_PHONE>").append(this.receivePhone).append("</RECEIVE_PHONE>");
+		builder.append("<CITY>").append(this.city).append("</CITY>");
+		builder.append("<DETAIL_ADDRESS>").append(this.detailAddress).append("</DETAIL_ADDRESS>");
+		builder.append("<DISCTRICT>").append(this.disctrict).append("</DISCTRICT>");
+		builder.append("<PROVINCE>").append(this.province).append("</PROVINCE>");
+		builder.append("<SUBDISCTRICT>").append(this.subdistrict).append("</SUBDISCTRICT>");
+		builder.append("<ORDER_TIME>").append(this.orderTime).append("</ORDER_TIME>");
+		builder.append("<SUB_ORDER_NUMBER></SUB_ORDER_NUMBER>");
+		builder.append("<SELLER_TEL>").append(this.sellerTel).append("</SELLER_TEL>");
+		builder.append("<GOODS_QUANTITY>").append(this.goodsQuantity).append("</GOODS_QUANTITY>");
+		builder.append("<UPSTAIRS_ALL>").append(this.upstairsAll).append("</UPSTAIRS_ALL>");
+		builder.append("<UPSTAIRS_LEFT>").append(this.upstairsLeft).append("</UPSTAIRS_LEFT>");
+		builder.append("<SELLER_NAME>").append(this.sellerRealName).append("</SELLER_NAME>");
+		builder.append("<DELIVERY_FEE>").append(this.deliveryFee).append("</DELIVERY_FEE>");
+		builder.append("<COLOR_FEE>").append(this.colorFee).append("</COLOR_FEE>");
+		builder.append("<DISCOUNT>").append(this.discount).append("</DISCOUNT>");
+		builder.append("<BALANCE_USED>").append(this.balanceUsed).append("</BALANCE_USED>");
+		builder.append("<MEMBER_RECEIVER>").append(this.memberReceiver).append("</MEMBER_RECEIVER>");
+		builder.append("<UNPAYED>").append(this.leftPrice).append("</UNPAYED>");
+		builder.append("<TOTAL_GOODS_PRICE>").append(this.totalGoodsPrice).append("</TOTAL_GOODS_PRICE>");
+		
+		builder.append("</TABLE></ERP>");
+		
+		return builder.toString();
 	}
 
 }

@@ -1657,8 +1657,6 @@ public class TdCommonService {
 		return virtual;
 	}
 
-	
-
 	/**
 	 * 查找用户已选获得的赠品 增加活动id zp
 	 * 
@@ -2774,8 +2772,19 @@ public class TdCommonService {
 			requisition.setSellerRealName(order.getSellerRealName());
 			requisition.setSellerTel(order.getSellerUsername());
 
+			if (null != order.getReceiverIsMember() && order.getReceiverIsMember()) {
+				requisition.setMemberReceiver("TRUE");
+			} else {
+				requisition.setMemberReceiver("FALSE");
+			}
+
 			List<TdRequisitionGoods> requisitionGoodsList = new ArrayList<>();
 			Double deliveryFee = 0.00;
+			Double totalGoodsPrice = 0d;
+			Double colorFee = 0d;
+			Double discount = 0d;
+			Double balanceUsed = 0d;
+
 			for (TdOrder tdOrder : orderList) {
 
 				if (null != tdOrder && null != tdOrder.getTotalPrice()) {
@@ -2828,8 +2837,32 @@ public class TdCommonService {
 					deliveryFee = order.getDeliverFee();
 				}
 
+				// 计算总共的调色费，促销减免，预存款减免和代收
+				totalGoodsPrice += (null == tdOrder.getTotalGoodsPrice() ? 0d : tdOrder.getTotalGoodsPrice());
+				colorFee += (null == tdOrder.getColorFee() ? 0d : tdOrder.getColorFee());
+				if ("FALSE".equalsIgnoreCase(requisition.getMemberReceiver())) {
+					Double subPrice = null == tdOrder.getActivitySubPrice() ? 0d : tdOrder.getActivitySubPrice();
+					Double cashCoupon = null == tdOrder.getCashCoupon() ? 0d : tdOrder.getCashCoupon();
+					Double proCoupon = null == tdOrder.getProCouponFee() ? 0d : tdOrder.getProCouponFee();
+					Double difFee = null == tdOrder.getDifFee() ? 0d : tdOrder.getDifFee();
+					Double cashBalanceUsed = null == tdOrder.getCashBalanceUsed() ? 0d : tdOrder.getCashBalanceUsed();
+					Double unCashBalanceUsed = null == tdOrder.getUnCashBalanceUsed() ? 0d
+							: tdOrder.getUnCashBalanceUsed();
+
+					discount += (subPrice + cashCoupon + proCoupon + difFee);
+					balanceUsed += (cashBalanceUsed + unCashBalanceUsed);
+				}
+
 			}
+
 			requisition.setDeliveryFee(deliveryFee);
+			requisition.setColorFee(colorFee);
+			requisition.setDiscount(discount);
+			requisition.setBalanceUsed(balanceUsed);
+			requisition.setTotalGoodsPrice(totalGoodsPrice);
+
+			left = totalGoodsPrice + deliveryFee + colorFee - discount - balanceUsed;
+
 			if ("支付宝".equalsIgnoreCase(payTypeTitle) || "银行卡".equalsIgnoreCase(payTypeTitle)
 					|| "微信支付".equalsIgnoreCase(payTypeTitle)) {
 				requisition.setLeftPrice(0.0);
@@ -2840,7 +2873,8 @@ public class TdCommonService {
 			requisition.setGoodsQuantity(requisitionGoodsList.size());
 			requisition = tdRequisitionService.save(requisition);
 		}
-		System.out.println("MDJ:WS:Requisition:" + requisition.getOrderNumber());
+		// System.out.println("MDJ:WS:Requisition:" +
+		// requisition.getOrderNumber());
 		return requisition;
 	}
 
@@ -2880,30 +2914,32 @@ public class TdCommonService {
 
 		if (type.equals(1)) {
 			TdRequisition requisition = (TdRequisition) object;
-			String xmlStr = "<ERP>" + "<TABLE>" + "<id>" + requisition.getId() + "</id>" + "<cancel_time>"
-					+ requisition.getSellerRealName() + "</cancel_time>" + "<check_time></check_time>"
-					+ "<diy_site_address></diy_site_address>" + "<diy_site_id>" + requisition.getDiyCode()
-					+ "</diy_site_id>" + "<diy_site_tel>" + requisition.getDiySiteTel() + "</diy_site_tel>"
-					+ "<manager_remark_info></manager_remark_info>" + "<remark_info>" + requisition.getRemarkInfo()
-					+ "</remark_info>" + "<requisition_number></requisition_number>" + "<status_id></status_id>"
-					+ "<type_id>" + requisition.getTypeId() + "</type_id>" + "<customer_name>"
-					+ requisition.getCustomerName() + "</customer_name>" + "<customer_id>" + requisition.getCustomerId()
-					+ "</customer_id>" + "<delivery_time>" + requisition.getDeliveryTime() + "</delivery_time>"
-					+ "<order_number>" + requisition.getOrderNumber() + "</order_number>" + "<receive_address>"
-					+ requisition.getReceiveAddress() + "</receive_address>" + "<receive_name>"
-					+ requisition.getReceiveName() + "</receive_name>" + "<receive_phone>"
-					+ requisition.getReceivePhone() + "</receive_phone>" + "<total_price>" + requisition.getTotalPrice()
-					+ "</total_price>" + "<city>" + requisition.getCity() + "</city>" + "<detail_address>"
-					+ requisition.getDetailAddress() + "</detail_address>" + "<disctrict>" + requisition.getDisctrict()
-					+ "</disctrict>" + "<province>" + requisition.getProvince() + "</province>" + "<subdistrict>"
-					+ requisition.getSubdistrict() + "</subdistrict>" + "<order_time>" + requisition.getOrderTime()
-					+ "</order_time>" + "<sub_order_number>" + requisition.getLeftPrice() + "</sub_order_number>"
-					+ "<seller_tel>" + requisition.getSellerTel() + "</seller_tel>" + "<goods_quantity>"
-					+ requisition.getGoodsQuantity() + "</goods_quantity>" + "<upstairs_all>"
-					+ requisition.getUpstairsAll() + "</upstairs_all>" + "<upstairs_left>"
-					+ requisition.getUpstairsLeft() + "</upstairs_left>" + "<DELIVERY_FEE>"
-					+ requisition.getDeliveryFee() + "</DELIVERY_FEE></TABLE>" + "</ERP>";
+//			String xmlStr = "<ERP>" + "<TABLE>" + "<id>" + requisition.getId() + "</id>" + "<cancel_time>"
+//					+ requisition.getSellerRealName() + "</cancel_time>" + "<check_time></check_time>"
+//					+ "<diy_site_address></diy_site_address>" + "<diy_site_id>" + requisition.getDiyCode()
+//					+ "</diy_site_id>" + "<diy_site_tel>" + requisition.getDiySiteTel() + "</diy_site_tel>"
+//					+ "<manager_remark_info></manager_remark_info>" + "<remark_info>" + requisition.getRemarkInfo()
+//					+ "</remark_info>" + "<requisition_number></requisition_number>" + "<status_id></status_id>"
+//					+ "<type_id>" + requisition.getTypeId() + "</type_id>" + "<customer_name>"
+//					+ requisition.getCustomerName() + "</customer_name>" + "<customer_id>" + requisition.getCustomerId()
+//					+ "</customer_id>" + "<delivery_time>" + requisition.getDeliveryTime() + "</delivery_time>"
+//					+ "<order_number>" + requisition.getOrderNumber() + "</order_number>" + "<receive_address>"
+//					+ requisition.getReceiveAddress() + "</receive_address>" + "<receive_name>"
+//					+ requisition.getReceiveName() + "</receive_name>" + "<receive_phone>"
+//					+ requisition.getReceivePhone() + "</receive_phone>" + "<total_price>" + requisition.getTotalPrice()
+//					+ "</total_price>" + "<city>" + requisition.getCity() + "</city>" + "<detail_address>"
+//					+ requisition.getDetailAddress() + "</detail_address>" + "<disctrict>" + requisition.getDisctrict()
+//					+ "</disctrict>" + "<province>" + requisition.getProvince() + "</province>" + "<subdistrict>"
+//					+ requisition.getSubdistrict() + "</subdistrict>" + "<order_time>" + requisition.getOrderTime()
+//					+ "</order_time>" + "<sub_order_number>" + requisition.getLeftPrice() + "</sub_order_number>"
+//					+ "<seller_tel>" + requisition.getSellerTel() + "</seller_tel>" + "<goods_quantity>"
+//					+ requisition.getGoodsQuantity() + "</goods_quantity>" + "<upstairs_all>"
+//					+ requisition.getUpstairsAll() + "</upstairs_all>" + "<upstairs_left>"
+//					+ requisition.getUpstairsLeft() + "</upstairs_left>" + "<DELIVERY_FEE>"
+//					+ requisition.getDeliveryFee() + "</DELIVERY_FEE></TABLE>" + "</ERP>";
+			String xmlStr = requisition.toXml();
 			xmlStr = xmlStr.replace("null", "");
+			LOGGER.info("XML拼装完毕：{}", xmlStr);
 
 			byte[] bs = xmlStr.getBytes();
 			byte[] encodeByte = Base64.encode(bs);

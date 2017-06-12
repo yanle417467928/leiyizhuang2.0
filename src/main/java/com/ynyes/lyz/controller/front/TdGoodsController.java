@@ -441,7 +441,7 @@ public class TdGoodsController {
 //			TdPriceListItem priceListItem = tdCommonService.getGoodsPrice(req, goods);
 			//根据登录信息查询门店信息
 			TdDiySite diySite = tdCommonService.getDiySite(req);
-			String custType = "";
+			String custType = "ZY";
 			//判断门店是经销还是直营
 			if (null != diySite) {
 				String custTypeName = diySite.getCustTypeName();
