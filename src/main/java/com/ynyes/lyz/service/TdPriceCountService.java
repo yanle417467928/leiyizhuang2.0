@@ -121,6 +121,8 @@ public class TdPriceCountService {
 		// 每次重新计算的时候，清空优惠券的使用说明
 		order.setCashCoupon(0.00);
 		order.setProductCoupon("");
+		order.setCashBalanceUsed(0d);
+		order.setUnCashBalanceUsed(0d);
 
 		List<TdOrderGoods> goodsList = order.getOrderGoodsList();
 		// 如果订单里面没有商品，则也没有计算的必要
@@ -131,6 +133,7 @@ public class TdPriceCountService {
 		// 初始化订单金额
 		order.setTotalPrice(0.00);
 		order.setTotalGoodsPrice(0.00);
+		order.getNotPayedFee();
 
 		// 开始计算原始商品总额和原始订单金额
 		for (TdOrderGoods orderGoods : goodsList) {
@@ -152,24 +155,6 @@ public class TdPriceCountService {
 			order.setTotalGoodsPrice(order.getTotalGoodsPrice() + total);
 		}
 
-		// 计算订单的运费
-		// order.setDeliverFee(0.00);
-
-		// 获取订单的收货街道
-		// List<TdSubdistrict> subDistrict_list = tdSubDistrictService
-		// .findByDistrictNameAndNameOrderBySortIdAsc(order.getDisctrict(),
-		// order.getSubdistrict());
-		// if (null != subDistrict_list && subDistrict_list.size() > 0) {
-		// TdSubdistrict subdistrict = subDistrict_list.get(0);
-		// if (null != subdistrict) {
-		// Double fee = subdistrict.getDeliveryFee();
-		// if (null != fee) {
-		// order.setDeliverFee(fee);
-		// }
-		// }
-		// }
-
-		// Double fee = 0d;
 		try {
 			Map<String, Double> depiveryFeeMap = new HashMap<>();
 			depiveryFeeMap = settlementService.countOrderDeliveryFee(user, order);
@@ -201,14 +186,6 @@ public class TdPriceCountService {
 		}
 		// 将运费的费用添加到订单总额中
 		order.setTotalPrice(order.getTotalPrice() + order.getDeliverFee());
-
-		// // 判断能否使用预存款和优惠券（支付方式为到店支付的情况下不能够使用预存款和优惠券）
-		// String payTypeTitle = order.getPayTypeTitle();
-		// if (null != payTypeTitle && payTypeTitle.equalsIgnoreCase("到店支付")) {
-		// order.setCashCouponId("");
-		// order.setProductCouponId("");
-		// canUseBalance = false;
-		// }
 
 		if (canUseBalance) {
 			// 开始计算使用的现金券的价值
@@ -262,10 +239,6 @@ public class TdPriceCountService {
 
 		order = this.memberDiscount(order);
 
-		// 计算会员差价优惠额
-		Double difFee = null == order.getDifFee() ? 0d : order.getDifFee();
-		order.setTotalPrice(order.getTotalPrice() - difFee);
-
 		// 计算上楼费
 		Double upstairsFee = tdUpstairSettingService.countUpstairsFee(order);
 		order.setUpstairsFee(upstairsFee);
@@ -281,7 +254,7 @@ public class TdPriceCountService {
 		}
 
 		order.setIsFixedDeliveryFee(isFixedDeliveryFee);
-
+		
 		// 开始计算最大能使用的预存款的额度
 		if (canUseBalance) {
 			Double balance = user.getBalance();
@@ -289,12 +262,12 @@ public class TdPriceCountService {
 				balance = 0.00;
 			}
 			// 如果预存款小于订单金额，则能够使用的最大预存款额度为用户的预存款
-			if (balance < (order.getTotalPrice() + order.getUpstairsFee())) {
+			if (balance < order.getNotPayedFee()) {
 				max_use = balance;
 			}
 			// 其他情况则为订单的金额
 			else {
-				max_use = (order.getTotalPrice() + order.getUpstairsFee());
+				max_use = order.getNotPayedFee();
 			}
 		} else {
 			max_use = 0.00;
@@ -311,14 +284,24 @@ public class TdPriceCountService {
 		}
 
 		// 判断是否使用的预存款大于了订单的总金额
-		if (order.getActualPay() > order.getTotalPrice()) {
-			order.setActualPay(order.getTotalPrice());
+		if (order.getActualPay() > order.getNotPayedFee()) {
+			order.setActualPay(order.getNotPayedFee());
 		}
 
 		// 判断上楼费是否多收
 		if (order.getUpstairsBalancePayed() > order.getUpstairsFee()) {
 			order.setUpstairsBalancePayed(order.getUpstairsFee());
 		}
+
+		// 判断是否是会员，如果不是，则不享受会员差价
+		TdUser realUser = tdUserService.findOne(order.getRealUserId());
+		if (null == realUser || null == realUser.getSellerId()) {
+			order.setDifFee(0d);
+		}
+
+		// 计算会员差价优惠额
+		Double difFee = null == order.getDifFee() ? 0d : order.getDifFee();
+		order.setTotalPrice(order.getTotalPrice() - difFee);
 
 		order.setTotalPrice(order.getTotalPrice() - order.getActualPay());
 
@@ -392,7 +375,7 @@ public class TdPriceCountService {
 					// 可用通用现金券的金额
 					Double normalPrice = 0d;
 					// 可用优工券的金额
-					Double YGPrice = 0d;
+					// Double YGPrice = 0d;
 
 					// 如果在模板里面配置了通用现金券的金额，则采用模板里配置的数据，否则就为0，表示不能用通用现金券
 					if (null != couponModule) {
@@ -400,11 +383,13 @@ public class TdPriceCountService {
 					}
 
 					// 根据价目表的价差获取差价券的金额
-					Double realPrice = null == orderGoods.getRealPrice() ? 0d : orderGoods.getRealPrice();
-					Double price = null == orderGoods.getPrice() ? 0d : orderGoods.getPrice();
-
-					YGPrice = price - realPrice;
-
+					// Double realPrice = null == orderGoods.getRealPrice() ? 0d
+					// : orderGoods.getRealPrice();
+					// Double price = null == orderGoods.getPrice() ? 0d :
+					// orderGoods.getPrice();
+					//
+					// YGPrice = price - realPrice;
+					//
 					Long quantity = orderGoods.getQuantity();
 					if (null == quantity) {
 						quantity = 0L;
@@ -413,7 +398,7 @@ public class TdPriceCountService {
 					if (null == couponNumber) {
 						couponNumber = 0L;
 					}
-					permitCash = (YGPrice + normalPrice) * (quantity - couponNumber);
+					permitCash = normalPrice * (quantity - couponNumber);
 
 					// 获取指定品牌下的【可使用额度，已使用额度】数组
 					Double[] permits = map.get(brandId);
@@ -736,13 +721,13 @@ public class TdPriceCountService {
 		// result参数中key代表商品的id，Double数组中依次存储：0. 商品的购买单价；1. 商品的购买数量；
 		// 2. 商品的总价；3.退货单价
 		Map<Long, Double[]> result = new HashMap<>();
-		
+
 		Boolean isMemberOrder = Boolean.FALSE;
 		// 判断该订单是否属于会员价
 		if (null != order.getDifFee() && order.getDifFee() > 0) {
 			isMemberOrder = Boolean.TRUE;
 		}
-		
+
 		if (null != order) {
 			List<TdOrderGoods> goodsList = order.getOrderGoodsList();
 			List<TdOrderGoods> presentedList = order.getPresentedList();
@@ -2445,17 +2430,17 @@ public class TdPriceCountService {
 				// tdCommonService.getGoodsPrice(req, good);
 				// 根据登录信息查询门店信息
 				TdDiySite diySite = tdCommonService.getDiySite(req);
-//				String custType = "";
-//				// 判断门店是经销还是直营
-//				if (null != diySite) {
-//					String custTypeName = diySite.getCustTypeName();
-//					if ("经销商".equals(custTypeName)) {
-//						custType = "JX";
-//					}
-//					if ("直营".equals(custTypeName)) {
-//						custType = "ZY";
-//					}
-//				}
+				// String custType = "";
+				// // 判断门店是经销还是直营
+				// if (null != diySite) {
+				// String custTypeName = diySite.getCustTypeName();
+				// if ("经销商".equals(custTypeName)) {
+				// custType = "JX";
+				// }
+				// if ("直营".equals(custTypeName)) {
+				// custType = "ZY";
+				// }
+				// }
 				// 根据门店、商品、价格类型查询商品价格信息
 				TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, good, "ZY");
 

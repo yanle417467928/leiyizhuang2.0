@@ -13,8 +13,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.GenerationTime;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.ynyes.lyz.entity.TdShippingAddress;
@@ -162,8 +160,7 @@ public class TdUser {
 	private Double creditLimit = 0d;
 	
 	//更改版本
-	@Column(length = 15, nullable = false, columnDefinition = "timestamp")
-	@Generated(GenerationTime.ALWAYS)
+	@Column(length = 15, nullable = false)
 	private Timestamp version;
 	
 	public Long getId() {

@@ -57,7 +57,7 @@
                 $.ajax({
                     url:"/fit/goods/category/" + id,
                     type:"post",
-                    timeout:10000,
+                    timeout:30000,
                     error:function(){
                         close(1);
                         warning("亲，您的网速不给力啊");

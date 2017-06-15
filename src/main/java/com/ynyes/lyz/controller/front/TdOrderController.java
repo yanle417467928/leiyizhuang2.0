@@ -1379,6 +1379,14 @@ public class TdOrderController {
 								req.getSession().setAttribute("order_temp", order);
 								// 存储产品券的实际使用价值
 //								coupon.setRealPrice(orderGoods.getPrice());
+								// 如果真实用户是会员，那么产品券的价值相当于商品的会员价
+								Long realUserId = order.getRealUserId();
+								TdUser realUser = tdUserService.findOne(realUserId);
+								if (null != realUser && null != realUser.getSellerId()) {
+									coupon.setRealPrice(orderGoods.getRealPrice());
+								} else {
+									coupon.setRealPrice(orderGoods.getPrice());
+								}
 
 								// 判断是否为购买的产品券，如果是，则记录
 								if (null != coupon.getIsBuy() && coupon.getIsBuy()) {
@@ -1418,14 +1426,6 @@ public class TdOrderController {
 									Long couponId = Long.valueOf(sCouponId);
 									if (null != couponId && couponId.longValue() != coupon.getId().longValue()) {
 										ids += (sCouponId + ",");
-										// 如果真实用户是会员，那么产品券的价值相当于商品的会员价
-										Long realUserId = order.getRealUserId();
-										TdUser realUser = tdUserService.findOne(realUserId);
-										if (null != realUser && null != realUser.getSellerId()) {
-											coupon.setRealPrice(orderGoods.getRealPrice());
-										} else {
-											coupon.setRealPrice(orderGoods.getPrice());
-										}
 										TdCoupon tempCoupon = tdCouponService.findOne(couponId);
 										if (null != tempCoupon && null != tempCoupon.getIsBuy()
 												&& tempCoupon.getIsBuy()) {
@@ -1942,6 +1942,7 @@ public class TdOrderController {
 					try {
 						settlementService.disminlate(req, order, null);
 					} catch (Exception e) {
+						LOG.error("拆单失败：{}", e.getMessage());
 						e.printStackTrace();
 					}
 				}

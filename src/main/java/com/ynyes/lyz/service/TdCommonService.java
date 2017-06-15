@@ -715,20 +715,22 @@ public class TdCommonService {
 
 		Long listHeaderId = diySitePriceList.get(0).getListHeaderId();
 
-		List<TdPriceList> priceList_list = tdPriceListService
-				.findByListHeaderIdAndPriceTypeAndStartDateActiveAndEndDateActive(listHeaderId, priceType, new Date(),
-						new Date());
+//		String goodsType;
+//		
+//		List<TdPriceList> priceList_list = tdPriceListService
+//				.findByListHeaderIdAndPriceTypeAndStartDateActiveAndEndDateActive(listHeaderId, priceType, new Date(),
+//						new Date());
+//
+//		if (null == priceList_list || priceList_list.size() == 0 || priceList_list.size() > 1) {
+//			return null;
+//		}
 
-		if (null == priceList_list || priceList_list.size() == 0 || priceList_list.size() > 1) {
-			return null;
-		}
-
-		// 价目表ID
-		Long list_header_id = 0L;
-		list_header_id = priceList_list.get(0).getListHeaderId();
+//		// 价目表ID
+//		Long list_header_id = 0L;
+//		list_header_id = priceList_list.get(0).getListHeaderId();
 
 		List<TdPriceListItem> priceItemList = tdPriceListItemService
-				.findByListHeaderIdAndInventoryItemIdAndStartDateActiveAndEndDateActive(list_header_id,
+				.findByListHeaderIdAndInventoryItemIdAndStartDateActiveAndEndDateActive(listHeaderId,
 						goods.getInventoryItemId(), new Date(), new Date());
 
 		if (null == priceItemList || priceItemList.size() == 0 || priceItemList.size() > 1) {
@@ -1583,6 +1585,10 @@ public class TdCommonService {
 		virtual.setRealUserId(user.getId());
 		virtual.setRealUserRealName(user.getRealName());
 		virtual.setRealUserUsername(user.getUsername());
+		
+		virtual.getNotPayedFee();
+		virtual.setUnCashBalanceUsed(0d);
+		virtual.setCashBalanceUsed(0d);
 
 		if (user.getUserType().equals(1L) || user.getUserType().equals(2L)) {
 			virtual.setIsSellerOrder(true);

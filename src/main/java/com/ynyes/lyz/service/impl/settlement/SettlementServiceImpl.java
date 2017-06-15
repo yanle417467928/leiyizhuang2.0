@@ -1639,24 +1639,25 @@ public class SettlementServiceImpl implements ISettlementService {
 	 * @param mainOrder
 	 */
 	private void disminlateDifFee(Map<Long, TdOrder> subOrderMap, TdOrder mainOrder) {
-		// 遍历当前生成的订单
-		for (TdOrder subOrder : subOrderMap.values()) {
-			if (null != subOrder) {
-				// 遍历订单商品信息
-				List<TdOrderGoods> orderGoodsList = subOrder.getOrderGoodsList();
-				if (null != orderGoodsList && orderGoodsList.size() > 0) {
-					for (TdOrderGoods orderGoods : orderGoodsList) {
-						if (null != orderGoods) {
-							// 设置会员差价
-							subOrder.setDifFee(subOrder.getDifFee()
-									+ (orderGoods.getPrice() - orderGoods.getRealPrice()) * orderGoods.getQuantity());
-							subOrder.setTotalPrice(subOrder.getTotalPrice() - subOrder.getDifFee());
+		if (null != mainOrder.getDifFee() && mainOrder.getDifFee() > 0) {
+			// 遍历当前生成的订单
+			for (TdOrder subOrder : subOrderMap.values()) {
+				if (null != subOrder) {
+					// 遍历订单商品信息
+					List<TdOrderGoods> orderGoodsList = subOrder.getOrderGoodsList();
+					if (null != orderGoodsList && orderGoodsList.size() > 0) {
+						for (TdOrderGoods orderGoods : orderGoodsList) {
+							if (null != orderGoods) {
+								// 设置会员差价
+								subOrder.setDifFee(subOrder.getDifFee()
+										+ (orderGoods.getPrice() - orderGoods.getRealPrice()) * orderGoods.getQuantity());
+								subOrder.setTotalPrice(subOrder.getTotalPrice() - subOrder.getDifFee());
+							}
 						}
 					}
 				}
 			}
 		}
-
 	}
 
 	/**
