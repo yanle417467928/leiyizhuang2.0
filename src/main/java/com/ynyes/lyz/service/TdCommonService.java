@@ -2784,6 +2784,7 @@ public class TdCommonService {
 			Double colorFee = 0d;
 			Double discount = 0d;
 			Double balanceUsed = 0d;
+			Double otherPayed = 0d;
 
 			for (TdOrder tdOrder : orderList) {
 
@@ -2848,20 +2849,29 @@ public class TdCommonService {
 					Double cashBalanceUsed = null == tdOrder.getCashBalanceUsed() ? 0d : tdOrder.getCashBalanceUsed();
 					Double unCashBalanceUsed = null == tdOrder.getUnCashBalanceUsed() ? 0d
 							: tdOrder.getUnCashBalanceUsed();
+					Double otherPay = null == tdOrder.getOtherPay() ? 0d : tdOrder.getOtherPay();
 
 					discount += (subPrice + cashCoupon + proCoupon + difFee);
 					balanceUsed += (cashBalanceUsed + unCashBalanceUsed);
+					otherPayed += otherPay;
 				}
 
 			}
+			
+			Double upstairsOtherPayed = null == order.getUpstairsOtherPayed() ? 0d : order.getUpstairsOtherPayed();
+			Double upstairsBalancePayed = null == order.getUpstairsBalancePayed() ? 0d : order.getUpstairsOtherPayed();
+			
+			balanceUsed -= upstairsBalancePayed;
+			otherPayed -= upstairsOtherPayed;
 
 			requisition.setDeliveryFee(deliveryFee);
 			requisition.setColorFee(colorFee);
 			requisition.setDiscount(discount);
 			requisition.setBalanceUsed(balanceUsed);
 			requisition.setTotalGoodsPrice(totalGoodsPrice);
+			requisition.setOtherPayed(otherPayed);
 
-			left = totalGoodsPrice + deliveryFee + colorFee - discount - balanceUsed;
+			left = totalGoodsPrice + deliveryFee + colorFee - discount - balanceUsed - otherPayed;
 
 			if ("支付宝".equalsIgnoreCase(payTypeTitle) || "银行卡".equalsIgnoreCase(payTypeTitle)
 					|| "微信支付".equalsIgnoreCase(payTypeTitle)) {

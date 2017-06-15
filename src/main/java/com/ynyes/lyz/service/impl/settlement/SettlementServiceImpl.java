@@ -114,7 +114,7 @@ public class SettlementServiceImpl implements ISettlementService {
 
 	@Autowired
 	private TdInterfaceService tdInterfaceService;
-	
+
 	private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
 	@Override
@@ -211,8 +211,8 @@ public class SettlementServiceImpl implements ISettlementService {
 	@Override
 	public void disminlate(HttpServletRequest req, TdOrder mainOrder, Boolean isFitmentOrder) throws Exception {
 		Double deliveryFee = mainOrder.getDeliverFee();
-		
-		//设置需扣减用户预存款
+
+		// 设置需扣减用户预存款
 		setbalanceUsed(mainOrder);
 		// 创建一个Map集合存储所有的分单，键值对规则为K-V：【品牌ID】-【分单】
 		Map<Long, TdOrder> subOrderMap = new HashMap<>();
@@ -220,7 +220,7 @@ public class SettlementServiceImpl implements ISettlementService {
 		disminlateOrderGoodsList(subOrderMap, mainOrder);
 		// 拆分优惠券
 		disminlateCoupon(subOrderMap, mainOrder);
-		//设置拆分会员差价
+		// 设置拆分会员差价
 		disminlateDifFee(subOrderMap, mainOrder);
 		// 获取赠品
 		getPresentAndGift(req, subOrderMap);
@@ -228,10 +228,10 @@ public class SettlementServiceImpl implements ISettlementService {
 		setDeliveryFee(subOrderMap, mainOrder);
 		// 拆分预存款
 		disminlateBalance(subOrderMap, mainOrder);
-		
-		//拆分调色费
-		
-		//计算代收金额
+
+		// 拆分调色费
+
+		// 计算代收金额
 		for (TdOrder subOrder : subOrderMap.values()) {
 			if (null != subOrder) {
 				subOrder.getNotPayedFee();
@@ -240,10 +240,6 @@ public class SettlementServiceImpl implements ISettlementService {
 		// 存储及发送订单
 		saveAndSend(req, subOrderMap, mainOrder, deliveryFee);
 	}
-
-	
-
-	
 
 	/**
 	 * <p>
@@ -409,7 +405,7 @@ public class SettlementServiceImpl implements ISettlementService {
 						initSubOrder(subOrder, mainOrder);
 					}
 
-					Double jxPrice = null == orderGoods.getJxPrice() ? 0d : orderGoods.getJxPrice();
+					Double jxDif = null == orderGoods.getJxDif() ? 0d : orderGoods.getJxDif();
 					Long couponQuantity = null == orderGoods.getCouponNumber() ? 0L : orderGoods.getCouponNumber();
 
 					subOrder.getOrderGoodsList().add(orderGoods);
@@ -417,9 +413,9 @@ public class SettlementServiceImpl implements ISettlementService {
 							subOrder.getTotalGoodsPrice() + (orderGoods.getPrice() * orderGoods.getQuantity()));
 					subOrder.setTotalPrice(
 							subOrder.getTotalPrice() + (orderGoods.getPrice() * orderGoods.getQuantity()));
-					
+
 					subOrder.setJxTotalPrice(
-							subOrder.getJxTotalPrice() + jxPrice * (orderGoods.getQuantity() - couponQuantity));
+							subOrder.getJxTotalPrice() + jxDif * (orderGoods.getQuantity() - couponQuantity));
 
 					subOrder = tdOrderService.save(subOrder);
 					subOrderMap.put(brandId, subOrder);
@@ -543,6 +539,8 @@ public class SettlementServiceImpl implements ISettlementService {
 
 		// 设置是否是电子券
 		subOrder.setIsCoupon(mainOrder.getIsCoupon());
+
+		subOrder.setReceiverIsMember(mainOrder.getReceiverIsMember());
 	}
 
 	/**
@@ -623,8 +621,9 @@ public class SettlementServiceImpl implements ISettlementService {
 													if (null == subOrder.getProCouponFee()) {
 														subOrder.setProCouponFee(0.00);
 													}
-													//拆分产品券优惠券金额
-													subOrder.setProCouponFee(subOrder.getProCouponFee() + coupon.getRealPrice());
+													// 拆分产品券优惠券金额
+													subOrder.setProCouponFee(
+															subOrder.getProCouponFee() + coupon.getRealPrice());
 												}
 											}
 										}
@@ -779,7 +778,7 @@ public class SettlementServiceImpl implements ISettlementService {
 		for (TdOrder subOrder : subOrderMap.values()) {
 			if (null != subOrder) {
 				Double subPrice = subOrder.getTotalPrice();
-				//扣减会员差价
+				// 扣减会员差价
 				if (null == subPrice || 0.00 == subPrice) {
 					subOrder.setUnCashBalanceUsed(0.00);
 					subOrder.setCashBalanceUsed(0.00);
@@ -822,10 +821,11 @@ public class SettlementServiceImpl implements ISettlementService {
 
 						// 不可提现预存款
 						if (new Double(scale2_uncash).doubleValue() != 0d) {
-//							realUser.setUnCashBalance(realUser.getUnCashBalance() - Double.valueOf(scale2_uncash));
-							//对预存款更新进行并发控制
+							// realUser.setUnCashBalance(realUser.getUnCashBalance()
+							// - Double.valueOf(scale2_uncash));
+							// 对预存款更新进行并发控制
 							realUser = modifyBalance(Double.valueOf(scale2_uncash), realUser);
-							
+
 							TdBalanceLog balanceLog = new TdBalanceLog();
 							balanceLog.setUserId(subOrder.getRealUserId());
 							balanceLog.setUsername(subOrder.getUsername());
@@ -851,10 +851,11 @@ public class SettlementServiceImpl implements ISettlementService {
 						}
 						// 可提现预存款
 						if (new Double(scale2_cash).doubleValue() != 0d) {
-//							realUser.setCashBalance(realUser.getCashBalance() - Double.valueOf(scale2_cash));
-							//对预存款更新进行并发控制
+							// realUser.setCashBalance(realUser.getCashBalance()
+							// - Double.valueOf(scale2_cash));
+							// 对预存款更新进行并发控制
 							realUser = modifyBalance(Double.valueOf(scale2_cash), realUser);
-							
+
 							TdBalanceLog balanceLog = new TdBalanceLog();
 							balanceLog.setUserId(subOrder.getRealUserId());
 							balanceLog.setUsername(subOrder.getUsername());
@@ -877,8 +878,8 @@ public class SettlementServiceImpl implements ISettlementService {
 							tdBalanceLogService.save(balanceLog);
 							// remainCash += Double.valueOf(scale2_cash);
 						}
-//						realUser.getBalance();
-//						tdUserService.save(realUser);
+						// realUser.getBalance();
+						// tdUserService.save(realUser);
 					}
 				}
 			}
@@ -887,13 +888,14 @@ public class SettlementServiceImpl implements ISettlementService {
 		// 2016-12-17:完成分单预存款的扣减之后，扣减支付上楼费的预存款
 		Double upstairsBalancePayed = mainOrder.getUpstairsBalancePayed();
 		Double unCashBalance = realUser.getUnCashBalance();
-//		Double cashBalance = realUser.getCashBalance();
+		// Double cashBalance = realUser.getCashBalance();
 		if (upstairsBalancePayed > 0) {
 			if (unCashBalance >= upstairsBalancePayed) {
-//				realUser.setUnCashBalance(realUser.getUnCashBalance() - upstairsBalancePayed);
-				//对预存款更新进行并发控制
+				// realUser.setUnCashBalance(realUser.getUnCashBalance() -
+				// upstairsBalancePayed);
+				// 对预存款更新进行并发控制
 				realUser = modifyBalance(upstairsBalancePayed, realUser);
-				
+
 				TdBalanceLog balanceLog = new TdBalanceLog();
 				balanceLog.setUserId(mainOrder.getRealUserId());
 				balanceLog.setUsername(mainOrder.getUsername());
@@ -917,10 +919,10 @@ public class SettlementServiceImpl implements ISettlementService {
 				tdBalanceLogService.save(balanceLog);
 			} else {
 				if (unCashBalance > 0) {
-//					realUser.setUnCashBalance(0d);
-					//对预存款更新进行并发控制
+					// realUser.setUnCashBalance(0d);
+					// 对预存款更新进行并发控制
 					realUser = modifyBalance(unCashBalance, realUser);
-					
+
 					TdBalanceLog balanceLog = new TdBalanceLog();
 					balanceLog.setUserId(mainOrder.getRealUserId());
 					balanceLog.setUsername(mainOrder.getUsername());
@@ -943,10 +945,11 @@ public class SettlementServiceImpl implements ISettlementService {
 					balanceLog.setAllLeft(realUser.getBalance());
 					tdBalanceLogService.save(balanceLog);
 				}
-//				realUser.setCashBalance(cashBalance + unCashBalance - upstairsBalancePayed);
-				//对预存款更新进行并发控制
+				// realUser.setCashBalance(cashBalance + unCashBalance -
+				// upstairsBalancePayed);
+				// 对预存款更新进行并发控制
 				realUser = modifyBalance(upstairsBalancePayed - unCashBalance, realUser);
-				
+
 				TdBalanceLog balanceLog = new TdBalanceLog();
 				balanceLog.setUserId(mainOrder.getRealUserId());
 				balanceLog.setUsername(mainOrder.getUsername());
@@ -969,8 +972,8 @@ public class SettlementServiceImpl implements ISettlementService {
 				balanceLog.setAllLeft(realUser.getBalance());
 				tdBalanceLogService.save(balanceLog);
 			}
-//			tdUserService.save(realUser);
-			
+			// tdUserService.save(realUser);
+
 		}
 
 		this.costCredit(mainOrder);
@@ -1073,7 +1076,7 @@ public class SettlementServiceImpl implements ISettlementService {
 					}
 
 					Double strandardFee = totalGoodsPrice - cashCouponFee - activitySubFee - proCouponFee;
-					
+
 					if (strandardFee >= 1000) {
 
 						deliveryMap.put("user_delivery_fee", 0d);
@@ -1477,6 +1480,9 @@ public class SettlementServiceImpl implements ISettlementService {
 			Long diySiteId = order.getDiySiteId();
 			TdDiySite diySite = tdDiySiteService.findOne(diySiteId);
 			String custTypeName = diySite.getCustTypeName();
+
+			Long realUserId = order.getRealUserId();
+			TdUser user = tdUserService.findOne(realUserId);
 			if (null != custTypeName && custTypeName.equalsIgnoreCase("经销商")) {
 				if (null != order.getOrderGoodsList() && order.getOrderGoodsList().size() > 0) {
 					List<TdOrderGoods> orderGoodsList = order.getOrderGoodsList();
@@ -1485,6 +1491,11 @@ public class SettlementServiceImpl implements ISettlementService {
 								orderGoods.getSku(), "JX");
 						Double jxPrice = jxPriceListItem.getPrice();
 						orderGoods.setJxPrice(jxPrice);
+						if (null != user && null != user.getSellerId()) {
+							orderGoods.setJxDif(orderGoods.getRealPrice() - orderGoods.getJxPrice());
+						} else {
+							orderGoods.setJxDif(orderGoods.getPrice() - orderGoods.getJxPrice());
+						}
 						tdOrderGoodsService.save(orderGoods);
 					}
 				}
@@ -1581,48 +1592,47 @@ public class SettlementServiceImpl implements ISettlementService {
 		int i = (int) (Math.random() * 900) + 100;
 		return "RC" + middle + i;
 	}
-	
+
 	/**
 	 * @title 根据version更新用户余额
-	 * @describe 
+	 * @describe
 	 * @author Generation Road
 	 * @date 2017年6月6日
 	 * @param variableAmount
 	 * @param user
 	 */
 	@Override
-	public TdUser modifyBalance(Double variableAmount, TdUser user){
-		
+	public TdUser modifyBalance(Double variableAmount, TdUser user) {
+
 		if (null == user) {
 			return user;
 		}
 		if (null == variableAmount || 0.0 == variableAmount || variableAmount > user.getBalance()) {
 			return user;
 		}
-		
+
 		Double unCashBalance = user.getUnCashBalance();
 		Double cashBalance = user.getCashBalance();
-		//先扣除不可提现预存款，在扣除可提现预存款
+		// 先扣除不可提现预存款，在扣除可提现预存款
 		if (variableAmount <= unCashBalance) {
 			user.setUnCashBalance(unCashBalance - variableAmount);
-		}else {
+		} else {
 			variableAmount = variableAmount - unCashBalance;
 			user.setUnCashBalance(0.0);
 			user.setCashBalance(cashBalance - variableAmount);
 		}
-		
+
 		int row = tdUserService.modifyBalace(user);
-		//并发控制，判断version是否改变
+		// 并发控制，判断version是否改变
 		if (1 != row) {
 			throw new AppConcurrentExcp("账号余额信息过期！");
 		}
 		return user;
 	}
-	
-	
+
 	/**
 	 * @title 设置会员差价
-	 * @describe 
+	 * @describe
 	 * @author Generation Road
 	 * @date 2017年6月8日
 	 * @param subOrderMap
@@ -1632,31 +1642,32 @@ public class SettlementServiceImpl implements ISettlementService {
 		// 遍历当前生成的订单
 		for (TdOrder subOrder : subOrderMap.values()) {
 			if (null != subOrder) {
-				//遍历订单商品信息
+				// 遍历订单商品信息
 				List<TdOrderGoods> orderGoodsList = subOrder.getOrderGoodsList();
 				if (null != orderGoodsList && orderGoodsList.size() > 0) {
 					for (TdOrderGoods orderGoods : orderGoodsList) {
 						if (null != orderGoods) {
-							//设置会员差价
-							subOrder.setDifFee(subOrder.getDifFee() + (orderGoods.getPrice() - orderGoods.getRealPrice()) * orderGoods.getQuantity());
+							// 设置会员差价
+							subOrder.setDifFee(subOrder.getDifFee()
+									+ (orderGoods.getPrice() - orderGoods.getRealPrice()) * orderGoods.getQuantity());
 							subOrder.setTotalPrice(subOrder.getTotalPrice() - subOrder.getDifFee());
 						}
 					}
 				}
 			}
 		}
-		
+
 	}
-	
+
 	/**
 	 * @title 设置需扣减用户预存款
-	 * @describe 
+	 * @describe
 	 * @author Generation Road
 	 * @date 2017年6月12日
 	 * @param mainOrder
 	 */
 	private void setbalanceUsed(TdOrder mainOrder) {
-		
+
 		// 获取真实用户
 		Long realUserId = mainOrder.getRealUserId();
 		TdUser realUser = tdUserService.findOne(realUserId);

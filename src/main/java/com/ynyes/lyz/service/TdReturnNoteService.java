@@ -432,7 +432,7 @@ public class TdReturnNoteService {
 	}
 
 	public List<TdCashRefundInf> doActionWithReturnCash(TdReturnNote returnNote, TdUser user, TdDiySite diySite) {
-		Double jxReturn = returnNote.getJxReturn();
+		Double jxReturn = null == returnNote.getJxReturn() ? 0d : returnNote.getJxReturn();
 		Double unCashBalance = user.getUnCashBalance();
 		Double unCashCost = 0d;
 		Double cashCost = 0d;

@@ -1189,6 +1189,7 @@ public class TdOrderController {
 		}
 		
 		if (0L == type) {
+			List<TdOrderGoods> goodsList = order.getOrderGoodsList();
 			if (0L == status) {
 				if (null == brandId) {
 					res.put("message", "未找到指定优惠券的信息");
@@ -1206,7 +1207,6 @@ public class TdOrderController {
 					// 第三种情况，使用的是指定产品现金券，并且使用数目 = 产品数量 - 产品券使用数量
 				} else if (coupon.getTypeCategoryId().longValue() == 2L) {
 					// 获取订单的已选商品
-					List<TdOrderGoods> goodsList = order.getOrderGoodsList();
 					for (TdOrderGoods orderGoods : goodsList) {
 						if (null != orderGoods && null != orderGoods.getGoodsId()
 								&& orderGoods.getGoodsId().longValue() == coupon.getGoodsId().longValue()) {
@@ -1257,7 +1257,6 @@ public class TdOrderController {
 					tdOrderService.save(order);
 					if (coupon.getTypeCategoryId().longValue() == 2L) {
 						// 获取订单的已选商品
-						List<TdOrderGoods> goodsList = order.getOrderGoodsList();
 						for (TdOrderGoods orderGoods : goodsList) {
 							if (null != orderGoods && null != orderGoods.getGoodsId()
 									&& orderGoods.getGoodsId().longValue() == coupon.getGoodsId().longValue()) {
@@ -1265,9 +1264,12 @@ public class TdOrderController {
 									orderGoods.setCashNumber(0L);
 								}
 								orderGoods.setCashNumber(orderGoods.getCashNumber() + 1L);
+								order.setOrderGoodsList(goodsList);
+								orderGoods.setTdOrderId(order.getId());
 								tdOrderGoodsService.save(orderGoods);
 							}
 						}
+						order.setOrderGoodsList(goodsList);
 					}
 
 					// 计算当前现金券的实际使用价值
@@ -1277,6 +1279,7 @@ public class TdOrderController {
 						coupon.setRealPrice(coupon.getPrice());
 					}
 					tdCouponService.save(coupon);
+					tdOrderService.save(order);
 				}
 			}
 			if (1L == status) {
@@ -1303,7 +1306,6 @@ public class TdOrderController {
 
 					if (coupon.getTypeCategoryId().longValue() == 2L) {
 						// 获取订单的已选商品
-						List<TdOrderGoods> goodsList = order.getOrderGoodsList();
 						for (TdOrderGoods orderGoods : goodsList) {
 							if (null != orderGoods && null != orderGoods.getGoodsId()
 									&& orderGoods.getGoodsId().longValue() == coupon.getGoodsId().longValue()) {
@@ -1311,9 +1313,13 @@ public class TdOrderController {
 									orderGoods.setCashNumber(0L);
 								}
 								orderGoods.setCashNumber(orderGoods.getCashNumber() - 1L);
+								order.setOrderGoodsList(goodsList);
+								orderGoods.setTdOrderId(order.getId());
 								tdOrderGoodsService.save(orderGoods);
 							}
 						}
+						order.setOrderGoodsList(goodsList);
+						tdOrderService.save(order);
 					}
 				}
 			}
@@ -1362,9 +1368,13 @@ public class TdOrderController {
 
 							if (!isHave) {
 								orderGoods.setCouponNumber(couponNumber + 1L);
+								order.setOrderGoodsList(goodsList);
+								orderGoods.setTdOrderId(order.getId());
 								tdOrderGoodsService.save(orderGoods);
 								productCouponId += coupon.getId() + ",";
 								order.setProductCouponId(productCouponId);
+								
+								order = tdOrderService.save(order);
 								
 								req.getSession().setAttribute("order_temp", order);
 								// 存储产品券的实际使用价值
@@ -1395,6 +1405,8 @@ public class TdOrderController {
 						} else {
 							orderGoods.setCouponNumber(orderGoods.getCouponNumber() - 1L);
 						}
+						order.setOrderGoodsList(goodsList);
+						orderGoods.setTdOrderId(order.getId());
 						tdOrderGoodsService.save(orderGoods);
 						if (!"".equals(productCouponId)) {
 							String[] strings = productCouponId.split(",");
@@ -1426,6 +1438,8 @@ public class TdOrderController {
 							order.setBuyCouponId(buyIds);
 						}
 						order.setProductCouponId(productCouponId);
+						order.setOrderGoodsList(goodsList);
+						tdOrderService.save(order);
 						req.getSession().setAttribute("order_temp", order);
 						tdOrderService.save(order);
 					}

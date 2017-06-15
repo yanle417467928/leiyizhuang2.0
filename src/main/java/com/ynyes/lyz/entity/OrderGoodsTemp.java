@@ -5,8 +5,11 @@ public class OrderGoodsTemp {
 	private Long goodsId;
 	private Double lsPrice = 0d;
 	private Double jxPrice = 0d;
+	private Double jxDif = 0d;
 	private Long quantity = 0L;
 	private Long freeCount = 0L;
+	
+	
 	public Long getGoodsId() {
 		return goodsId;
 	}
@@ -36,5 +39,11 @@ public class OrderGoodsTemp {
 	}
 	public void setFreeCount(Long freeCount) {
 		this.freeCount = freeCount;
+	}
+	public Double getJxDif() {
+		return jxDif;
+	}
+	public void setJxDif(Double jxDif) {
+		this.jxDif = jxDif;
 	}
 }

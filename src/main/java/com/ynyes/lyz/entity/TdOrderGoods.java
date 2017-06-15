@@ -169,6 +169,9 @@ public class TdOrderGoods {
 	// 经销价
 	@Column(scale = 2)
 	private Double jxPrice = 0d;
+	
+	@Column(scale = 2)
+	private Double jxDif = 0d;
 
 	public String getSubOrderNumber() {
 		return subOrderNumber;
@@ -480,6 +483,14 @@ public class TdOrderGoods {
 
 	public void setJxPrice(Double jxPrice) {
 		this.jxPrice = jxPrice;
+	}
+
+	public Double getJxDif() {
+		return jxDif;
+	}
+
+	public void setJxDif(Double jxDif) {
+		this.jxDif = jxDif;
 	}
 
 }

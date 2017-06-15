@@ -149,6 +149,10 @@ public class TdRequisition {
 	@Column(scale = 2, nullable = false)
 	private Double balanceUsed = 0d;
 
+	// 表示第三方支付金额
+	@Column(scale = 2, nullable = false)
+	private Double otherPayed = 0d;
+	
 	// 表示是否是主家收货
 	@Column(length = 5, nullable = false)
 	private String memberReceiver = "FALSE";
@@ -428,6 +432,14 @@ public class TdRequisition {
 		this.totalGoodsPrice = totalGoodsPrice;
 	}
 
+	public Double getOtherPayed() {
+		return otherPayed;
+	}
+
+	public void setOtherPayed(Double otherPayed) {
+		this.otherPayed = otherPayed;
+	}
+
 	@Override
 	public String toString() {
 		return "TdRequisition [id=" + id + ", diySiteTitle=" + diySiteTitle + ", diySiteId=" + diySiteId
@@ -440,7 +452,8 @@ public class TdRequisition {
 				+ diySiteTel + ", diyCode=" + diyCode + ", sellerRealName=" + sellerRealName + ", sellerTel="
 				+ sellerTel + ", goodsQuantity=" + goodsQuantity + ", upstairsAll=" + upstairsAll + ", upstairsLeft="
 				+ upstairsLeft + ", deliveryFee=" + deliveryFee + ", colorFee=" + colorFee + ", discount=" + discount
-				+ ", balanceUsed=" + balanceUsed + ", memberReceiver=" + memberReceiver + "]";
+				+ ", balanceUsed=" + balanceUsed + ", otherPayed=" + otherPayed + ", memberReceiver=" + memberReceiver
+				+ ", totalGoodsPrice=" + totalGoodsPrice + "]";
 	}
 
 	public String toXml() {
@@ -482,6 +495,7 @@ public class TdRequisition {
 		builder.append("<COLOR_FEE>").append(this.colorFee).append("</COLOR_FEE>");
 		builder.append("<DISCOUNT>").append(this.discount).append("</DISCOUNT>");
 		builder.append("<BALANCE_USED>").append(this.balanceUsed).append("</BALANCE_USED>");
+		builder.append("<OTHER_PAYED>").append(this.otherPayed).append("</OTHER_PAYED>");
 		builder.append("<MEMBER_RECEIVER>").append(this.memberReceiver).append("</MEMBER_RECEIVER>");
 		builder.append("<UNPAYED>").append(this.leftPrice).append("</UNPAYED>");
 		builder.append("<TOTAL_GOODS_PRICE>").append(this.totalGoodsPrice).append("</TOTAL_GOODS_PRICE>");

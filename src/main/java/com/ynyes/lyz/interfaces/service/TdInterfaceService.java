@@ -383,7 +383,14 @@ public class TdInterfaceService {
 				if (tdOrder.getOrderNumber().contains("FIT")) {
 					goodsInf.setLsPrice(tdOrderGoods.getRealPrice());
 				} else {
-					goodsInf.setLsPrice(tdOrderGoods.getPrice());
+					if (null != tdOrder.getDifFee() && tdOrder.getDifFee() > 0) {
+						goodsInf.setLsPrice(tdOrderGoods.getRealPrice());
+					} else {
+						goodsInf.setLsPrice(tdOrderGoods.getPrice());
+					}
+				}
+				if (null != tdOrder.getJxTotalPrice() && tdOrder.getJxTotalPrice() > 0) {
+					goodsInf.setJxPrice(tdOrderGoods.getJxPrice());
 				}
 				goodsInf.setGiftFlag("N");
 				goodsInf.setPromotion(tdOrderGoods.getActivityId());
@@ -836,8 +843,6 @@ public class TdInterfaceService {
 
 		return null;
 	}
-	
-	
 
 	public TdCashReciptInf initCashReceiptInfWithOrderAndReceiptTypeAndMoney(TdOrder tdOrder, String receiptTtpe,
 			Double amount) {

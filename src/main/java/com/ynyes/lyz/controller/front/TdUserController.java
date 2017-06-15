@@ -428,17 +428,17 @@ public class TdUserController {
 					TdGoods goods = tdGoodsService.findOne(userCollect.getGoodsId());
 					// TdPriceListItem priceListItem =
 					// tdCommonService.getGoodsPrice(req, goods);
-//					String custType = "";
-//					// 判断门店是经销还是直营
-//					if (null != diySite) {
-//						String custTypeName = diySite.getCustTypeName();
-//						if ("经销商".equals(custTypeName)) {
-//							custType = "JX";
-//						}
-//						if ("直营".equals(custTypeName)) {
-//							custType = "ZY";
-//						}
-//					}
+					// String custType = "";
+					// // 判断门店是经销还是直营
+					// if (null != diySite) {
+					// String custTypeName = diySite.getCustTypeName();
+					// if ("经销商".equals(custTypeName)) {
+					// custType = "JX";
+					// }
+					// if ("直营".equals(custTypeName)) {
+					// custType = "ZY";
+					// }
+					// }
 					// 根据门店、商品、价格类型查询商品价格信息
 					TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, goods, "ZY");
 
@@ -545,17 +545,17 @@ public class TdUserController {
 				TdGoods goods = tdGoodsService.findOne(recentVisit.getGoodsId());
 				// TdPriceListItem priceListItem =
 				// tdCommonService.getGoodsPrice(req, goods);
-//				String custType = "";
-//				// 判断门店是经销还是直营
-//				if (null != diySite) {
-//					String custTypeName = diySite.getCustTypeName();
-//					if ("经销商".equals(custTypeName)) {
-//						custType = "JX";
-//					}
-//					if ("直营".equals(custTypeName)) {
-//						custType = "ZY";
-//					}
-//				}
+				// String custType = "";
+				// // 判断门店是经销还是直营
+				// if (null != diySite) {
+				// String custTypeName = diySite.getCustTypeName();
+				// if ("经销商".equals(custTypeName)) {
+				// custType = "JX";
+				// }
+				// if ("直营".equals(custTypeName)) {
+				// custType = "ZY";
+				// }
+				// }
 				// 根据门店、商品、价格类型查询商品价格信息
 				TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite, goods, "ZY");
 
@@ -2488,17 +2488,18 @@ public class TdUserController {
 											// TdPriceListItem priceListItem =
 											// tdCommonService.getGoodsPrice(req,
 											// goods);
-//											String custType = "";
-//											// 判断门店是经销还是直营
-//											if (null != diySite) {
-//												String custTypeName = diySite.getCustTypeName();
-//												if ("经销商".equals(custTypeName)) {
-//													custType = "JX";
-//												}
-//												if ("直营".equals(custTypeName)) {
-//													custType = "ZY";
-//												}
-//											}
+											// String custType = "";
+											// // 判断门店是经销还是直营
+											// if (null != diySite) {
+											// String custTypeName =
+											// diySite.getCustTypeName();
+											// if ("经销商".equals(custTypeName)) {
+											// custType = "JX";
+											// }
+											// if ("直营".equals(custTypeName)) {
+											// custType = "ZY";
+											// }
+											// }
 											// 根据门店、商品、价格类型查询商品价格信息
 											TdPriceListItem priceListItem = tdCommonService.secondGetGoodsPrice(diySite,
 													goods, "ZY");
@@ -3199,6 +3200,7 @@ public class TdUserController {
 				Long goodsId = orderGoods.getGoodsId();
 				Double jxPrice = orderGoods.getJxPrice();
 				Double lsPrice = orderGoods.getPrice();
+				Double jxDif = orderGoods.getJxDif();
 
 				OrderGoodsTemp orderGoodsTemp = map.get(goodsId);
 				orderGoodsTemp = null == orderGoodsTemp ? new OrderGoodsTemp() : orderGoodsTemp;
@@ -3206,6 +3208,7 @@ public class TdUserController {
 				orderGoodsTemp.setJxPrice(jxPrice);
 				orderGoodsTemp.setLsPrice(lsPrice);
 				orderGoodsTemp.setQuantity(orderGoodsTemp.getQuantity() + quantity);
+				orderGoodsTemp.setJxDif(jxDif);
 
 				map.put(goodsId, orderGoodsTemp);
 			}
@@ -3236,6 +3239,26 @@ public class TdUserController {
 				orderGoodsTemp.setFreeCount(orderGoodsTemp.getFreeCount() + quantity);
 
 				map.put(goodsId, orderGoodsTemp);
+			}
+		}
+
+		// 遍历使用的产品券，产品券也不回收回经销差价
+		String productCouponId = order.getProductCouponId();
+		if (null != productCouponId && productCouponId.length() > 0) {
+			String[] split = productCouponId.split(",");
+			for (String sId : split) {
+				if (null != sId && sId.length() > 0) {
+					Long id = Long.valueOf(sId);
+					TdCoupon coupon = tdCouponService.findOne(id);
+					Long goodsId = coupon.getGoodsId();
+					if (null != goodsId) {
+						OrderGoodsTemp orderGoodsTemp = map.get(goodsId);
+						orderGoodsTemp = null == orderGoodsTemp ? new OrderGoodsTemp() : orderGoodsTemp;
+						orderGoodsTemp.setGoodsId(goodsId);
+						orderGoodsTemp.setFreeCount(orderGoodsTemp.getFreeCount() + 1L);
+						map.put(goodsId, orderGoodsTemp);
+					}
+				}
 			}
 		}
 
