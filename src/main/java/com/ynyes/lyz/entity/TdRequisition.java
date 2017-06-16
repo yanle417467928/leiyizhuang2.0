@@ -483,7 +483,7 @@ public class TdRequisition {
 		builder.append("<DETAIL_ADDRESS>").append(this.detailAddress).append("</DETAIL_ADDRESS>");
 		builder.append("<DISCTRICT>").append(this.disctrict).append("</DISCTRICT>");
 		builder.append("<PROVINCE>").append(this.province).append("</PROVINCE>");
-		builder.append("<SUBDISCTRICT>").append(this.subdistrict).append("</SUBDISCTRICT>");
+		builder.append("<SUBDISTRICT>").append(this.subdistrict).append("</SUBDISTRICT>");
 		builder.append("<ORDER_TIME>").append(this.orderTime).append("</ORDER_TIME>");
 		builder.append("<SUB_ORDER_NUMBER></SUB_ORDER_NUMBER>");
 		builder.append("<SELLER_TEL>").append(this.sellerTel).append("</SELLER_TEL>");
