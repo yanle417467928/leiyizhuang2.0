@@ -813,7 +813,11 @@ public class TdPriceCountService {
 		}
 		for (TdOrderGoods orderGoods : goodsList) {
 			if (null != orderGoods && null != orderGoods.getPrice()) {
-				total += (orderGoods.getPrice() * orderGoods.getQuantity());
+				if (null != order.getDifFee() && order.getDifFee() > 0) {
+					total += (orderGoods.getRealPrice() * orderGoods.getQuantity()); 
+				} else {
+					total += (orderGoods.getPrice() * orderGoods.getQuantity());
+				}
 			}
 		}
 		String productCouponId = order.getProductCouponId();

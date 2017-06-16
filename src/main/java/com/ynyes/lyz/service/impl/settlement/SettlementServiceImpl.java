@@ -1645,9 +1645,10 @@ public class SettlementServiceImpl implements ISettlementService {
 						for (TdOrderGoods orderGoods : orderGoodsList) {
 							if (null != orderGoods) {
 								// 设置会员差价
-								subOrder.setDifFee(subOrder.getDifFee()
-										+ (orderGoods.getPrice() - orderGoods.getRealPrice()) * orderGoods.getQuantity());
-								subOrder.setTotalPrice(subOrder.getTotalPrice() - subOrder.getDifFee());
+								Double singleDif = (orderGoods.getPrice() - orderGoods.getRealPrice())
+										* orderGoods.getQuantity();
+								subOrder.setDifFee(subOrder.getDifFee() + singleDif);
+								subOrder.setTotalPrice(subOrder.getTotalPrice() - singleDif);
 							}
 						}
 					}
