@@ -1523,8 +1523,9 @@ public class SettlementServiceImpl implements ISettlementService {
 
 		TdUser user = this.getDiySiteUser(order, diySite);
 		user.setUnCashBalance(user.getUnCashBalance() + sendBalance);
+		tdUserService.updateUnCashBalance(sendBalance, user.getId());
 
-		this.createLog(order.getOrderNumber(), sendBalance, user, diySite);
+		tdBalanceLogService.save(this.createLog(order.getOrderNumber(), sendBalance, user, diySite));
 		this.sendEBS(order, diySite, user, sendBalance, headerId);
 	}
 

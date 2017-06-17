@@ -3272,11 +3272,10 @@ public class TdUserController {
 			OrderGoodsTemp orderGoodsTemp = map.get(goodsId);
 
 			Long freeCount = orderGoodsTemp.getFreeCount();
-			Double lsPrice = orderGoodsTemp.getLsPrice();
-			Double jxPrice = orderGoodsTemp.getJxPrice();
+			Double jxDif = orderGoodsTemp.getJxDif();
 
 			if (quantity > freeCount) {
-				allJXPrice += (lsPrice - jxPrice) * (quantity - freeCount);
+				allJXPrice += jxDif * (quantity - freeCount);
 			}
 		}
 

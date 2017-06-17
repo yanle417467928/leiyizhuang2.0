@@ -6,6 +6,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.springframework.data.annotation.Transient;
+
 /**
  * 订单商品
  *
@@ -161,9 +163,11 @@ public class TdOrderGoods {
 	private Boolean isWallAccessory = false;
 
 	// order表id
+	@Transient
 	private Long tdOrderId;
 
 	// returnNote表id
+	@Transient
 	private Long tdReturnId;
 
 	// 经销价
