@@ -466,4 +466,12 @@ public class TdUserService {
 	public int modifyBalace(TdUser tdUser){
 		return repository.update(tdUser.getCashBalance(), tdUser.getUnCashBalance(), tdUser.getId(), tdUser.getVersion());
 	}
+	
+	public int updateUnCashBalance(Double value, Long id) {
+		if (null == value || value == 0d || null == id) {
+			return 0;
+		} else {
+			return this.repository.updateUnCashBalance(value, id);
+		}
+	}
 }

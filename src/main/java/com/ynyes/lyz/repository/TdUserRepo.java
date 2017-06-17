@@ -168,5 +168,7 @@ public interface TdUserRepo extends PagingAndSortingRepository<TdUser, Long>, Jp
 	@Query("update TdUser set cash_balance = :cashBalance, un_cash_balance = :unCashBalance where id = :id and version = :version")
 	public int update(@Param("cashBalance")Double cashBalance, @Param("unCashBalance")Double unCashBalance, @Param("id")Long id, @Param("version")Timestamp version);
 	
-	
+	@Modifying
+	@Query("update TdUser set un_cash_balance = (un_cash_balance + :value) where id = :id")
+	public int updateUnCashBalance(@Param("value") Double value, @Param("id") Long id);
 }
