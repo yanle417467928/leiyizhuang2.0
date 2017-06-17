@@ -1510,6 +1510,10 @@ public class SettlementServiceImpl implements ISettlementService {
 	 */
 	@Override
 	public void returnJX(TdOrder order, Long headerId) {
+		// Double activitySubPrice = null == order.getActivitySubPrice() ? 0d :
+		// order.getActivitySubPrice();
+		// Double cashCoupon = null == order.getCashCoupon() ? 0d :
+		// order.getCashCoupon();
 		Double sendBalance = null == order.getJxTotalPrice() ? 0d : order.getJxTotalPrice();
 
 		sendBalance = 0d > sendBalance ? 0d : sendBalance;
@@ -1645,10 +1649,9 @@ public class SettlementServiceImpl implements ISettlementService {
 						for (TdOrderGoods orderGoods : orderGoodsList) {
 							if (null != orderGoods) {
 								// 设置会员差价
-								Double singleDif = (orderGoods.getPrice() - orderGoods.getRealPrice())
-										* orderGoods.getQuantity();
-								subOrder.setDifFee(subOrder.getDifFee() + singleDif);
-								subOrder.setTotalPrice(subOrder.getTotalPrice() - singleDif);
+								subOrder.setDifFee(subOrder.getDifFee()
+										+ (orderGoods.getPrice() - orderGoods.getRealPrice()) * orderGoods.getQuantity());
+								subOrder.setTotalPrice(subOrder.getTotalPrice() - subOrder.getDifFee());
 							}
 						}
 					}
