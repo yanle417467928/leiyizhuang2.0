@@ -23,6 +23,7 @@ import com.ynyes.lyz.interfaces.entity.TdOrderInf;
 import com.ynyes.lyz.interfaces.service.TdCashRefundInfService;
 import com.ynyes.lyz.interfaces.service.TdOrderInfService;
 import com.ynyes.lyz.repository.TdReturnNoteRepo;
+import com.ynyes.lyz.service.basic.settlement.ISettlementService;
 import com.ynyes.lyz.strategy.refund.ReturnNoteStrategyFactory;
 import com.ynyes.lyz.util.Criteria;
 import com.ynyes.lyz.util.Restrictions;
@@ -48,6 +49,9 @@ public class TdReturnNoteService {
 
 	@Autowired
 	private TdCashRefundInfService tdCashRefundService;
+	
+	@Autowired
+	private ISettlementService iSettlementService;
 
 	private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
@@ -437,16 +441,17 @@ public class TdReturnNoteService {
 		Double unCashCost = 0d;
 		Double cashCost = 0d;
 		if (unCashBalance >= jxReturn) {
-			user.setUnCashBalance(user.getUnCashBalance() - jxReturn);
+//			user.setUnCashBalance(user.getUnCashBalance() - jxReturn);
 			unCashCost = jxReturn;
-			tdUserService.save(user);
+//			tdUserService.save(user);
 		} else {
-			unCashCost = user.getUnCashBalance();
-			user.setUnCashBalance(0d);
+//			unCashCost = user.getUnCashBalance();
+//			user.setUnCashBalance(0d);
 			cashCost = jxReturn - unCashCost;
-			user.setCashBalance(user.getCashBalance() - cashCost);
-			tdUserService.save(user);
+//			user.setCashBalance(user.getCashBalance() - cashCost);
+//			tdUserService.save(user);
 		}
+		user = iSettlementService.modifyBalance(jxReturn, user);
 
 		TdOrderInf tdOrderInf = tdOrderInfService.findByOrderNumber(returnNote.getOrderNumber());
 
