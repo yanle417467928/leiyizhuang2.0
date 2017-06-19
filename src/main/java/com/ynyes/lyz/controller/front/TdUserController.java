@@ -1584,7 +1584,16 @@ public class TdUserController {
 						TdReturnNote returnNote = tdCommonService.MakeReturnNote(subOrder, 0L, "");
 
 						tdCommonService.sendBackMsgToWMS(returnNote);
-
+						//设置需要退还的经销差价
+						Double subJX = null == subOrder.getJxTotalPrice() ? 0d : subOrder.getJxTotalPrice();
+						returnNote.setJxReturn(subJX);
+						
+						//查找需要扣除经销差价的账号
+						TdDiySiteAccount tdDiySiteAccount = tdDiySiteAccountService.findByDiySiteId(diySiteId);
+						if (null != tdDiySiteAccount) {
+							user = tdUserService.findOne(tdDiySiteAccount.getUserId());
+						}
+						
 						// 在此进行资金和优惠券的退还
 						tdPriceCountService.cashAndCouponBack(subOrder, realUser, returnNote);
 
