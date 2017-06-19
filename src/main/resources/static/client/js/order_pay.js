@@ -55,7 +55,6 @@ function changeCheckBox() {
 	// 发送异步请求
 	$.ajax({
 		url : "/order/checkbox/save",
-		timeout : 10000,
 		type : "post",
 		error : function(XMLHttpRequest, textStatus, errorThrown) {
 			// 关闭等待响应的图标

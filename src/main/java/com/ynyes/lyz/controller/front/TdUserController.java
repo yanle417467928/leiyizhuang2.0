@@ -1631,6 +1631,8 @@ public class TdUserController {
 			// 2017-02-13 取消订单的时候增加信用额度
 			tdUserService.repayCredit(CreditChangeType.CANCEL, seller, totalPrice, order.getMainOrderNumber());
 		}
+		
+		
 
 		res.put("status", 0);
 		return res;
